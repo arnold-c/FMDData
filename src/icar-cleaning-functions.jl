@@ -1,5 +1,5 @@
 using CSV
-using DataFrames: DataFrame, select, subset, filter, rename
+using DataFrames: DataFrame, select, subset, filter, rename, transform!, ByRow
 
 export load_csv,
     clean_colnames,
@@ -9,8 +9,8 @@ export load_csv,
     check_aggregated_pre_post_counts,
     rename_aggregated_pre_post_counts,
     check_state_names,
-    get_possible_state_values,
-    correct_state_names
+    correct_state_name,
+    correct_all_state_names
 
 """
     load_csv(
@@ -133,40 +133,53 @@ function totals_check(df::DataFrame, totals_key = "total")
     return nothing
 end
 
-function correct_state_names(
+"""
+    correct_all_state_names(
         df::DataFrame,
         column::Symbol = :states_ut,
         states_dict::Dict = FMDData.states_dict
     )
-    df_state_keys = df.states_ut
+
+Correct all state name values in the data
+"""
+function correct_all_state_names(
+        df::DataFrame,
+        column::Symbol = :states_ut,
+        states_dict::Dict = FMDData.states_dict
+    )
+    df_state_keys = df[!, column]
 
     df2 = copy(df)
+
+    transform!(
+        df2,
+        column => ByRow(s -> correct_state_name(s, states_dict))
+    )
 
     return df2
 end
 
-function check_state_names(
-        df::DataFrame,
-        column::Symbol = :states_ut,
+"""
+	correct_state_name(
+        input_name::String,
         states_dict::Dict = FMDData.states_dict
     )
-    df_state_keys = df.states_ut
 
-    possible_state_values = get_possible_state_values(states_dict)
-
-    map(
-        k -> in(k, possible_state_values) || error("State name `$k` doesn't exist in current dictionary match. Confirm if this is a new state or uncharacterized misspelling"),
-        df_state_keys
+Check if a state name is correctly spelled, or previously characterized and matched with a correct name. Returns the correct name if possible, or errors.
+"""
+function correct_state_name(
+        input_name::String,
+        states_dict::Dict = FMDData.states_dict
     )
+    possible_state_values = values(states_dict)
 
-    return nothing
-end
+    if in(input_name, possible_state_values)
+        return input_name
+    end
 
-"""
-    get_possible_state_values(states_dict::Dict = FMDData.states_dict)
+    possible_state_keys = keys(states_dict)
+    in(input_name, possible_state_keys) ||
+        error("State name `$input_name` doesn't exist in current dictionary match. Confirm if this is a new state or uncharacterized misspelling")
 
-Return a vector of possible state names in the underlying data.
-"""
-function get_possible_state_values(states_dict::Dict = FMDData.states_dict)
-    return vcat(values(states_dict)...)
+    return states_dict[input_name]
 end

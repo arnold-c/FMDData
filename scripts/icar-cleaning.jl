@@ -16,7 +16,8 @@ nadcp_2 = load_csv(
 #%%
 has_totals_row(nadcp_2)
 check_duplicated_states(nadcp_2)
-check_state_names(
+
+correct_all_state_names(
     filter(:states_ut => s -> s != "Total", nadcp_2)
 )
 
