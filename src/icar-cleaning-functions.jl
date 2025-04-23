@@ -1,9 +1,16 @@
 using CSV
 using DataFrames: DataFrame, select, subset, filter, rename
 
-export load_csv, clean_colnames, totals_check, has_totals_row,
-    check_duplicated_states, check_aggregated_pre_post_counts,
-    rename_aggregated_pre_post_counts
+export load_csv,
+    clean_colnames,
+    totals_check,
+    has_totals_row,
+    check_duplicated_states,
+    check_aggregated_pre_post_counts,
+    rename_aggregated_pre_post_counts,
+    check_state_names,
+    get_possible_state_values,
+    correct_state_names
 
 """
     load_csv(
@@ -72,8 +79,8 @@ end
 """
     rename_aggregated_pre_post_counts(
         df::DataFrame,
-        original_regex::Regex = r'^(p.*)_\(n\)',
-        substitution_string::SubstitutionString = s'serotype_all_(n)_\1'
+        original_regex::Regex
+        substitution_string::SubstitutionString
     )
 
 Rename the aggregated pre/post counts to use the same format as the serotype-specific values
@@ -124,4 +131,42 @@ TBW
 """
 function totals_check(df::DataFrame, totals_key = "total")
     return nothing
+end
+
+function correct_state_names(
+        df::DataFrame,
+        column::Symbol = :states_ut,
+        states_dict::Dict = FMDData.states_dict
+    )
+    df_state_keys = df.states_ut
+
+    df2 = copy(df)
+
+    return df2
+end
+
+function check_state_names(
+        df::DataFrame,
+        column::Symbol = :states_ut,
+        states_dict::Dict = FMDData.states_dict
+    )
+    df_state_keys = df.states_ut
+
+    possible_state_values = get_possible_state_values(states_dict)
+
+    map(
+        k -> in(k, possible_state_values) || error("State name `$k` doesn't exist in current dictionary match. Confirm if this is a new state or uncharacterized misspelling"),
+        df_state_keys
+    )
+
+    return nothing
+end
+
+"""
+    get_possible_state_values(states_dict::Dict = FMDData.states_dict)
+
+Return a vector of possible state names in the underlying data.
+"""
+function get_possible_state_values(states_dict::Dict = FMDData.states_dict)
+    return vcat(values(states_dict)...)
 end
