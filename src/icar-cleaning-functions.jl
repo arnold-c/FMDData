@@ -1,5 +1,5 @@
 using CSV
-using DataFrames: DataFrame, select, subset, filter, rename, transform!, ByRow
+using DataFrames: DataFrame, select, subset, filter, rename, transform, transform!, ByRow
 
 export load_csv,
     clean_colnames,
@@ -149,14 +149,12 @@ function correct_all_state_names(
     )
     df_state_keys = df[!, column]
 
-    df2 = copy(df)
-
-    transform!(
-        df2,
-        column => ByRow(s -> correct_state_name(s, states_dict))
+    return transform(
+        df,
+        column => ByRow(s -> correct_state_name(s, states_dict));
+        renamecols = false
     )
 
-    return df2
 end
 
 """
@@ -173,7 +171,7 @@ function correct_state_name(
     )
     possible_state_values = values(states_dict)
 
-    if in(input_name, possible_state_values)
+    if in(input_name, possible_state_values) || lowercase(input_name) == "total"
         return input_name
     end
 

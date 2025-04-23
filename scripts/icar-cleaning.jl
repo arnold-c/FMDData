@@ -15,14 +15,14 @@ nadcp_2 = load_csv(
 
 #%%
 has_totals_row(nadcp_2)
-check_duplicated_states(nadcp_2)
 
-correct_all_state_names(
-    filter(:states_ut => s -> s != "Total", nadcp_2)
-)
+correct_all_state_names(nadcp_2)
+
+check_duplicated_states(nadcp_2)
 
 # runic: off
 # clean column names
+# correct state names
 # check no duplicated states
 # if total pre/post counts & serotype counts, calculate serotype seroprevs
 	# if serotype seroprevs exist, assert approx equal calculated serotype seroprevs
