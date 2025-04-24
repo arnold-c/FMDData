@@ -305,7 +305,7 @@ function calculate_state_counts(df::DataFrame)
         df,
         select(
             df,
-            AsTable(Cols(r"serotype_(.*)_\(%\)_(\w+)$")) .=> (t -> _calculate_state_counts(t, df)) => AsTable;
+            AsTable(Cols(r"serotype_(.*)_\(%\)_(pre|post)$")) .=> (t -> _calculate_state_counts(t, df)) => AsTable;
             renamecols = true
         )
     )
@@ -340,7 +340,7 @@ function calculate_state_seroprevalence(df::DataFrame)
         df,
         select(
             select(df, Not(r"serotype_all_\(n\).*")),
-            AsTable(Cols(r"serotype_(.*)_\(n\)_(\w+)$")) .=> (t -> _calculate_state_seroprevalence(t, df)) => AsTable;
+            AsTable(Cols(r"serotype_(.*)_\(n\)_(pre|post)$")) .=> (t -> _calculate_state_seroprevalence(t, df)) => AsTable;
             renamecols = true
         )
     )
@@ -354,7 +354,6 @@ Because DataFrames handles tables as named tuples, we can extract information ab
 """
 function _calculate_state_seroprevalence(table, original_df)
     str_keys = String.(keys(table))
-    @show str_keys
     timing = replace.(str_keys, r"serotype_.*_\(n\)_(\w+)$" => s"serotype_all_(n)_\1")
     vals = map(
         ((serotype_count, agg_counts_col),) -> (serotype_count ./ @view(original_df[!, agg_counts_col])) .* 100,
