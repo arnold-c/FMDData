@@ -4,7 +4,6 @@ using DataFrames: DataFrame, select, subset, filter, rename, transform, transfor
 export load_csv,
     clean_colnames,
     all_totals_check,
-    totals_check,
     has_totals_row,
     check_duplicated_states,
     check_aggregated_pre_post_counts,
@@ -13,6 +12,9 @@ export load_csv,
     correct_all_state_names,
     calculate_state_counts,
     calculate_state_seroprevalence
+
+
+allowed_serotypes::Vector{String} = ["o", "a", "asia1"]
 
 """
     load_csv(
@@ -141,20 +143,25 @@ function all_totals_check(df::DataFrame, totals_key = "total")
         if col_name == "states_ut"
             continue
         end
-        totals_check_args = collect_totals_check_args(
+        totals_check_args = _collect_totals_check_args(
             df[Not(totals_rn), col_ind],
             totals,
             names(df)[col_ind],
             df,
             totals_rn,
         )
-        totals_check(totals_check_args...)
+        _totals_check(totals_check_args...)
     end
     return nothing
 end
 
 """
-    collect_totals_check_args(
+    _collect_totals_check_args(
+        col::Vector{T},
+        totals::DataFrame,
+        colname::String,
+        _...
+    ) where {T <: Union{Union{<:Missing, <:Integer}, <:Integer}}
         col::Vector{T},
         totals::DataFrame,
         colname::String,
@@ -165,7 +172,7 @@ Collect the necessary arguments to provide to the `totals_check()` functions. Wh
 
 Returns a tuple of variables to be unpacked and passed to `totals_check()`
 """
-function collect_totals_check_args(
+function _collect_totals_check_args(
         col::Vector{T},
         totals::DataFrame,
         colname::String,
@@ -174,14 +181,16 @@ function collect_totals_check_args(
     return (col, totals[1, colname], colname)
 end
 
-function collect_totals_check_args(
+function _collect_totals_check_args(
         col::Vector{T},
         totals::DataFrame,
         colname::String,
         df::DataFrame,
         totals_rn,
+        allowed_serotypes = allowed_serotypes
     ) where {T <: Union{Union{<:Missing, <:AbstractFloat}, <:AbstractFloat}}
-    denom_type_matches = match(r"serotype_.*_\(%\)_(pre|post)", colname)
+    reg = Regex("serotype_($(join(allowed_serotypes, "|")))_\\(%\\)_(pre|post)\$")
+    denom_type_matches = match(reg, colname)
     @assert length(denom_type_matches) == 1
     denom_type = denom_type_matches[1]
     denom_colname = "serotype_all_(n)_$denom_type"
@@ -201,7 +210,7 @@ end
 
 Check if the provided total counts equal the sum calculated using the provided state counts.
 """
-function totals_check(
+function _totals_check(
         col::Vector{T},
         provided_total,
         colname::String,
@@ -214,7 +223,16 @@ function totals_check(
 end
 
 """
-    totals_check(
+    _totals_check(
+        col::Vector{T},
+        provided_total,
+        colname::String,
+        denom_col::Vector{C},
+        denom_total
+    ) where {
+        T <: Union{<:Union{<:Missing, <:AbstractFloat}, <:AbstractFloat},
+        C <: Union{<:Union{<:Missing, <:Integer}, <:Integer},
+    }
         col::Vector{T},
         provided_total,
         colname::String,
@@ -227,7 +245,7 @@ end
 
 Check if the provided total for serotype seroprevalence values equal a weighted sum based on reported total counts.
 """
-function totals_check(
+function _totals_check(
         col::Vector{T},
         provided_total,
         colname::String,
@@ -296,16 +314,17 @@ end
 
 
 """
-    calculate_state_counts(df::DataFrame)
+    calculate_state_counts(df::DataFrame, allowed_serotypes = allowed_serotypes)
 
 A wrapper function around the internal `_calculate_state_counts()` function to calculate the state/serotype specific counts based upon the state/serotype seroprevalence values and total state counts. See the documentation of `_calculate_state_counts()` for more details on the implementation.
 """
-function calculate_state_counts(df::DataFrame)
+function calculate_state_counts(df::DataFrame, allowed_serotypes = allowed_serotypes)
+    reg = Regex("serotype_($(join(allowed_serotypes, "|")))_\\(n\\)_(pre|post)\$")
     return hcat(
         df,
         select(
             df,
-            AsTable(Cols(r"serotype_(.*)_\(%\)_(pre|post)$")) .=> (t -> _calculate_state_counts(t, df)) => AsTable;
+            AsTable(Cols(reg)) .=> (t -> _calculate_state_counts(t, df)) => AsTable;
             renamecols = true
         )
     )
@@ -331,16 +350,17 @@ function _calculate_state_counts(table, original_df)
 end
 
 """
-    calculate_state_seroprevalence(df::DataFrame)
+    calculate_state_seroprevalence(df::DataFrame, allowed_serotypes = allowed_serotypes)
 
-A wrapper function around the internal `_calculate_state_counts()` function to calculate the state/serotype specific counts based upon the state/serotype seroprevalence values and total state counts. See the documentation of `_calculate_state_counts()` for more details on the implementation.
+A wrapper function around the internal `_calculate_state_seroprevalence()` function to calculate the state/serotype specific counts based upon the state/serotype seroprevalence values and total state counts. See the documentation of `_calculate_state_seroprevalence()` for more details on the implementation.
 """
-function calculate_state_seroprevalence(df::DataFrame)
+function calculate_state_seroprevalence(df::DataFrame, allowed_serotypes = allowed_serotypes)
+    reg = Regex("serotype_($(join(allowed_serotypes, "|")))_\\(n\\)_(pre|post)\$")
     return hcat(
         df,
         select(
-            select(df, Not(r"serotype_all_\(n\).*")),
-            AsTable(Cols(r"serotype_(.*)_\(n\)_(pre|post)$")) .=> (t -> _calculate_state_seroprevalence(t, df)) => AsTable;
+            df,
+            AsTable(Cols(reg)) .=> (t -> _calculate_state_seroprevalence(t, df)) => AsTable;
             renamecols = true
         )
     )
