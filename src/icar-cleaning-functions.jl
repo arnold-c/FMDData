@@ -304,7 +304,7 @@ function calculate_state_counts(df::DataFrame)
     return hcat(
         df,
         select(
-            select(df, Cols(r"serotype_(.*)_\(%\)_(\w+)$")),
+            df,
             AsTable(Cols(r"serotype_(.*)_\(%\)_(\w+)$")) .=> (t -> _calculate_state_counts(t, df)) => AsTable;
             renamecols = true
         )
@@ -326,5 +326,40 @@ function _calculate_state_counts(table, original_df)
     )
 
     names = Symbol.(replace.(str_keys, r"(.*_)\(%\)(_.*)" => s"\1(n)\2_calculated"))
+    return NamedTuple{tuple(names...)}((vals...,))
+end
+
+"""
+    calculate_state_seroprevalence(df::DataFrame)
+
+A wrapper function around the internal `_calculate_state_counts()` function to calculate the state/serotype specific counts based upon the state/serotype seroprevalence values and total state counts. See the documentation of `_calculate_state_counts()` for more details on the implementation.
+"""
+function calculate_state_seroprevalence(df::DataFrame)
+    return hcat(
+        df,
+        select(
+            select(df, Not(r"serotype_all_\(n\).*")),
+            AsTable(Cols(r"serotype_(.*)_\(n\)_(\w+)$")) .=> (t -> _calculate_state_seroprevalence(t, df)) => AsTable;
+            renamecols = true
+        )
+    )
+end
+
+"""
+    _calculate_state_seroprevalence(table, original_df)
+
+An internal function to handle the calculation of the state/serotype counts based upon the provided state/serotype seroprevalence values and total state counts.
+Because DataFrames handles tables as named tuples, we can extract information about the columns being passed from the regex selection and then use substitution strings to collect a view of the correct column of total state counts.
+"""
+function _calculate_state_seroprevalence(table, original_df)
+    str_keys = String.(keys(table))
+    @show str_keys
+    timing = replace.(str_keys, r"serotype_.*_\(n\)_(\w+)$" => s"serotype_all_(n)_\1")
+    vals = map(
+        ((serotype_count, agg_counts_col),) -> (serotype_count ./ @view(original_df[!, agg_counts_col])) .* 100,
+        zip(table, timing)
+    )
+
+    names = Symbol.(replace.(str_keys, r"(.*_)\(n\)(_.*)" => s"\1(%)\2_calculated"))
     return NamedTuple{tuple(names...)}((vals...,))
 end

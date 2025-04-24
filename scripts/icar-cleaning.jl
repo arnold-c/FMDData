@@ -26,7 +26,43 @@ aggregated_nadcp_2 = rename_aggregated_pre_post_counts(nadcp_2)
 all_totals_check(aggregated_nadcp_2)
 
 #%%
-calculate_state_counts(aggregated_nadcp_2)
+calculated_count_data = calculate_state_counts(aggregated_nadcp_2)
+
+calculated_count_no_seroprev_data = rename(
+    s -> replace(s, r"(.*)_calculated$" => s"\1"),
+    select(calculated_count_data, Not(r"serotype_.*\(%\).*")),
+)
+
+calculated_seroprev_data = calculate_state_seroprevalence(calculated_count_no_seroprev_data)
+
+
+function compare_calculations(calculated_count_data, calculated_seroprev_data)
+    strp_count_data =
+        rename(
+        s -> replace(s, r"(.*)_calculated$" => s"\1"),
+        calculated_count_data
+    )
+
+    strp_seroprev_data = select(
+        rename(
+            s -> replace(s, r"(.*)_calculated$" => s"\1"),
+            calculated_seroprev_data
+        ), names(strp_count_data)
+    )
+
+    @show strp_count_data == strp_seroprev_data && return
+
+    @assert names(strp_count_data) == names(strp_seroprev_data)
+
+    for j in 2:ncol(strp_count_data)
+        println(hcat(strp_count_data[!, [1, j]], strp_seroprev_data[!, j]))
+    end
+    return
+end
+
+
+compare_calculations(calculated_count_data, calculated_seroprev_data)
+
 
 #%%
 # runic: off
