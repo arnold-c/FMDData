@@ -89,7 +89,7 @@ Rename the aggregated pre/post counts to use the same format as the serotype-spe
 """
 function rename_aggregated_pre_post_counts(
         df::DataFrame,
-        original_regex::Regex = r"^(p.*)_\(n\)",
+        original_regex::Regex = r"^(pre|post)_\(n\)",
         substitution_string::SubstitutionString = s"serotype_all_(n)_\1"
     )
     return rename(
@@ -181,7 +181,7 @@ function collect_totals_check_args(
         df::DataFrame,
         totals_rn,
     ) where {T <: Union{Union{<:Missing, <:AbstractFloat}, <:AbstractFloat}}
-    denom_type_matches = match(r"serotype_.*_\(%\)_(\w+)$", colname)
+    denom_type_matches = match(r"serotype_.*_\(%\)_(pre|post)", colname)
     @assert length(denom_type_matches) == 1
     denom_type = denom_type_matches[1]
     denom_colname = "serotype_all_(n)_$denom_type"
