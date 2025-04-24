@@ -9,7 +9,6 @@ export load_csv,
     check_duplicated_states,
     check_aggregated_pre_post_counts,
     rename_aggregated_pre_post_counts,
-    check_state_names,
     correct_state_name,
     correct_all_state_names
 
@@ -169,7 +168,7 @@ function collect_totals_check_args(
         totals::DataFrame,
         colname::String,
         _...
-    ) where {T <: Union{<:Union{<:Missing, <:Integer}, <:Integer}}
+    ) where {T <: Union{Union{<:Missing, <:Integer}, <:Integer}}
     return (col, totals[1, colname], colname)
 end
 
@@ -179,7 +178,7 @@ function collect_totals_check_args(
         colname::String,
         df::DataFrame,
         totals_rn,
-    ) where {T <: Union{<:Union{<:Missing, <:AbstractFloat}, <:AbstractFloat}}
+    ) where {T <: Union{Union{<:Missing, <:AbstractFloat}, <:AbstractFloat}}
     denom_type_matches = match(r"serotype_.*_\(%\)_(\w+)$", colname)
     @assert length(denom_type_matches) == 1
     denom_type = denom_type_matches[1]

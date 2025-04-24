@@ -1,15 +1,16 @@
 using FMDData
 using Test
-
 using JET
-@testset "static analysis with JET.jl" begin
-    @test isempty(JET.get_reports(report_package(FMDData, target_modules = (FMDData,))))
-end
+import Aqua
 
-@testset "QA with Aqua" begin
-    import Aqua
-    Aqua.test_all(FMDData)
-end
+@testset "FMDData" begin
+    @testset "Static analysis with JET.jl" begin
+        @test isempty(JET.get_reports(report_package(FMDData, target_modules = (FMDData,))))
+    end
 
-# DrWatson.testdir()
-# include("../test/icar-cleaning-functions.jl")
+    @testset "QA with Aqua" begin
+        Aqua.test_all(FMDData)
+    end
+
+    # include("../test/icar-cleaning-functions.jl")
+end
