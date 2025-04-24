@@ -320,10 +320,11 @@ Because DataFrames handles tables as named tuples, we can extract information ab
 function _calculate_state_counts(table, original_df)
     str_keys = String.(keys(table))
     timing = replace.(str_keys, r"serotype_.*_\(%\)_(\w+)$" => s"serotype_all_(n)_\1")
-    vals = map(
-        ((seroprev, agg_counts_col),) -> (seroprev / 100) .* @view(original_df[!, agg_counts_col]),
-        zip(table, timing)
-    )
+    vals = map(zip(table, timing)) do (seroprev, agg_counts_col)
+        original_view = @view(original_df[!, agg_counts_col])
+        vals = round.((seroprev / 100) .* original_view)
+        return convert.(eltype(original_view), vals)
+    end
 
     names = Symbol.(replace.(str_keys, r"(.*_)\(%\)(_.*)" => s"\1(n)\2_calculated"))
     return NamedTuple{tuple(names...)}((vals...,))
