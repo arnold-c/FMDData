@@ -1,8 +1,9 @@
 using CSV
-using DataFrames: DataFrame, select, subset, filter, rename, transform, transform!, ByRow
+using DataFrames: DataFrame, select, subset, filter, rename, transform, transform!, ByRow, Not, Cols, nrow
 
 export load_csv,
     clean_colnames,
+    all_totals_check,
     totals_check,
     has_totals_row,
     check_duplicated_states,
@@ -129,9 +130,119 @@ end
 
 TBW
 """
-function totals_check(df::DataFrame, totals_key = "total")
+function all_totals_check(df::DataFrame, totals_key = "total")
+    totals = subset(df, :states_ut => s -> lowercase.(s) .== totals_key)
+    @assert nrow(totals) == 1
+    totals_rn = indexin((totals_key,), lowercase.(df.states_ut))
+    col_names = names(df)
+    for col_ind in eachindex(names(df))
+        col_name = col_names[col_ind]
+        if col_name == "states_ut"
+            continue
+        end
+        totals_check_args = collect_totals_check_args(
+            df[Not(totals_rn), col_ind],
+            totals,
+            names(df)[col_ind],
+            df,
+            totals_rn,
+        )
+        totals_check(totals_check_args...)
+    end
     return nothing
 end
+
+"""
+    collect_totals_check_args(
+        col::Vector{T},
+        totals::DataFrame,
+        colname::String,
+        _...
+    ) where {T <: Union{<:Union{<:Missing, <:Integer}, <:Integer}}
+
+Collect the necessary arguments to provide to the `totals_check()` functions. When checking the totals on counts, use `_...` varargs to denote additional arguments can be passed (necessary for total checks on seroprevalence values) but will not be assigned an used within the function body.
+
+Returns a tuple of variables to be unpacked and passed to `totals_check()`
+"""
+function collect_totals_check_args(
+        col::Vector{T},
+        totals::DataFrame,
+        colname::String,
+        _...
+    ) where {T <: Union{<:Union{<:Missing, <:Integer}, <:Integer}}
+    return (col, totals[1, colname], colname)
+end
+
+function collect_totals_check_args(
+        col::Vector{T},
+        totals::DataFrame,
+        colname::String,
+        df::DataFrame,
+        totals_rn,
+    ) where {T <: Union{<:Union{<:Missing, <:AbstractFloat}, <:AbstractFloat}}
+    denom_type_matches = match(r"serotype_.*_\(%\)_(\w+)$", colname)
+    @assert length(denom_type_matches) == 1
+    denom_type = denom_type_matches[1]
+    denom_colname = "serotype_all_(n)_$denom_type"
+
+    denom_col = df[Not(totals_rn), denom_colname]
+    denom_total = sum(skipmissing(denom_col))
+
+    return (col, totals[1, colname], colname, denom_col, denom_total)
+end
+
+"""
+    totals_check(
+        col::Vector{T},
+        provided_total,
+        colname::String,
+    ) where {T <: Union{<:Union{<:Missing, <:Integer}, <:Integer}}
+
+Check if the provided total counts equal the sum calculated using the provided state counts.
+"""
+function totals_check(
+        col::Vector{T},
+        provided_total,
+        colname::String,
+    ) where {T <: Union{<:Union{<:Missing, <:Integer}, <:Integer}}
+    calculated_total = sum(skipmissing(col))
+    if calculated_total != provided_total
+        @warn "`$colname`: $calculated_total doesn't match provided total $provided_total"
+    end
+    return nothing
+end
+
+"""
+    totals_check(
+        col::Vector{T},
+        provided_total,
+        colname::String,
+        denom_col::Vector{C},
+        denom_total
+    ) where {
+        T <: Union{<:Union{<:Missing, <:AbstractFloat}, <:AbstractFloat},
+        C <: Union{<:Union{<:Missing, <:Integer}, <:Integer},
+    }
+
+Check if the provided total for serotype seroprevalence values equal a weighted sum based on reported total counts.
+"""
+function totals_check(
+        col::Vector{T},
+        provided_total,
+        colname::String,
+        denom_col::Vector{C},
+        denom_total
+    ) where {
+        T <: Union{<:Union{<:Missing, <:AbstractFloat}, <:AbstractFloat},
+        C <: Union{<:Union{<:Missing, <:Integer}, <:Integer},
+    }
+    calculated_total = sum(skipmissing(col .* denom_col)) / denom_total
+    if !isapprox(calculated_total, provided_total; atol = 0.2)
+        @warn "`$colname`: $calculated_total doesn't match provided total $provided_total"
+    end
+    return nothing
+end
+
 
 """
     correct_all_state_names(

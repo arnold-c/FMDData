@@ -20,10 +20,17 @@ correct_all_state_names(nadcp_2)
 
 check_duplicated_states(nadcp_2)
 
+
+#%%
+rename_aggregated_pre_post_counts(nadcp_2) |>
+    all_totals_check
+
+
 # runic: off
 # clean column names
 # correct state names
 # check no duplicated states
+# assert counts are ints and seroprevs are floats (use dispatch later)
 # if total pre/post counts & serotype counts, calculate serotype seroprevs
 	# if serotype seroprevs exist, assert approx equal calculated serotype seroprevs
 # if total pre/post counts & serotype seroprovs, calculate state counts
