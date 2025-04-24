@@ -1,5 +1,5 @@
 using CSV
-using DataFrames: DataFrame, select, subset, filter, rename, transform, transform!, ByRow, Not, Cols, nrow
+using DataFrames: DataFrame, select, subset, filter, rename, transform, transform!, ByRow, Not, Cols, nrow, AsTable
 
 export load_csv,
     clean_colnames,
@@ -10,7 +10,9 @@ export load_csv,
     check_aggregated_pre_post_counts,
     rename_aggregated_pre_post_counts,
     correct_state_name,
-    correct_all_state_names
+    correct_all_state_names,
+    calculate_state_counts,
+    calculate_state_seroprevalence
 
 """
     load_csv(
@@ -125,9 +127,9 @@ function contains_count_results(df, serotypes = ["all", "o", "a", "asia1"])
 end
 
 """
-    totals_check(df::DataFrame, totals_key = "total")
+    all_totals_check(df::DataFrame, totals_key = "total")
 
-TBW
+Check if all provided values in the provided totals row are correct. If the column is a count, then calculate an unweighted sum. If the column is the seroprevalence, calculated the sum weighted by the relevant counts (pre- or post-vaccination counts).
 """
 function all_totals_check(df::DataFrame, totals_key = "total")
     totals = subset(df, :states_ut => s -> lowercase.(s) .== totals_key)
@@ -290,4 +292,39 @@ function correct_state_name(
         error("State name `$input_name` doesn't exist in current dictionary match. Confirm if this is a new state or uncharacterized misspelling")
 
     return states_dict[input_name]
+end
+
+
+"""
+    calculate_state_counts(df::DataFrame)
+
+A wrapper function around the internal `_calculate_state_counts()` function to calculate the state/serotype specific counts based upon the state/serotype seroprevalence values and total state counts. See the documentation of `_calculate_state_counts()` for more details on the implementation.
+"""
+function calculate_state_counts(df::DataFrame)
+    return hcat(
+        df,
+        select(
+            select(df, Cols(r"serotype_(.*)_\(%\)_(\w+)$")),
+            AsTable(Cols(r"serotype_(.*)_\(%\)_(\w+)$")) .=> (t -> _calculate_state_counts(t, df)) => AsTable;
+            renamecols = true
+        )
+    )
+end
+
+"""
+    _calculate_state_counts(table, original_df)
+
+An internal function to handle the calculation of the state/serotype counts based upon the provided state/serotype seroprevalence values and total state counts.
+Because DataFrames handles tables as named tuples, we can extract information about the columns being passed from the regex selection and then use substitution strings to collect a view of the correct column of total state counts.
+"""
+function _calculate_state_counts(table, original_df)
+    str_keys = String.(keys(table))
+    timing = replace.(str_keys, r"serotype_.*_\(%\)_(\w+)$" => s"serotype_all_(n)_\1")
+    vals = map(
+        ((seroprev, agg_counts_col),) -> (seroprev / 100) .* @view(original_df[!, agg_counts_col]),
+        zip(table, timing)
+    )
+
+    names = Symbol.(replace.(str_keys, r"(.*_)\(%\)(_.*)" => s"\1(n)\2_calculated"))
+    return NamedTuple{tuple(names...)}((vals...,))
 end

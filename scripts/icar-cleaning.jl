@@ -20,12 +20,15 @@ correct_all_state_names(nadcp_2)
 
 check_duplicated_states(nadcp_2)
 
+aggregated_nadcp_2 = rename_aggregated_pre_post_counts(nadcp_2)
 
 #%%
-rename_aggregated_pre_post_counts(nadcp_2) |>
-    all_totals_check
+all_totals_check(aggregated_nadcp_2)
 
+#%%
+calculate_state_counts(aggregated_nadcp_2)
 
+#%%
 # runic: off
 # clean column names
 # correct state names
