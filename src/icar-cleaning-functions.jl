@@ -6,6 +6,7 @@ export load_csv,
     all_totals_check,
     has_totals_row,
     check_duplicated_states,
+    check_allowed_serotypes,
     check_aggregated_pre_post_counts,
     rename_aggregated_pre_post_counts,
     correct_state_name,
@@ -13,8 +14,7 @@ export load_csv,
     calculate_state_counts,
     calculate_state_seroprevalence
 
-
-allowed_serotypes::Vector{String} = ["o", "a", "asia1"]
+default_allowed_serotypes::Vector{String} = ["o", "a", "asia1"]
 
 """
     load_csv(
@@ -65,8 +65,67 @@ Check if there are duplicated states in the data
 function check_duplicated_states(
         df::DataFrame,
         column::Symbol = :states_ut,
+        allowed_serotypes = default_allowed_serotypes
     )
     return @assert length(df[!, column]) == length(unique(df[!, column]))
+end
+
+"""
+    check_allowed_serotypes(
+        df::DataFrame,
+        allowed_serotypes::Vector{String} = default_allowed_serotypes,
+        reg::Regex = r"serotype_(.*)_\(.\)_(pre|post)"
+    )
+
+Function to confirm that all required and no disallowed serotypes are provided in the data.
+"""
+function check_allowed_serotypes(
+        df::DataFrame,
+        allowed_serotypes::Vector{String} = default_allowed_serotypes,
+        reg::Regex = r"serotype_(.*)_\(.\)_(pre|post)"
+    )
+    colnames = names(df)
+    all_matched_cols = filter(!isnothing, match.(reg, colnames))
+    all_matched_serotypes = unique(map(m -> String(m[1]), all_matched_cols))
+
+    _check_all_required_serotypes(all_matched_serotypes, allowed_serotypes)
+    _check_no_disallowed_serotypes(all_matched_serotypes, allowed_serotypes)
+    return nothing
+end
+
+"""
+    _check_all_required_serotypes(
+        all_matched_serotypes::T,
+        allowed_serotypes::T = default_allowed_serotypes,
+    ) where {T <: AbstractVector{<:AbstractString}}
+
+Internal function to check that all required serotypes provided in the data.
+"""
+function _check_all_required_serotypes(
+        all_matched_serotypes::T,
+        allowed_serotypes::T = default_allowed_serotypes,
+    ) where {T <: AbstractVector{<:AbstractString}}
+    matched_serotypes = unique(filter(m -> in(m, allowed_serotypes), all_matched_serotypes))
+    @assert length(matched_serotypes) == length(allowed_serotypes) "Found $(length(matched_serotypes)) allowed serotypes ($matched_serotypes). Required $(length(allowed_serotypes)): $allowed_serotypes"
+    return nothing
+end
+
+"""
+    _check_no_disallowed_serotypes(
+        all_matched_serotypes::T,
+        allowed_serotypes::T = default_allowed_serotypes,
+    ) where {T <: AbstractVector{<:AbstractString}}
+
+Internal function to check that there are no disallowed serotypes provided in the data.
+"""
+function _check_no_disallowed_serotypes(
+        all_matched_serotypes::T,
+        allowed_serotypes::T = default_allowed_serotypes,
+    ) where {T <: AbstractVector{<:AbstractString}}
+    matched_serotypes = unique(filter(m -> !in(m, allowed_serotypes), all_matched_serotypes))
+    @assert length(matched_serotypes) == 0 "Found $(length(matched_serotypes)) disallowed serotypes ($matched_serotypes)."
+    return nothing
+
 end
 
 """
@@ -187,7 +246,7 @@ function _collect_totals_check_args(
         colname::String,
         df::DataFrame,
         totals_rn,
-        allowed_serotypes = allowed_serotypes
+        allowed_serotypes = default_allowed_serotypes
     ) where {T <: Union{Union{<:Missing, <:AbstractFloat}, <:AbstractFloat}}
     reg = Regex("serotype_($(join(allowed_serotypes, "|")))_\\(%\\)_(pre|post)\$")
     denom_type_matches = match(reg, colname)
@@ -314,11 +373,11 @@ end
 
 
 """
-    calculate_state_counts(df::DataFrame, allowed_serotypes = allowed_serotypes)
+    calculate_state_counts(df::DataFrame, allowed_serotypes = default_allowed_serotypes)
 
 A wrapper function around the internal `_calculate_state_counts()` function to calculate the state/serotype specific counts based upon the state/serotype seroprevalence values and total state counts. See the documentation of `_calculate_state_counts()` for more details on the implementation.
 """
-function calculate_state_counts(df::DataFrame, allowed_serotypes = allowed_serotypes)
+function calculate_state_counts(df::DataFrame, allowed_serotypes = default_allowed_serotypes)
     reg = Regex("serotype_($(join(allowed_serotypes, "|")))_\\(n\\)_(pre|post)\$")
     return hcat(
         df,
@@ -350,11 +409,14 @@ function _calculate_state_counts(table, original_df)
 end
 
 """
-    calculate_state_seroprevalence(df::DataFrame, allowed_serotypes = allowed_serotypes)
+    calculate_state_seroprevalence(df::DataFrame, allowed_serotypes = default_allowed_serotypes)
 
 A wrapper function around the internal `_calculate_state_seroprevalence()` function to calculate the state/serotype specific counts based upon the state/serotype seroprevalence values and total state counts. See the documentation of `_calculate_state_seroprevalence()` for more details on the implementation.
 """
-function calculate_state_seroprevalence(df::DataFrame, allowed_serotypes = allowed_serotypes)
+function calculate_state_seroprevalence(
+        df::DataFrame,
+        allowed_serotypes::T = default_allowed_serotypes,
+    ) where {T <: AbstractVector{<:AbstractString}}
     reg = Regex("serotype_($(join(allowed_serotypes, "|")))_\\(n\\)_(pre|post)\$")
     return hcat(
         df,
