@@ -57,6 +57,26 @@ function clean_colnames(df::DataFrame)
 end
 
 """
+    rename_aggregated_pre_post_counts(
+        df::DataFrame,
+        original_regex::Regex
+        substitution_string::SubstitutionString
+    )
+
+Rename the aggregated pre/post counts to use the same format as the serotype-specific values
+"""
+function rename_aggregated_pre_post_counts(
+        df::DataFrame,
+        original_regex::Regex = r"^(pre|post)_\(n\)",
+        substitution_string::SubstitutionString = s"serotype_all_(n)_\1"
+    )
+    return rename(
+        s -> replace(s, original_regex => substitution_string),
+        df
+    )
+end
+
+"""
     check_duplicated_columns(df::DataFrame)
 
 Check if the provided data has any duplicate column names
@@ -104,7 +124,7 @@ Function to confirm that all required and no disallowed serotypes are provided i
 """
 function check_allowed_serotypes(
         df::DataFrame,
-        allowed_serotypes::Vector{String} = default_allowed_serotypes,
+        allowed_serotypes::Vector{String} = vcat("all", default_allowed_serotypes),
         reg::Regex = r"serotype_(.*)_\(.\)_(pre|post)"
     )
     all_matched_serotypes = unique(collect_all_present_serotypes(df))
@@ -136,7 +156,7 @@ Internal function to check that all required serotypes provided in the data.
 """
 function _check_all_required_serotypes(
         all_matched_serotypes::T,
-        allowed_serotypes::T = default_allowed_serotypes,
+        allowed_serotypes::T = vcat("all", default_allowed_serotypes)
     ) where {T <: AbstractVector{<:AbstractString}}
     matched_serotypes = unique(filter(m -> in(m, allowed_serotypes), all_matched_serotypes))
     @assert length(matched_serotypes) == length(allowed_serotypes) "Found $(length(matched_serotypes)) allowed serotypes ($matched_serotypes). Required $(length(allowed_serotypes)): $allowed_serotypes"
@@ -153,7 +173,7 @@ Internal function to check that there are no disallowed serotypes provided in th
 """
 function _check_no_disallowed_serotypes(
         all_matched_serotypes::T,
-        allowed_serotypes::T = default_allowed_serotypes,
+        allowed_serotypes::T = vcat("all", default_allowed_serotypes)
     ) where {T <: AbstractVector{<:AbstractString}}
     matched_serotypes = unique(filter(m -> !in(m, allowed_serotypes), all_matched_serotypes))
     @assert length(matched_serotypes) == 0 "Found $(length(matched_serotypes)) disallowed serotypes ($matched_serotypes)."
@@ -162,7 +182,7 @@ function _check_no_disallowed_serotypes(
 end
 
 """
-    check_pre_post_exists(df::DataFrame, reg::Regex = r"serotype_(.*)_\((.)\)_(pre|post)")
+    check_pre_post_exists(df::DataFrame, reg::Regex)
 
 Confirms each combination of serotype and result type (N/%) has both a pre- and post-vaccination results column, but nothing else.
 """
@@ -193,26 +213,6 @@ Check if data contains aggregated counts of pre and post vaccinated individuals
 """
 function check_aggregated_pre_post_counts(df::DataFrame, columns = ["pre_(n)", "post_(n)"])
     return @assert sum(map(c -> in(c, names(df)), columns)) == length(columns)
-end
-
-"""
-    rename_aggregated_pre_post_counts(
-        df::DataFrame,
-        original_regex::Regex
-        substitution_string::SubstitutionString
-    )
-
-Rename the aggregated pre/post counts to use the same format as the serotype-specific values
-"""
-function rename_aggregated_pre_post_counts(
-        df::DataFrame,
-        original_regex::Regex = r"^(pre|post)_\(n\)",
-        substitution_string::SubstitutionString = s"serotype_all_(n)_\1"
-    )
-    return rename(
-        s -> replace(s, original_regex => substitution_string),
-        df
-    )
 end
 
 
