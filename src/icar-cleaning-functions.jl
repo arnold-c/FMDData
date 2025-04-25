@@ -10,6 +10,7 @@ export load_csv,
     check_allowed_serotypes,
     check_aggregated_pre_post_counts,
     rename_aggregated_pre_post_counts,
+    check_pre_post_exists,
     correct_state_name,
     correct_all_state_names,
     calculate_state_counts,
@@ -158,6 +159,29 @@ function _check_no_disallowed_serotypes(
     @assert length(matched_serotypes) == 0 "Found $(length(matched_serotypes)) disallowed serotypes ($matched_serotypes)."
     return nothing
 
+end
+
+"""
+    check_pre_post_exists(df::DataFrame, reg::Regex = r"serotype_(.*)_\((.)\)_(pre|post)")
+
+Confirms each combination of serotype and result type (N/%) has both a pre- and post-vaccination results column, but nothing else.
+"""
+function check_pre_post_exists(df::DataFrame, reg::Regex = r"serotype_(.*)_\((.)\)_(pre|post)")
+    colnames = names(df)
+
+    all_matched_columns = filter(
+        !isnothing,
+        match.(r"(serotype_.*_\(.\))_(pre|post)", colnames)
+    )
+
+    unique_serotype_result = unique(map(m -> m[1], all_matched_columns))
+
+    for serotype in unique_serotype_result
+        pre_post_matches = filter(m -> m[1] == serotype, all_matched_columns)
+        @assert length(unique(pre_post_matches)) == 2 "Serotype results $(serotype) should have both a 'Pre' and 'Post' results column. Instead, data contains $(length(unique(pre_post_matches)))columns: $(map(m -> m[2], pre_post_matches))"
+    end
+
+    return nothing
 end
 
 """
