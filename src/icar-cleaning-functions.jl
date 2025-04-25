@@ -138,7 +138,10 @@ end
 
 Return a vector of all column names that contain serotype information specified in the regex.
 """
-function collect_all_present_serotypes(df::DataFrame, reg::Regex = r"serotype_(.*)_\(.\)_(pre|post)")
+function collect_all_present_serotypes(
+        df::DataFrame,
+        reg::Regex = r"serotype_(.*)_\(.\)_(pre|post)"
+    )
     colnames = names(df)
     all_matched_cols = filter(!isnothing, match.(reg, colnames))
     all_matched_serotypes = map(m -> String(m[1]), all_matched_cols)
@@ -304,9 +307,12 @@ function _collect_totals_check_args(
         totals_rn,
         allowed_serotypes = default_allowed_serotypes
     ) where {T <: Union{Union{<:Missing, <:AbstractFloat}, <:AbstractFloat}}
-    reg = Regex("serotype_($(join(allowed_serotypes, "|")))_\\(%\\)_(pre|post)\$")
+    # Forms the regex string: r"serotype_(?|o|a|asia1)_\(%\)_(pre|post)$"
+    # (?|...) indicates a non-capture group i.e. must match any of the words separated by '|' characters, but does not return a match as a capture group
+    # (pre|post) is the only capture group, providing the timing used to collect the correct state column for weighting the seroprevalence sums
+    reg = Regex("serotype_(?|$(join(allowed_serotypes, "|")))_\\(%\\)_(pre|post)\$")
     denom_type_matches = match(reg, colname)
-    @assert length(denom_type_matches) == 1
+    @assert length(denom_type_matches) == 1 "For column $colname, $(length(denom_type_matches)) possible denominators found, but only expected 1: $(denom_type_matches.captures)"
     denom_type = denom_type_matches[1]
     denom_colname = "serotype_all_(n)_$denom_type"
 
