@@ -1,11 +1,13 @@
 using CSV
 using DataFrames: DataFrame, select, subset, filter, rename, transform, transform!, ByRow, Not, Cols, nrow, AsTable
+using DataFrames: DataFrame, select, subset, filter, rename, transform, transform!, ByRow, Not, Cols, nrow, AsTable, ncol
 
 export load_csv,
     clean_colnames,
     all_totals_check,
     has_totals_row,
     check_duplicated_states,
+    check_duplicated_columns,
     check_allowed_serotypes,
     check_aggregated_pre_post_counts,
     rename_aggregated_pre_post_counts,
@@ -52,6 +54,27 @@ function clean_colnames(df::DataFrame)
         t -> lowercase(replace(t, "/" => "_", " " => "_")),
         df
     )
+end
+
+"""
+    check_duplicated_columns(df::DataFrame)
+
+Check if the provided data has any duplicate column names
+"""
+function check_duplicated_columns(df::DataFrame)
+    df_ncol = ncol(df)
+    colnames = names(df)
+    unique_colnames = unique(colnames)
+
+    colname_counts = NamedTuple{tuple(Symbol.(unique_colnames)...)}(
+        map(
+            i -> sum(i .== colnames),
+            unique_colnames,
+        )
+    )
+
+    @assert df_ncol == length(unique_colnames) "The dataframe has $df_ncol columns, but only $(length(unique_colnames)) uniques column names. $(keys(filter(c -> values(c) != 1, colname_counts))) were duplicated"
+    return nothing
 end
 
 """
