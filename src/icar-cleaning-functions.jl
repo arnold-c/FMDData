@@ -459,7 +459,7 @@ Because DataFrames handles tables as named tuples, we can extract information ab
 """
 function _calculate_state_counts(table, original_df)
     str_keys = String.(keys(table))
-    timing = replace.(str_keys, r"serotype_.*_\(%\)_(\w+)$" => s"serotype_all_(n)_\1")
+    timing = replace.(str_keys, r"serotype_.*_\(%\)_(pre|post)$" => s"serotype_all_(n)_\1")
     vals = map(zip(table, timing)) do (seroprev, agg_counts_col)
         original_view = @view(original_df[!, agg_counts_col])
         vals = round.((seroprev / 100) .* original_view)
@@ -498,7 +498,7 @@ Because DataFrames handles tables as named tuples, we can extract information ab
 """
 function _calculate_state_seroprevalence(table, original_df)
     str_keys = String.(keys(table))
-    timing = replace.(str_keys, r"serotype_.*_\(n\)_(\w+)$" => s"serotype_all_(n)_\1")
+    timing = replace.(str_keys, r"serotype_.*_\(n\)_(pre|post)$" => s"serotype_all_(n)_\1")
     vals = map(
         ((serotype_count, agg_counts_col),) -> (serotype_count ./ @view(original_df[!, agg_counts_col])) .* 100,
         zip(table, timing)
