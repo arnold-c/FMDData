@@ -1,5 +1,4 @@
-using CSV
-using DataFrames: DataFrame, select, subset, filter, rename, transform, transform!, ByRow, Not, Cols, nrow, AsTable
+using CSV: read
 using DataFrames: DataFrame, select, subset, filter, rename, transform, transform!, ByRow, Not, Cols, nrow, AsTable, ncol
 
 export load_csv,
@@ -38,7 +37,7 @@ function load_csv(
     dir_files = filter(t -> contains(t, r".*\.csv$"), readdir(dir))
     in(filename, dir_files) || error("$filename is not within the directory $dir")
 
-    return CSV.read(
+    return read(
         joinpath(dir, filename),
         output_format
     )
