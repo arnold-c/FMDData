@@ -74,7 +74,7 @@ end
     check_allowed_serotypes(
         df::DataFrame,
         allowed_serotypes::Vector{String} = default_allowed_serotypes,
-        reg::Regex = r"serotype_(.*)_\(.\)_(pre|post)"
+        reg::Regex
     )
 
 Function to confirm that all required and no disallowed serotypes are provided in the data.
@@ -84,13 +84,23 @@ function check_allowed_serotypes(
         allowed_serotypes::Vector{String} = default_allowed_serotypes,
         reg::Regex = r"serotype_(.*)_\(.\)_(pre|post)"
     )
-    colnames = names(df)
-    all_matched_cols = filter(!isnothing, match.(reg, colnames))
-    all_matched_serotypes = unique(map(m -> String(m[1]), all_matched_cols))
-
+    all_matched_serotypes = unique(collect_all_present_serotypes(df))
     _check_all_required_serotypes(all_matched_serotypes, allowed_serotypes)
     _check_no_disallowed_serotypes(all_matched_serotypes, allowed_serotypes)
     return nothing
+end
+
+"""
+    collect_all_present_serotypes(df::DataFrame, reg::Regex)
+
+Return a vector of all column names that contain serotype information specified in the regex.
+"""
+function collect_all_present_serotypes(df::DataFrame, reg::Regex = r"serotype_(.*)_\(.\)_(pre|post)")
+    colnames = names(df)
+    all_matched_cols = filter(!isnothing, match.(reg, colnames))
+    all_matched_serotypes = map(m -> String(m[1]), all_matched_cols)
+
+    return all_matched_serotypes
 end
 
 """
