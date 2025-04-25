@@ -36,7 +36,7 @@ shell> tree
 ├── 2022_Annual-Report_NADCP-2.csv
 ├── 2022_Annual-Report_NADCP-3.csv
 ├── 2022_Annual-Report_Organized-farms.csv
-└── metadata.md
+└── README.md
 
 1 directory, 32 files
 ```
