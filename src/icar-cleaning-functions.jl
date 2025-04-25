@@ -127,7 +127,7 @@ function check_allowed_serotypes(
         allowed_serotypes::Vector{String} = vcat("all", default_allowed_serotypes),
         reg::Regex = r"serotype_(.*)_\(.\)_(pre|post)"
     )
-    all_matched_serotypes = unique(collect_all_present_serotypes(df))
+    all_matched_serotypes = unique(collect_all_present_serotypes(df, reg))
     _check_all_required_serotypes(all_matched_serotypes, allowed_serotypes)
     _check_no_disallowed_serotypes(all_matched_serotypes, allowed_serotypes)
     return nothing
