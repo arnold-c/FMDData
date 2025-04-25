@@ -440,7 +440,7 @@ end
 A wrapper function around the internal `_calculate_state_counts()` function to calculate the state/serotype specific counts based upon the state/serotype seroprevalence values and total state counts. See the documentation of `_calculate_state_counts()` for more details on the implementation.
 """
 function calculate_state_counts(df::DataFrame, allowed_serotypes = default_allowed_serotypes)
-    reg = Regex("serotype_($(join(allowed_serotypes, "|")))_\\(n\\)_(pre|post)\$")
+    reg = Regex("serotype_($(join(allowed_serotypes, "|")))_\\(%\\)_(pre|post)\$")
     return hcat(
         df,
         select(
