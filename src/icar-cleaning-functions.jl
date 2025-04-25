@@ -3,18 +3,18 @@ using DataFrames: DataFrame, select, subset, filter, rename, transform, transfor
 
 export load_csv,
     clean_colnames,
-    all_totals_check,
-    has_totals_row,
-    check_duplicated_states,
-    check_duplicated_columns,
-    check_allowed_serotypes,
-    check_aggregated_pre_post_counts,
     rename_aggregated_pre_post_counts,
+    check_duplicated_columns,
+    check_duplicated_states,
+    check_allowed_serotypes,
     check_pre_post_exists,
-    correct_state_name,
+    has_totals_row,
+    all_totals_check,
     correct_all_state_names,
     calculate_state_counts,
     calculate_state_seroprevalence
+
+public collect_all_present_serotypes, check_aggregated_pre_post_counts_exist, contains_seroprev_results, contains_count_results, correct_state_name
 
 default_allowed_serotypes::Vector{String} = ["o", "a", "asia1"]
 
@@ -212,9 +212,9 @@ end
         df::DataFrame,
     )
 
-Check if data contains aggregated counts of pre and post vaccinated individuals
+Check if data contains aggregated counts of pre and post vaccinated individuals. Should only be used on dataframes that haven't yet renamed these columns to meet the standard pattern of "serotype_all_(n)_pre"
 """
-function check_aggregated_pre_post_counts(df::DataFrame, columns = ["pre_(n)", "post_(n)"])
+function check_aggregated_pre_post_counts_exist(df::DataFrame, columns = ["pre_(n)", "post_(n)"])
     return @assert sum(map(c -> in(c, names(df)), columns)) == length(columns)
 end
 
