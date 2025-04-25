@@ -78,6 +78,37 @@ shell> tree
     - Sample year(s):
         - 2021/2022
         - States "17029 serum samples (pre-vac: 9450, post-vac: 7579) were processed during 2021. Rest .. tested during the year 2022"
+    - States sampled:
+        - A&N Island
+        - Andhra Pradesh
+        - Arunachal Pradesh
+        - Assam
+        - Bihar
+        - Chandigarh
+        - Chhattisgarh
+        - Dadra and Nagar Haveli and Daman and Diu
+        - Delhi
+        - Goa
+        - Gujarat
+        - Haryana
+        - Himachal Pradesh
+        - Jammu & Kashmir
+        - Jharkhand
+        - Karnataka
+        - Kerala
+        - Madhya Pradesh
+        - Maharashtra
+        - Meghalaya
+        - Nagaland
+        - Odisha
+        - Pudhucherry
+        - Punjab
+        - Sikkim
+        - Tamilnadu
+        - Telanagana
+        - Uttar Pradesh
+        - Uttarakhand
+        - West Bengal
 - NADCP-3
     - Table number: 7
     - Report page number: 32
@@ -86,6 +117,9 @@ shell> tree
         - 1.65 log10
     - Sample year(s):
         - 2022
+    - States sampled:
+        - Haryana
+        - Karnataka
 - Organized-farms
     - Table number: 8
     - Report page number: 32
@@ -95,6 +129,21 @@ shell> tree
         - Assumed due to a testing date of 2022
     - Sample year(s):
         - 2022
+    - States sampled:
+        - Andhra Pradesh
+        - Kerala
+        - Chhattisgarh
+        - Uttar Pradesh
+        - Himachal Pradesh
+        - Madhya Pradesh
+        - Tamilnadu
+        - Haryana
+        - Odisha
+        - Telangana
+        - Maharashtra
+        - Gujarat
+        - Uttarakhand
+        - Karnataka
 
 ### 2021
 
@@ -107,6 +156,36 @@ shell> tree
     - Sample year(s):
         - 2020/2021
         - States "90154 serum samples (pre-vac: 53922, post-vac: 49340) were tested during the year 2020 and rest of the samples were processed during 2021"
+    - States sampled:
+        - Andhra Pradesh
+        - Tamilnadu
+        - Karnataka
+        - Kerala
+        - Telangana
+        - Maharashtra
+        - Gujarat
+        - Madhya Pradesh
+        - Chhattisgarh
+        - Odisha
+        - Jharkhand
+        - Haryana
+        - Punjab
+        - Uttar Pradesh
+        - Himachal Pradesh
+        - Jammu Kashmir
+        - Uttarakhand
+        - Mizoram
+        - Assam
+        - Manipur
+        - Sikkim
+        - Meghalaya
+        - Arunachal Pradesh
+        - Nagaland
+        - Goa
+        - Andaman
+        - Delhi
+        - Rajasthan
+        - Pondichery
 - NADCP-2
     - Table number: 10
     - Report page number: 23
@@ -115,6 +194,17 @@ shell> tree
         - 1.65 log10
     - Sample year(s):
         - 2021
+    - States sampled:
+        - Haryana
+        - Maharashtra
+        - Delhi
+        - Uttar Pradesh
+        - Kamataka
+        - Jammu Kashmir
+        - Chandigarh
+        - Andhra Pradesh
+        - A&N Island
+        - Himachal Pradesh
 - Organized-farms
     - Table number: 11
     - Report page number: 26
@@ -123,6 +213,18 @@ shell> tree
         - 1.8 log10
     - Sample year(s):
         - 2021
+    - States sampled:
+        - Haryana
+        - HP (assuming Himachal Pradesh)
+        - AP
+        - MP (assuming Madhya Pradesh)
+        - Chhattisgarh
+        - UP (assuming Uttar Pradesh)
+        - Gujarat
+        - Tamilnadu
+        - Kerala
+        - West Bengal
+
 ### 2020
 
 - NADCP-1
@@ -133,6 +235,32 @@ shell> tree
         - 1.8 log10
     - Sample year(s):
         - 2020
+    - States sampled:
+        - Andhra Pradesh
+        - Arunachal Pradesh
+        - Assam
+        - Chhattisgarh
+        - Goa
+        - Gujarat
+        - Haryana
+        - Himachal Pradesh
+        - Jharkhand
+        - Karnataka
+        - Kerala
+        - Maharashtra
+        - Mizoram
+        - Manipur
+        - Madhya Pradesh
+        - Odisha
+        - Punjab
+        - Sikkim
+        - Tamilnadu
+        - Telangana
+        - Uttar Pradesh
+        - Uttarakhand
+        - A&N Island
+        - Delhi
+        - Jammu Kashmir
 - Organized-farms
     - Table number: 9
     - Report page number: 16
@@ -141,6 +269,26 @@ shell> tree
         - 1.8 log10
     - Sample year(s):
         - No information about sample year provided, so assumed to be 2020
+    - States sampled:
+        - KLDB, Kulathupuzha, Kerala
+        - KLDB, Kulathupuzha, Kerala
+        - KLDB, Kulathupuzha, Kerala
+        - KLDB, Kulathupuzha, Kerala
+        - KLDB, Dhoni, Kerala
+        - KLDB, Dhoni, Kerala
+        - KLDB, Dhoni, Kerala
+        - KLDB, Mattupatty, Kerala
+        - KLDB, Mattupatty, Kerala
+        - KLDB, Mattupatty, Kerala
+        - KLDB, Mattupatty, Kerala
+        - KLDB, Palakkad, Kerala
+        - APLDA, Banavasi, AP
+        - APLDA, Banavasi, AP
+        - APLDA, Visakhapatnam, AP
+        - APLDA, Nandyal, AP
+        - APLDA, Nandyal, AP
+        - CBF, Anjora, Chhattisgarh
+        - CSS, Bhopal, MP
     - Additional information:
         - Unlike other "organized farm" tables, 2020 provides information about specific farm vaccination results
         - "In most of the organized farms, four monthly vaccinations have been practised without fail."
