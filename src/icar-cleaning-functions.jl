@@ -4,17 +4,21 @@ using DataFrames: DataFrame, select, subset, filter, rename, transform, transfor
 export load_csv,
     clean_colnames,
     rename_aggregated_pre_post_counts,
+    correct_all_state_names,
     check_duplicated_columns,
     check_duplicated_states,
     check_allowed_serotypes,
     check_pre_post_exists,
     has_totals_row,
     all_totals_check,
-    correct_all_state_names,
     calculate_state_counts,
     calculate_state_seroprevalence
 
-public collect_all_present_serotypes, check_aggregated_pre_post_counts_exist, contains_seroprev_results, contains_count_results, correct_state_name
+public collect_all_present_serotypes,
+    check_aggregated_pre_post_counts_exist,
+    contains_seroprev_results,
+    contains_count_results,
+    correct_state_name
 
 default_allowed_serotypes::Vector{String} = ["o", "a", "asia1"]
 
@@ -75,6 +79,54 @@ function rename_aggregated_pre_post_counts(
         df
     )
 end
+
+"""
+    correct_all_state_names(
+        df::DataFrame,
+        column::Symbol = :states_ut,
+        states_dict::Dict = FMDData.states_dict
+    )
+
+Correct all state name values in the data
+"""
+function correct_all_state_names(
+        df::DataFrame,
+        column::Symbol = :states_ut,
+        states_dict::Dict = FMDData.states_dict
+    )
+
+    return transform(
+        df,
+        column => ByRow(s -> correct_state_name(s, states_dict));
+        renamecols = false
+    )
+end
+
+"""
+	correct_state_name(
+        input_name::String,
+        states_dict::Dict = FMDData.states_dict
+    )
+
+Check if a state name is correctly spelled, or previously characterized and matched with a correct name. Returns the correct name if possible, or errors.
+"""
+function correct_state_name(
+        input_name::String,
+        states_dict::Dict = FMDData.states_dict
+    )
+    possible_state_values = values(states_dict)
+
+    if in(input_name, possible_state_values) || lowercase(input_name) == "total"
+        return input_name
+    end
+
+    possible_state_keys = keys(states_dict)
+    in(input_name, possible_state_keys) ||
+        error("State name `$input_name` doesn't exist in current dictionary match. Confirm if this is a new state or uncharacterized misspelling")
+
+    return states_dict[input_name]
+end
+
 
 """
     check_duplicated_columns(df::DataFrame)
@@ -381,56 +433,6 @@ function _totals_check(
         @warn "`$colname`: $calculated_total doesn't match provided total $provided_total"
     end
     return nothing
-end
-
-
-"""
-    correct_all_state_names(
-        df::DataFrame,
-        column::Symbol = :states_ut,
-        states_dict::Dict = FMDData.states_dict
-    )
-
-Correct all state name values in the data
-"""
-function correct_all_state_names(
-        df::DataFrame,
-        column::Symbol = :states_ut,
-        states_dict::Dict = FMDData.states_dict
-    )
-    df_state_keys = df[!, column]
-
-    return transform(
-        df,
-        column => ByRow(s -> correct_state_name(s, states_dict));
-        renamecols = false
-    )
-
-end
-
-"""
-	correct_state_name(
-        input_name::String,
-        states_dict::Dict = FMDData.states_dict
-    )
-
-Check if a state name is correctly spelled, or previously characterized and matched with a correct name. Returns the correct name if possible, or errors.
-"""
-function correct_state_name(
-        input_name::String,
-        states_dict::Dict = FMDData.states_dict
-    )
-    possible_state_values = values(states_dict)
-
-    if in(input_name, possible_state_values) || lowercase(input_name) == "total"
-        return input_name
-    end
-
-    possible_state_keys = keys(states_dict)
-    in(input_name, possible_state_keys) ||
-        error("State name `$input_name` doesn't exist in current dictionary match. Confirm if this is a new state or uncharacterized misspelling")
-
-    return states_dict[input_name]
 end
 
 
