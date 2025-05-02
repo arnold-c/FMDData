@@ -240,12 +240,12 @@ end
 
 Confirms each combination of serotype and result type (N/%) has both a pre- and post-vaccination results column, but nothing else.
 """
-function check_pre_post_exists(df::DataFrame, reg::Regex = r"serotype_(.*)_\((.)\)_(pre|post)")
+function check_pre_post_exists(df::DataFrame, reg::Regex = r"(serotype_.*_\(.\))_(pre|post)")
     colnames = names(df)
 
     all_matched_columns = filter(
         !isnothing,
-        match.(r"(serotype_.*_\(.\))_(pre|post)", colnames)
+        match.(reg, colnames)
     )
 
     unique_serotype_result = unique(map(m -> m[1], all_matched_columns))
