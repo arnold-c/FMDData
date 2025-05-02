@@ -49,15 +49,39 @@ function load_csv(
 end
 
 """
-    clean_colnames(df::DataFrame)
+    clean_colnames(df::DataFrame, allowed_chars_reg::Regex)
 
-Replace spaces and / with underscores
+Replace spaces and / with underscores, and (n) and (%) with "count" and "pct" respectively. `allowed_chars_reg` should be a negative match, where the default `r"[^\\w]"` matches to all non numeric/alphabetic/_ characters
 """
-function clean_colnames(df::DataFrame)
-    return rename(
-        t -> lowercase(replace(t, "/" => "_", " " => "_")),
+function clean_colnames(
+        df::DataFrame,
+        allowed_chars_reg::Regex = r"[^\w]"
+    )
+    clean_df = rename(
+        t -> replace(
+            lowercase(t),
+            "/" => "_",
+            " " => "_",
+            "(n)" => "count",
+            "(%)" => "pct",
+        ),
         df
     )
+
+    colnames = names(clean_df)
+
+    cols_with_dissallowed_chars = Dict(
+        n => collect(eachmatch(allowed_chars_reg, n)) for n in colnames
+    )
+
+    filter!(
+        c -> !isempty(c.second),
+        cols_with_dissallowed_chars
+    )
+
+    @assert length(cols_with_dissallowed_chars) == 0 "$(keys(cols_with_dissallowed_chars)) are columns with disallowed characters.\n$(cols_with_dissallowed_chars)"
+
+    return clean_df
 end
 
 """
