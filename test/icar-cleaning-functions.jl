@@ -1,7 +1,6 @@
 using DataFrames
 
 @testset verbose = true "icar-cleaning-functions.jl" begin
-    # load_csv,
     #    clean_colnames,
     #    rename_aggregated_pre_post_counts,
     #    correct_all_state_names,
@@ -86,6 +85,50 @@ using DataFrames
 
         for (j, col) in pairs(eachcol(data))
             @test eltype(col) <: expected_col_types[String(j)]
+        end
+
+    end
+
+    @testset "Column name cleaning" begin
+        dir = "./"
+
+        filename = "test-data.csv"
+
+        data = load_csv(
+            filename,
+            dir,
+            DataFrame
+        )
+
+        cleaned_data = clean_colnames(data)
+
+        @test isequal(
+            names(cleaned_data),
+            [
+                "states_ut",
+                "pre_count",
+                "post_count",
+                "serotype_o_pct_pre",
+                "serotype_o_pct_post",
+                "serotype_a_pct_pre",
+                "serotype_a_pct_post",
+                "serotype_asia1_pct_pre",
+                "serotype_asia1_pct_post",
+            ]
+        )
+
+        special_char_df = DataFrame(
+            "States/UT" => String[],
+            "flag-this_column^" => Int64[]
+        )
+
+        try
+            clean_colnames(special_char_df)
+        catch e
+            @test isequal(
+                e,
+                AssertionError("[\"flag-this_column^\"] are columns with disallowed characters.\nDict{String, Vector{RegexMatch}}(\"flag-this_column^\" => [RegexMatch(\"-\"), RegexMatch(\"^\")])")
+            )
         end
 
     end

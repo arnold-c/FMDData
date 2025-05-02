@@ -63,7 +63,9 @@ function clean_colnames(
             "/" => "_",
             " " => "_",
             "(n)" => "count",
+            "_n_" => "_count_",
             "(%)" => "pct",
+            "_%_" => "_pct_",
         ),
         df
     )
