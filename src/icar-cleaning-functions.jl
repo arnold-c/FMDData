@@ -137,9 +137,9 @@ end
 Check if a state name is correctly spelled, or previously characterized and matched with a correct name. Returns the correct name if possible, or errors.
 """
 function correct_state_name(
-        input_name::String,
+        input_name::S,
         states_dict::Dict = FMDData.states_dict
-    )
+    ) where {S <: AbstractString}
     possible_state_values = values(states_dict)
 
     if in(input_name, possible_state_values) || lowercase(input_name) == "total"

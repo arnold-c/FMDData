@@ -79,11 +79,11 @@ using DataFrames
         dir,
         DataFrame
     )
-    cleaned_data = clean_colnames(data)
+    cleaned_colname_data = clean_colnames(data)
 
     @testset "Column name cleaning" begin
         @test isequal(
-            names(cleaned_data),
+            names(cleaned_colname_data),
             [
                 "states_ut",
                 "pre_count",
@@ -112,7 +112,7 @@ using DataFrames
         end
     end
 
-    renamed_aggregated_counts_df = rename_aggregated_pre_post_counts(cleaned_data)
+    renamed_aggregated_counts_df = rename_aggregated_pre_post_counts(cleaned_colname_data)
     @testset "Rename aggregated Pre/Post counts" begin
         @test isequal(
             names(renamed_aggregated_counts_df),
@@ -130,7 +130,30 @@ using DataFrames
         )
     end
 
-    #    rename_aggregated_pre_post_counts,
+    cleaned_states_data = correct_all_state_names(
+        renamed_aggregated_counts_df,
+        :states_ut,
+        FMDData.states_dict
+    )
+
+    @testset "Correcting state names" begin
+        for n in cleaned_states_data[!, :states_ut]
+            @test in(n, [values(FMDData.states_dict)..., "Total"])
+        end
+
+        try
+            FMDData.correct_state_name(
+                "New State",
+                FMDData.states_dict
+            )
+        catch e
+            @test isequal(
+                e,
+                ErrorException("State name `New State` doesn't exist in current dictionary match. Confirm if this is a new state or uncharacterized misspelling")
+            )
+        end
+    end
+
     #    correct_all_state_names,
     #    check_duplicated_columns,
     #    check_duplicated_states,
