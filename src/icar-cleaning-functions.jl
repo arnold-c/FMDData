@@ -160,7 +160,6 @@ Check if there are duplicated states in the data
 function check_duplicated_states(
         df::DataFrame,
         column::Symbol = :states_ut,
-        allowed_serotypes = default_allowed_serotypes
     )
     return @assert length(df[!, column]) == length(unique(df[!, column]))
 end
