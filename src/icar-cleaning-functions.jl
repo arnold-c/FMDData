@@ -289,14 +289,6 @@ function has_totals_row(
     return length(filter(s -> in(s, possible_keys), lowercase.(df[!, column]))) > 0
 end
 
-function contains_seroprev_results(df, serotypes = ["all", "o", "a", "asia1"])
-
-end
-
-function contains_count_results(df, serotypes = ["all", "o", "a", "asia1"])
-
-end
-
 """
     all_totals_check(df::DataFrame, totals_key = "total")
 
