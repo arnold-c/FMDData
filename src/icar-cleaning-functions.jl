@@ -1,10 +1,12 @@
 using CSV: read
 using DataFrames: DataFrame, select, subset, filter, rename, transform, transform!, ByRow, Not, Cols, nrow, AsTable, ncol
+using StringDistances: findall, Levenshtein, Metric, SemiMetric
 
 export load_csv,
     clean_colnames,
     rename_aggregated_pre_post_counts,
     correct_all_state_names,
+    check_duplicated_column_names,
     check_duplicated_columns,
     check_duplicated_states,
     check_allowed_serotypes,
@@ -153,15 +155,35 @@ function correct_state_name(
     return states_dict[input_name]
 end
 
+"""
+    check_duplicated_column_names(
+        df::DataFrame,
+        metric::T = Levenshtein();
+        min_score = 0.79
+    ) where {T <: Union{<:Metric, <:SemiMetric}}
+
+Wrapper function around the two internal functions `_check_identical_column_names()` and `_check_similar_column_names()`. If a DataFrame is created then all identical column names should result in an error before it is created, but potentially they may be coerced to be made unique so a similarity check should be performed.
+"""
+function check_duplicated_column_names(
+        df::DataFrame,
+        metric::T = Levenshtein();
+        min_score = 0.79
+    ) where {T <: Union{<:Metric, <:SemiMetric}}
+    _check_identical_column_names(df)
+    _check_similar_column_names(df, metric; min_score = min_score)
+    return nothing
+end
 
 """
-    check_duplicated_columns(df::DataFrame)
+    _check_identical_column_names(df::DataFrame)
 
-Check if the provided data has any duplicate column names
+Check if the provided data has any duplicate column names.
+
+Should be run BEFORE `_check_similar_column_names()` as `push!()` call in `_check_similar_column_names` will overwrite previous Dict entry key (of similar column names) if there are exact matches.
 """
-function check_duplicated_columns(df::DataFrame)
+function _check_identical_column_names(df::DataFrame)
     df_ncol = ncol(df)
-    colnames = names(df)
+    colnames = String.(names(df))
     unique_colnames = unique(colnames)
 
     colname_counts = NamedTuple{tuple(Symbol.(unique_colnames)...)}(
@@ -172,7 +194,70 @@ function check_duplicated_columns(df::DataFrame)
     )
 
     @assert df_ncol == length(unique_colnames) "The dataframe has $df_ncol columns, but only $(length(unique_colnames)) uniques column names. $(keys(filter(c -> values(c) != 1, colname_counts))) were duplicated"
+
     return nothing
+end
+
+"""
+    _check_similar_column_names(
+        df::DataFrame,
+        metric::T = Levenshtein();
+        min_score = 0.79
+    ) where {T <: Union{<:Metric, <:SemiMetric}}
+
+Check if any columns have similar names.
+
+Should be run AFTER `_check_identical_column_names()` as `push!()` call will overwrite previous Dict entry key if there are exact matches.
+"""
+function _check_similar_column_names(
+        df::DataFrame,
+        metric::T = Levenshtein();
+        min_score = 0.79
+    ) where {T <: Union{<:Metric, <:SemiMetric}}
+    colnames = String.(names(df))
+    duplicates = Dict{String, Vector{String}}()
+    for (i, nm) in pairs(colnames)
+        idx = findall(nm, @view(colnames[(i + 1):end]), metric, min_score = min_score)
+        if !isempty(idx)
+            push!(duplicates, nm => colnames[(i .+ idx)])
+        end
+    end
+    if !isempty(duplicates)
+        error("Similar column names were found in the data:\n$duplicates")
+    end
+    return nothing
+end
+
+"""
+    check_duplicated_columns(df::DataFrame)
+
+Check if any columns have identical values
+"""
+function check_duplicated_columns(df::DataFrame)
+    df_ncol = ncol(df)
+    df_ncol < 2 && return false
+
+    duplicate_columns = Dict()
+    for (k, v) in pairs(eachcol(df))
+        if haskey(duplicate_columns, v)
+            push!(duplicate_columns[v], k)
+        else
+            duplicate_columns[v] = [k]
+        end
+    end
+    # seen_columns = Dict{Symbol, AbstractVector}()
+    # duplicate_columns = Dict{Symbol, Symbol}()
+    # for (colname, col_vector) in pairs(eachcol(df))
+    #     if col_vector in values(seen_columns)
+    #         push!(duplicate_columns, colname =>)
+    #     else
+    #         push!(seen_columns, colname => col_vector)
+    #     end
+    # end
+    if !isempty(duplicate_columns)
+        error("Found duplicated columns: $(duplicate_columns)")
+    end
+    return false
 end
 
 """
