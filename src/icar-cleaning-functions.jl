@@ -95,8 +95,8 @@ Rename the aggregated pre/post counts to use the same format as the serotype-spe
 """
 function rename_aggregated_pre_post_counts(
         df::DataFrame,
-        original_regex::Regex = r"^(pre|post)_\(n\)",
-        substitution_string::SubstitutionString = s"serotype_all_(n)_\1"
+        original_regex::Regex = r"^(pre|post)_count",
+        substitution_string::SubstitutionString = s"serotype_all_count_\1"
     )
     return rename(
         s -> replace(s, original_regex => substitution_string),
@@ -200,7 +200,7 @@ Function to confirm that all required and no disallowed serotypes are provided i
 function check_allowed_serotypes(
         df::DataFrame,
         allowed_serotypes::Vector{String} = vcat("all", default_allowed_serotypes),
-        reg::Regex = r"serotype_(.*)_\(.\)_(pre|post)"
+        reg::Regex = r"serotype_(.*)_(?|count|pct)_(pre|post)"
     )
     all_matched_serotypes = unique(collect_all_present_serotypes(df, reg))
     _check_all_required_serotypes(all_matched_serotypes, allowed_serotypes)
@@ -215,7 +215,7 @@ Return a vector of all column names that contain serotype information specified 
 """
 function collect_all_present_serotypes(
         df::DataFrame,
-        reg::Regex = r"serotype_(.*)_\(.\)_(pre|post)"
+        reg::Regex = r"serotype_(.*)_(?|count|pct)_(pre|post)"
     )
     colnames = names(df)
     all_matched_cols = filter(!isnothing, match.(reg, colnames))
@@ -264,7 +264,10 @@ end
 
 Confirms each combination of serotype and result type (N/%) has both a pre- and post-vaccination results column, but nothing else.
 """
-function check_pre_post_exists(df::DataFrame, reg::Regex = r"(serotype_.*_\(.\))_(pre|post)")
+function check_pre_post_exists(
+        df::DataFrame,
+        reg::Regex = r"(serotype_.*_(?|count|pct))_(pre|post)"
+    )
     colnames = names(df)
 
     all_matched_columns = filter(
@@ -276,7 +279,7 @@ function check_pre_post_exists(df::DataFrame, reg::Regex = r"(serotype_.*_\(.\))
 
     for serotype in unique_serotype_result
         pre_post_matches = filter(m -> m[1] == serotype, all_matched_columns)
-        @assert length(unique(pre_post_matches)) == 2 "Serotype results $(serotype) should have both a 'Pre' and 'Post' results column. Instead, data contains $(length(unique(pre_post_matches)))columns: $(map(m -> m[2], pre_post_matches))"
+        @assert length(unique(pre_post_matches)) == 2 "Serotype results $(serotype) should have both a 'Pre' and 'Post' results column. Instead, data contains $(length(unique(pre_post_matches))) columns: $(map(m -> m[2], pre_post_matches))"
     end
 
     return nothing
@@ -287,9 +290,9 @@ end
         df::DataFrame,
     )
 
-Check if data contains aggregated counts of pre and post vaccinated individuals. Should only be used on dataframes that haven't yet renamed these columns to meet the standard pattern of "serotype_all_(n)_pre"
+Check if data contains aggregated counts of pre and post vaccinated individuals. Should only be used on dataframes that haven't yet renamed these columns to meet the standard pattern of "serotype_all_count_pre"
 """
-function check_aggregated_pre_post_counts_exist(df::DataFrame, columns = ["pre_(n)", "post_(n)"])
+function check_aggregated_pre_post_counts_exist(df::DataFrame, columns = ["pre_count", "post_count"])
     return @assert sum(map(c -> in(c, names(df)), columns)) == length(columns)
 end
 
@@ -374,14 +377,14 @@ function _collect_totals_check_args(
         totals_rn,
         allowed_serotypes = default_allowed_serotypes
     ) where {T <: Union{Union{<:Missing, <:AbstractFloat}, <:AbstractFloat}}
-    # Forms the regex string: r"serotype_(?|o|a|asia1)_\(%\)_(pre|post)$"
+    # Forms the regex string: r"serotype_(?|o|a|asia1)_pct_(pre|post)$"
     # (?|...) indicates a non-capture group i.e. must match any of the words separated by '|' characters, but does not return a match as a capture group
     # (pre|post) is the only capture group, providing the timing used to collect the correct state column for weighting the seroprevalence sums
-    reg = Regex("serotype_(?|$(join(allowed_serotypes, "|")))_\\(%\\)_(pre|post)\$")
+    reg = Regex("serotype_(?|$(join(allowed_serotypes, "|")))_pct_(pre|post)\$")
     denom_type_matches = match(reg, colname)
     @assert length(denom_type_matches) == 1 "For column $colname, $(length(denom_type_matches)) possible denominators found, but only expected 1: $(denom_type_matches.captures)"
     denom_type = denom_type_matches[1]
-    denom_colname = "serotype_all_(n)_$denom_type"
+    denom_colname = "serotype_all_count_$denom_type"
 
     denom_col = df[Not(totals_rn), denom_colname]
     denom_total = sum(skipmissing(denom_col))
@@ -457,7 +460,7 @@ end
 A wrapper function around the internal `_calculate_state_counts()` function to calculate the state/serotype specific counts based upon the state/serotype seroprevalence values and total state counts. See the documentation of `_calculate_state_counts()` for more details on the implementation.
 """
 function calculate_state_counts(df::DataFrame, allowed_serotypes = default_allowed_serotypes)
-    reg = Regex("serotype_($(join(allowed_serotypes, "|")))_\\(%\\)_(pre|post)\$")
+    reg = Regex("serotype_($(join(allowed_serotypes, "|")))_pct_(pre|post)\$")
     return hcat(
         df,
         select(
@@ -476,14 +479,14 @@ Because DataFrames handles tables as named tuples, we can extract information ab
 """
 function _calculate_state_counts(table, original_df)
     str_keys = String.(keys(table))
-    timing = replace.(str_keys, r"serotype_.*_\(%\)_(pre|post)$" => s"serotype_all_(n)_\1")
+    timing = replace.(str_keys, r"serotype_.*_pct_(pre|post)$" => s"serotype_all_count_\1")
     vals = map(zip(table, timing)) do (seroprev, agg_counts_col)
         original_view = @view(original_df[!, agg_counts_col])
         vals = round.((seroprev / 100) .* original_view)
         return convert.(eltype(original_view), vals)
     end
 
-    names = Symbol.(replace.(str_keys, r"(.*_)\(%\)(_.*)" => s"\1(n)\2_calculated"))
+    names = Symbol.(replace.(str_keys, r"(.*_)pct(_.*)" => s"\1count\2_calculated"))
     return NamedTuple{tuple(names...)}((vals...,))
 end
 
@@ -496,7 +499,7 @@ function calculate_state_seroprevalence(
         df::DataFrame,
         allowed_serotypes::T = default_allowed_serotypes,
     ) where {T <: AbstractVector{<:AbstractString}}
-    reg = Regex("serotype_($(join(allowed_serotypes, "|")))_\\(n\\)_(pre|post)\$")
+    reg = Regex("serotype_($(join(allowed_serotypes, "|")))_count_(pre|post)\$")
     return hcat(
         df,
         select(
@@ -515,12 +518,12 @@ Because DataFrames handles tables as named tuples, we can extract information ab
 """
 function _calculate_state_seroprevalence(table, original_df)
     str_keys = String.(keys(table))
-    timing = replace.(str_keys, r"serotype_.*_\(n\)_(pre|post)$" => s"serotype_all_(n)_\1")
+    timing = replace.(str_keys, r"serotype_.*_count_(pre|post)$" => s"serotype_all_count_\1")
     vals = map(
         ((serotype_count, agg_counts_col),) -> (serotype_count ./ @view(original_df[!, agg_counts_col])) .* 100,
         zip(table, timing)
     )
 
-    names = Symbol.(replace.(str_keys, r"(.*_)\(n\)(_.*)" => s"\1(%)\2_calculated"))
+    names = Symbol.(replace.(str_keys, r"(.*_)count(_.*)" => s"\1pct\2_calculated"))
     return NamedTuple{tuple(names...)}((vals...,))
 end
