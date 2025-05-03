@@ -1,5 +1,6 @@
 using CSV: read
 using DataFrames: DataFrame, select, subset, filter, rename, transform, transform!, ByRow, Not, Cols, nrow, AsTable, ncol
+using OrderedCollections: OrderedDict
 
 export load_csv,
     clean_colnames,
@@ -202,7 +203,7 @@ Should be run AFTER `_check_identical_column_names()` as `push!()` call will ove
 """
 function _check_similar_column_names(df::DataFrame)
     colnames = sort(String.(names(df)); by = length)
-    duplicates = Dict{String, Vector{String}}()
+    duplicates = OrderedDict{String, Vector{String}}()
     for (i, nm) in pairs(colnames)
         for (_, next_nm) in pairs(colnames[(i + 1):end])
             if nm == next_nm
@@ -231,7 +232,7 @@ function _check_similar_column_names(df::DataFrame)
         end
     end
     if !isempty(duplicates)
-        error("Similar column names were found in the data:\n$duplicates")
+        error("Similar column names were found in the data:\n$(sort!(duplicates; by = first))")
     end
     return nothing
 end

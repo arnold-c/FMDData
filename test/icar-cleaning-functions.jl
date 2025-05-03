@@ -173,16 +173,37 @@ using DataFrames
         catch e
             @test isequal(
                 e,
-                ErrorException("Similar column names were found in the data:\nDict(\"seroprevalance_all_count_pre\" => [\"seroprevalance_all_count_pre_1\"], \"states_ut\" => [\"states_ut_1\"])")
+                ErrorException("Similar column names were found in the data:\nOrderedCollections.OrderedDict(\"states_ut\" => [\"states_ut_1\"], \"seroprevalance_all_count_pre\" => [\"seroprevalance_all_count_pre_1\"])")
             )
         end
+
+        similar_column_names_df_2 = DataFrame(
+            "states_ut_1_2" => String[],
+            "states_ut" => String[],
+            "states_ut_1" => String[],
+            "states_u" => String[],
+            "seroprevalance_all_count_pre" => Int64[],
+            "seroprevalance_all_count_post" => Int64[],
+            "seroprevalance_all_pct_pre" => Float64[],
+            "seroprevalance_all_count_pre_test" => Int64[],
+        )
+
+        try
+            FMDData._check_similar_column_names(similar_column_names_df_2)
+        catch e
+            @test isequal(
+                e,
+                ErrorException("Similar column names were found in the data:\nOrderedCollections.OrderedDict(\"states_u\" => [\"states_ut\", \"states_ut_1\", \"states_ut_1_2\"], \"seroprevalance_all_count_pre\" => [\"seroprevalance_all_count_pre_test\"])")
+            )
+        end
+
 
         try
             check_duplicated_column_names(similar_column_names_df)
         catch e
             @test isequal(
                 e,
-                ErrorException("Similar column names were found in the data:\nDict(\"seroprevalance_all_count_pre\" => [\"seroprevalance_all_count_pre_1\"], \"states_ut\" => [\"states_ut_1\"])")
+                ErrorException("Similar column names were found in the data:\nOrderedCollections.OrderedDict(\"states_ut\" => [\"states_ut_1\"], \"seroprevalance_all_count_pre\" => [\"seroprevalance_all_count_pre_1\"])")
             )
         end
 
