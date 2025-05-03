@@ -19,8 +19,6 @@ export load_csv,
 
 public collect_all_present_serotypes,
     check_aggregated_pre_post_counts_exist,
-    contains_seroprev_results,
-    contains_count_results,
     correct_state_name
 
 default_allowed_serotypes::Vector{String} = ["o", "a", "asia1"]
@@ -451,11 +449,18 @@ end
 
 Check if all provided values in the provided totals row are correct. If the column is a count, then calculate an unweighted sum. If the column is the seroprevalence, calculated the sum weighted by the relevant counts (pre- or post-vaccination counts).
 """
-function all_totals_check(df::DataFrame, totals_key = "total")
-    totals = subset(df, :states_ut => s -> lowercase.(s) .== totals_key)
-    @assert nrow(totals) == 1
-    totals_rn = indexin((totals_key,), lowercase.(df.states_ut))
+function all_totals_check(
+        df::DataFrame,
+        column::Symbol = :states_ut,
+        totals_key = "total",
+        allowed_serotypes = default_allowed_serotypes;
+        atol = 0.02
+    )
+    totals = subset(df, column => s -> lowercase.(s) .== totals_key)
+    @assert nrow(totals) == 1 "Expected 1 row of totals. Found $(nrow(totals)). Check the spelling in the states column :$column matches the provided `totals_key` \"$totals_key\""
+    totals_rn = indexin((totals_key,), lowercase.(df[!, column]))
     col_names = names(df)
+    errors_dict = OrderedDict{AbstractString, NamedTuple{(:provided, :calculated)}}()
     for col_ind in eachindex(names(df))
         col_name = col_names[col_ind]
         if col_name == "states_ut"
@@ -467,8 +472,13 @@ function all_totals_check(df::DataFrame, totals_key = "total")
             names(df)[col_ind],
             df,
             totals_rn,
+            allowed_serotypes,
+            atol,
         )
-        _totals_check(totals_check_args...)
+        _totals_check!(errors_dict, totals_check_args...)
+    end
+    if !isempty(errors_dict)
+        error(errors_dict)
     end
     return nothing
 end
@@ -505,7 +515,8 @@ function _collect_totals_check_args(
         colname::String,
         df::DataFrame,
         totals_rn,
-        allowed_serotypes = default_allowed_serotypes
+        allowed_serotypes = default_allowed_serotypes,
+        atol = 0.02
     ) where {T <: Union{Union{<:Missing, <:AbstractFloat}, <:AbstractFloat}}
     # Forms the regex string: r"serotype_(?|o|a|asia1)_pct_(pre|post)$"
     # (?|...) indicates a non-capture group i.e. must match any of the words separated by '|' characters, but does not return a match as a capture group
@@ -516,10 +527,11 @@ function _collect_totals_check_args(
     denom_type = denom_type_matches[1]
     denom_colname = "serotype_all_count_$denom_type"
 
+    # Calculate own aggregate pre/post total in case provided values are incorrect
     denom_col = df[Not(totals_rn), denom_colname]
     denom_total = sum(skipmissing(denom_col))
 
-    return (col, totals[1, colname], colname, denom_col, denom_total)
+    return (col, totals[1, colname], colname, denom_col, denom_total, atol)
 end
 
 """
@@ -531,14 +543,15 @@ end
 
 Check if the provided total counts equal the sum calculated using the provided state counts.
 """
-function _totals_check(
+function _totals_check!(
+        errors_dict::OrderedDict,
         col::Vector{T},
         provided_total,
         colname::String,
     ) where {T <: Union{<:Union{<:Missing, <:Integer}, <:Integer}}
     calculated_total = sum(skipmissing(col))
     if calculated_total != provided_total
-        @warn "`$colname`: $calculated_total doesn't match provided total $provided_total"
+        errors_dict[colname] = (provided_total, calculated_total)
     end
     return nothing
 end
@@ -566,19 +579,21 @@ end
 
 Check if the provided total for serotype seroprevalence values equal a weighted sum based on reported total counts.
 """
-function _totals_check(
+function _totals_check!(
+        errors_dict::OrderedDict,
         col::Vector{T},
         provided_total,
         colname::String,
         denom_col::Vector{C},
-        denom_total
+        denom_total,
+        atol = 0.02
     ) where {
         T <: Union{<:Union{<:Missing, <:AbstractFloat}, <:AbstractFloat},
         C <: Union{<:Union{<:Missing, <:Integer}, <:Integer},
     }
     calculated_total = sum(skipmissing(col .* denom_col)) / denom_total
-    if !isapprox(calculated_total, provided_total; atol = 0.2)
-        @warn "`$colname`: $calculated_total doesn't match provided total $provided_total"
+    if !isapprox(calculated_total, provided_total; atol = atol)
+        errors_dict[colname] = (provided_total, round(calculated_total; digits = 2))
     end
     return nothing
 end
