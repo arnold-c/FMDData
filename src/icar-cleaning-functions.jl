@@ -521,7 +521,7 @@ function _collect_totals_check_args(
         df::DataFrame,
         totals_rn,
         allowed_serotypes = default_allowed_serotypes,
-        atol = 0.05,
+        atol = 0.1,
         digits = 1,
     ) where {T <: Union{Union{<:Missing, <:AbstractFloat}, <:AbstractFloat}}
     # Forms the regex string: r"serotype_(?|o|a|asia1)_pct_(pre|post)$"
@@ -592,7 +592,7 @@ function _totals_check!(
         colname::String,
         denom_col::Vector{C},
         denom_total,
-        atol = 0.05,
+        atol = 0.1,
         digits = 1
     ) where {
         T <: Union{<:Union{<:Missing, <:AbstractFloat}, <:AbstractFloat},

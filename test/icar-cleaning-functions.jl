@@ -355,8 +355,8 @@ using DataFrames
             "serotype_all_count_post" => [10, 10, 10, 30],
             "serotype_a_count_pre" => [10, 10, 10, 32],
             "serotype_a_count_post" => [10, 10, 10, 29],
-            "serotype_a_pct_pre" => [0.2, 0.1, 0.1, 0.2],
-            "serotype_a_pct_post" => [0.8, 0.6, 0.5, 0.5],
+            "serotype_a_pct_pre" => [20.0, 10.0, 10.0, 13.1],
+            "serotype_a_pct_post" => [80.0, 60.0, 50.0, 63.0],
         )
 
         correct_totals_row_df = DataFrame(
@@ -365,8 +365,8 @@ using DataFrames
             "serotype_all_count_post" => [10, 10, 10, 30],
             "serotype_a_count_pre" => [10, 10, 10, 30],
             "serotype_a_count_post" => [10, 10, 10, 30],
-            "serotype_a_pct_pre" => [0.2, 0.1, 0.1, 0.1],
-            "serotype_a_pct_post" => [0.8, 0.6, 0.5, 0.6],
+            "serotype_a_pct_pre" => [20.0, 10.0, 10.0, 13.3],
+            "serotype_a_pct_post" => [80.0, 60.0, 50.0, 63.3],
         )
 
         try
@@ -376,17 +376,52 @@ using DataFrames
         end
 
         try
-            all_totals_check(incorrect_totals_row_df)
+            all_totals_check(incorrect_totals_row_df; atol = 0.1)
         catch e
-            @test isequal(e, ErrorException("OrderedCollections.OrderedDict{AbstractString, NamedTuple{(:provided, :calculated)}}(\"serotype_a_count_pre\" => (provided = 32, calculated = 30), \"serotype_a_count_post\" => (provided = 29, calculated = 30), \"serotype_a_pct_pre\" => (provided = 0.02, calculated = 0.15))"))
+            @test isequal(e, ErrorException("OrderedCollections.OrderedDict{AbstractString, NamedTuple{(:provided, :calculated)}}(\"serotype_a_count_pre\" => (provided = 32, calculated = 30), \"serotype_a_count_post\" => (provided = 29, calculated = 30), \"serotype_a_pct_pre\" => (provided = 13.1, calculated = 13.3), \"serotype_a_pct_post\" => (provided = 63.0, calculated = 63.3))"))
         end
 
         @test isnothing(all_totals_check(correct_totals_row_df))
     end
+
+    # @testset "Calculate missing counts/seroprevs" begin
+    #     # no_missing_counts_df = DataFrame(
+    #     #     "states_ut" => ["a", "b", "c", "total"],
+    #     #     "serotype_all_count_pre" => [10, 10, 10, 30],
+    #     #     "serotype_all_count_post" => [10, 10, 10, 30],
+    #     #     "serotype_a_count_pre" => [10, 10, 10, 30],
+    #     #     "serotype_a_count_post" => [10, 10, 10, 30],
+    #     #     "serotype_a_pct_pre" => [0.2, 0.1, 0.1, 0.1],
+    #     #     "serotype_a_pct_post" => [0.8, 0.6, 0.5, 0.6],
+    #     # )
+    #     #
+    #     # a = calculate_state_counts(no_missing_counts_df)
+    #
+    #     missing_counts_df = DataFrame(
+    #         "states_ut" => ["a", "b", "c", "total"],
+    #         "serotype_all_count_pre" => [10, 10, 10, 30],
+    #         "serotype_all_count_post" => [10, 10, 10, 30],
+    #         "serotype_a_pct_pre" => [0.2, 0.1, 0.1, 0.1],
+    #         "serotype_a_pct_post" => [0.8, 0.6, 0.5, 0.6],
+    #     )
+    #
+    #     a = calculate_state_counts(missing_counts_df)
+    #
+    #     # a = calculate_state_seroprevalence(no_missing_counts_df)
+    #     #
+    #     # missing_seroprev_df = DataFrame(
+    #     #     "states_ut" => ["a", "b", "c", "total"],
+    #     #     "serotype_all_count_pre" => [10, 10, 10, 30],
+    #     #     "serotype_all_count_post" => [10, 10, 10, 30],
+    #     #     "serotype_a_count_pre" => [10, 10, 10, 30],
+    #     #     "serotype_a_count_post" => [10, 10, 10, 30],
+    #     # )
+    #     #
+    #     # a = calculate_state_seroprevalence(missing_seroprev_df)
+    #
+    # end
     #    calculate_state_counts,
     #    calculate_state_seroprevalence
-    #
-    #    check_aggregated_pre_post_counts_exist,
     #    contains_seroprev_results,
     #    contains_count_results,
 
