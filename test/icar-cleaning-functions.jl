@@ -318,6 +318,28 @@ using DataFrames
 
     end
 
+    @testset "Check serotype pre and post columns exist" begin
+        @test isnothing(check_pre_post_exists(cleaned_states_data))
+
+        missing_pre_post_df = DataFrame(
+            "serotype_a_pct_pre" => Float64[],
+            "serotype_a_count_post" => Float64[],
+            "serotype_o_pct_pre" => Float64[],
+            "serotype_o_pct_post" => Float64[],
+            "serotype_asia1_pct_pre" => Float64[],
+            "serotype_asia1_pct_post" => Float64[],
+        )
+
+        try
+            check_pre_post_exists(missing_pre_post_df)
+        catch e
+            @test isequal(
+                e,
+                ErrorException("All serotype results should have both 'Pre' and 'Post' results columns, only. Instead, the following serotype results have the associated data columns:\nOrderedCollections.OrderedDict{AbstractString, Vector{AbstractString}}(\"serotype_a_pct\" => AbstractString[\"pre\"], \"serotype_a_count\" => AbstractString[\"post\"])")
+            )
+        end
+
+    end
     #    check_pre_post_exists,
     #    has_totals_row,
     #    all_totals_check,

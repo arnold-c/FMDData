@@ -400,9 +400,16 @@ function check_pre_post_exists(
 
     unique_serotype_result = unique(map(m -> m[1], all_matched_columns))
 
+    missing_dict = OrderedDict{AbstractString, Vector{AbstractString}}()
     for serotype in unique_serotype_result
         pre_post_matches = filter(m -> m[1] == serotype, all_matched_columns)
-        @assert length(unique(pre_post_matches)) == 2 "Serotype results $(serotype) should have both a 'Pre' and 'Post' results column. Instead, data contains $(length(unique(pre_post_matches))) columns: $(map(m -> m[2], pre_post_matches))"
+        if length(unique(pre_post_matches)) != 2
+            missing_dict[serotype] = map(m -> m[2], pre_post_matches)
+        end
+    end
+
+    if !isempty(missing_dict)
+        error("All serotype results should have both 'Pre' and 'Post' results columns, only. Instead, the following serotype results have the associated data columns:\n$missing_dict")
     end
 
     return nothing
