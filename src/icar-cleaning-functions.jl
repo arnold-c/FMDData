@@ -183,16 +183,23 @@ function _check_identical_column_names(df::DataFrame)
     colnames = String.(names(df))
     unique_colnames = unique(colnames)
 
-    colname_counts = NamedTuple{tuple(Symbol.(unique_colnames)...)}(
-        map(
-            i -> sum(i .== colnames),
-            unique_colnames,
-        )
-    )
+    colname_counts = _calculate_string_occurences(colnames, unique_colnames)
 
     @assert df_ncol == length(unique_colnames) "The dataframe has $df_ncol columns, but only $(length(unique_colnames)) uniques column names. $(keys(filter(c -> values(c) != 1, colname_counts))) were duplicated"
 
     return nothing
+end
+
+function _calculate_string_occurences(
+        vals::Vector{S},
+        unique_vals::Vector{S} = unique(vals)
+    ) where {S <: AbstractString}
+    return NamedTuple{tuple(Symbol.(unique_vals)...)}(
+        map(
+            i -> sum(i .== vals),
+            unique_vals,
+        )
+    )
 end
 
 """
