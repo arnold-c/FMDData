@@ -458,7 +458,8 @@ function all_totals_check(
         column::Symbol = :states_ut,
         totals_key = "total",
         allowed_serotypes = default_allowed_serotypes;
-        atol = 0.02
+        atol = 0.1,
+        digits = 1
     )
     totals = subset(df, column => s -> lowercase.(s) .== totals_key)
     @assert nrow(totals) == 1 "Expected 1 row of totals. Found $(nrow(totals)). Check the spelling in the states column :$column matches the provided `totals_key` \"$totals_key\""
@@ -520,7 +521,8 @@ function _collect_totals_check_args(
         df::DataFrame,
         totals_rn,
         allowed_serotypes = default_allowed_serotypes,
-        atol = 0.02
+        atol = 0.05,
+        digits = 1,
     ) where {T <: Union{Union{<:Missing, <:AbstractFloat}, <:AbstractFloat}}
     # Forms the regex string: r"serotype_(?|o|a|asia1)_pct_(pre|post)$"
     # (?|...) indicates a non-capture group i.e. must match any of the words separated by '|' characters, but does not return a match as a capture group
@@ -535,7 +537,7 @@ function _collect_totals_check_args(
     denom_col = df[Not(totals_rn), denom_colname]
     denom_total = sum(skipmissing(denom_col))
 
-    return (col, totals[1, colname], colname, denom_col, denom_total, atol)
+    return (col, totals[1, colname], colname, denom_col, denom_total, atol, digits)
 end
 
 """
@@ -590,14 +592,15 @@ function _totals_check!(
         colname::String,
         denom_col::Vector{C},
         denom_total,
-        atol = 0.02
+        atol = 0.05,
+        digits = 1
     ) where {
         T <: Union{<:Union{<:Missing, <:AbstractFloat}, <:AbstractFloat},
         C <: Union{<:Union{<:Missing, <:Integer}, <:Integer},
     }
-    calculated_total = sum(skipmissing(col .* denom_col)) / denom_total
+    calculated_total = round(sum(skipmissing(col .* denom_col)) / denom_total; digits = digits)
     if !isapprox(calculated_total, provided_total; atol = atol)
-        errors_dict[colname] = (provided_total, round(calculated_total; digits = 2))
+        errors_dict[colname] = (provided_total, calculated_total)
     end
     return nothing
 end

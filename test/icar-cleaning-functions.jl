@@ -355,8 +355,8 @@ using DataFrames
             "serotype_all_count_post" => [10, 10, 10, 30],
             "serotype_a_count_pre" => [10, 10, 10, 32],
             "serotype_a_count_post" => [10, 10, 10, 29],
-            "serotype_a_pct_pre" => [0.2, 0.1, 0.15, 0.02],
-            "serotype_a_pct_post" => [0.8, 0.6, 0.64, 0.67],
+            "serotype_a_pct_pre" => [0.2, 0.1, 0.1, 0.2],
+            "serotype_a_pct_post" => [0.8, 0.6, 0.5, 0.5],
         )
 
         correct_totals_row_df = DataFrame(
@@ -365,8 +365,8 @@ using DataFrames
             "serotype_all_count_post" => [10, 10, 10, 30],
             "serotype_a_count_pre" => [10, 10, 10, 30],
             "serotype_a_count_post" => [10, 10, 10, 30],
-            "serotype_a_pct_pre" => [0.2, 0.1, 0.15, 0.15],
-            "serotype_a_pct_post" => [0.8, 0.6, 0.64, 0.68],
+            "serotype_a_pct_pre" => [0.2, 0.1, 0.1, 0.1],
+            "serotype_a_pct_post" => [0.8, 0.6, 0.5, 0.6],
         )
 
         try
