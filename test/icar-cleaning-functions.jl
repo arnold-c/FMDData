@@ -340,13 +340,52 @@ using DataFrames
         end
 
     end
-    #    check_pre_post_exists,
-    #    has_totals_row,
+
+    @testset "Totals row checks" begin
+        @test has_totals_row(cleaned_states_data)
+
+        missing_totals_df = subset(cleaned_states_data, :states_ut => ByRow(s -> !(lowercase(s) in ["totals", "total"])))
+
+        @test !has_totals_row(missing_totals_df)
+
+        incorrect_totals_row_df = DataFrame(
+            "states_ut" => ["a", "b", "c", "total"],
+            "serotype_all_count_pre" => [10, 10, 10, 30],
+            "serotype_all_count_post" => [10, 10, 10, 30],
+            "serotype_a_count_pre" => [10, 10, 10, 32],
+            "serotype_a_count_post" => [10, 10, 10, 29],
+            "serotype_a_pct_pre" => [0.2, 0.1, 0.15, 0.02],
+            "serotype_a_pct_post" => [0.8, 0.6, 0.64, 0.67],
+        )
+
+        correct_totals_row_df = DataFrame(
+            "states_ut" => ["a", "b", "c", "total"],
+            "serotype_all_count_pre" => [10, 10, 10, 30],
+            "serotype_all_count_post" => [10, 10, 10, 30],
+            "serotype_a_count_pre" => [10, 10, 10, 30],
+            "serotype_a_count_post" => [10, 10, 10, 30],
+            "serotype_a_pct_pre" => [0.2, 0.1, 0.15, 0.15],
+            "serotype_a_pct_post" => [0.8, 0.6, 0.64, 0.68],
+        )
+
+        try
+            all_totals_check(missing_totals_df)
+        catch e
+            @test isequal(e, AssertionError("Expected 1 row of totals. Found 0. Check the spelling in the states column :states_ut matches the provided `totals_key` \"total\""))
+        end
+
+        try
+            all_totals_check(incorrect_totals_row_df)
+        catch e
+            @test isequal(e, ErrorException("OrderedCollections.OrderedDict{AbstractString, NamedTuple{(:provided, :calculated)}}(\"serotype_a_count_pre\" => (provided = 32, calculated = 30), \"serotype_a_count_post\" => (provided = 29, calculated = 30), \"serotype_a_pct_pre\" => (provided = 0.02, calculated = 0.15))"))
+        end
+
+        @test isnothing(all_totals_check(correct_totals_row_df))
+    end
     #    all_totals_check,
     #    calculate_state_counts,
     #    calculate_state_seroprevalence
     #
-    # collect_all_present_serotypes,
     #    check_aggregated_pre_post_counts_exist,
     #    contains_seroprev_results,
     #    contains_count_results,
