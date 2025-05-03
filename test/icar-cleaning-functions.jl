@@ -154,7 +154,65 @@ using DataFrames
         end
     end
 
-    #    correct_all_state_names,
+    @testset "Check duplicate columns" begin
+        check_duplicate_column_names_data = check_duplicated_column_names(cleaned_states_data)
+        @test isnothing(check_duplicate_column_names_data)
+
+        similar_column_names_df = DataFrame(
+            "states_ut" => String[],
+            "states_ut" => String[],
+            "seroprevalance_all_count_pre" => Int64[],
+            "seroprevalance_all_count_post" => Int64[],
+            "seroprevalance_all_pct_pre" => Float64[],
+            "seroprevalance_all_count_pre" => Int64[],
+            makeunique = true
+        )
+
+        try
+            FMDData._check_similar_column_names(similar_column_names_df)
+        catch e
+            @test isequal(
+                e,
+                ErrorException("Similar column names were found in the data:\nDict(\"seroprevalance_all_count_pre\" => [\"seroprevalance_all_count_pre_1\"], \"states_ut\" => [\"states_ut_1\"])")
+            )
+        end
+
+        try
+            check_duplicated_column_names(similar_column_names_df)
+        catch e
+            @test isequal(
+                e,
+                ErrorException("Similar column names were found in the data:\nDict(\"seroprevalance_all_count_pre\" => [\"seroprevalance_all_count_pre_1\"], \"states_ut\" => [\"states_ut_1\"])")
+            )
+        end
+
+        duplicate_column_vals_df = DataFrame(
+            :a => 1:10,
+            :b => 2:11,
+            :c => 1:10,
+            :d => 3:12,
+            :e => 2:11,
+        )
+
+        try
+            check_duplicated_columns(duplicate_column_vals_df)
+        catch e
+            @test isequal(
+                e,
+                ErrorException("Found columns with identical values: [[:a, :c], [:b, :e]]")
+            )
+        end
+
+        unique_column_vals_df = DataFrame(
+            :a => 1:10,
+            :b => 2:11,
+            :c => 3:12,
+        )
+
+        @test isnothing(check_duplicated_columns(unique_column_vals_df))
+
+    end
+
     #    check_duplicated_columns,
     #    check_duplicated_states,
     #    check_allowed_serotypes,
@@ -168,6 +226,5 @@ using DataFrames
     #    check_aggregated_pre_post_counts_exist,
     #    contains_seroprev_results,
     #    contains_count_results,
-    #    correct_state_name
 
 end
