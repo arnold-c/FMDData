@@ -1,6 +1,5 @@
 using CSV: read
 using DataFrames: DataFrame, select, subset, filter, rename, transform, transform!, ByRow, Not, Cols, nrow, AsTable, ncol
-using StringDistances: findall, Levenshtein, Metric, SemiMetric
 
 export load_csv,
     clean_colnames,
@@ -244,29 +243,24 @@ Check if any columns have identical values
 """
 function check_duplicated_columns(df::DataFrame)
     df_ncol = ncol(df)
-    df_ncol < 2 && return false
+    df_ncol < 2 && return nothing
 
-    duplicate_columns = Dict()
+    duplicate_columns_dict = Dict{AbstractVector, AbstractVector}()
     for (k, v) in pairs(eachcol(df))
-        if haskey(duplicate_columns, v)
-            push!(duplicate_columns[v], k)
+        if haskey(duplicate_columns_dict, v)
+            push!(duplicate_columns_dict[v], k)
         else
-            duplicate_columns[v] = [k]
+            duplicate_columns_dict[v] = [k]
         end
     end
-    # seen_columns = Dict{Symbol, AbstractVector}()
-    # duplicate_columns = Dict{Symbol, Symbol}()
-    # for (colname, col_vector) in pairs(eachcol(df))
-    #     if col_vector in values(seen_columns)
-    #         push!(duplicate_columns, colname =>)
-    #     else
-    #         push!(seen_columns, colname => col_vector)
-    #     end
-    # end
-    if !isempty(duplicate_columns)
-        error("Found duplicated columns: $(duplicate_columns)")
+    filter!(cols -> length(cols.second) > 1, duplicate_columns_dict)
+    if !isempty(duplicate_columns_dict)
+        duplicated_columns = [v for (_, v) in pairs(duplicate_columns_dict)]
+        error(
+            "Found columns with identical values: $(duplicated_columns)"
+        )
     end
-    return false
+    return nothing
 end
 
 """
