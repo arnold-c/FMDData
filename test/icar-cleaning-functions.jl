@@ -250,6 +250,22 @@ using DataFrames
         end
 
     end
+
+    @testset "Check duplicated states" begin
+        check_duplicated_states_data = check_duplicated_states(cleaned_states_data)
+        @test isnothing(check_duplicated_states_data)
+
+        duplicated_states_df = DataFrame("states_ut" => ["a", "b", "c", "a"])
+
+        try
+            check_duplicated_states(duplicated_states_df)
+        catch e
+            @test isequal(
+                e,
+                AssertionError("The dataframe has 4 state values, but only 3 unique state values. (\"a\",) were duplicated")
+            )
+        end
+    end
     #    check_duplicated_states,
     #    check_allowed_serotypes,
     #    check_pre_post_exists,

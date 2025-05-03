@@ -300,8 +300,16 @@ function check_duplicated_states(
         df::DataFrame,
         column::Symbol = :states_ut,
     )
-    return @assert length(df[!, column]) == length(unique(df[!, column]))
+    states = filter(!ismissing, df[!, column])
+    nstates = length(states)
+    unique_states = unique(states)
+    state_counts = _calculate_string_occurences(states, unique_states)
+
+    @assert nstates == length(unique_states) "The dataframe has $nstates state values, but only $(length(unique_states)) unique state values. $(String.(keys(filter(c -> values(c) != 1, state_counts)))) were duplicated"
+
+    return nothing
 end
+
 
 """
     check_allowed_serotypes(
