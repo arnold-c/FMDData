@@ -8,6 +8,7 @@ export load_csv,
     correct_all_state_names,
     check_duplicated_column_names,
     check_duplicated_columns,
+    check_missing_states,
     check_duplicated_states,
     check_allowed_serotypes,
     check_pre_post_exists,
@@ -262,6 +263,22 @@ function check_duplicated_columns(df::DataFrame)
         )
     end
     return nothing
+end
+
+"""
+    check_missing_states(
+        df::DataFrame,
+        column::Symbol = :states_ut,
+    )
+
+Check if the states column of the data contains missing values
+"""
+function check_missing_states(
+        df::DataFrame,
+        column::Symbol = :states_ut,
+    )
+    nmissing = sum(ismissing.(df[!, column]))
+    return @assert nmissing == 0 "There are $nmissing values in the $column column that are of type `Missing`"
 end
 
 """
