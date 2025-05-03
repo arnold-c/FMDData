@@ -234,7 +234,22 @@ using DataFrames
 
     end
 
-    #    check_duplicated_columns,
+    @testset "Check missing states" begin
+        check_missing_states_data = check_missing_states(cleaned_states_data)
+        @test isnothing(check_missing_states_data)
+
+        missing_states_df = DataFrame("states_ut" => ["a", "b", missing, "a", missing])
+
+        try
+            check_missing_states(missing_states_df)
+        catch e
+            @test isequal(
+                e,
+                AssertionError("There are 2 values in the states_ut column that are of type `Missing`")
+            )
+        end
+
+    end
     #    check_duplicated_states,
     #    check_allowed_serotypes,
     #    check_pre_post_exists,
