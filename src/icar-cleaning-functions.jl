@@ -185,7 +185,7 @@ function _check_identical_column_names(df::DataFrame)
 
     colname_counts = _calculate_string_occurences(colnames, unique_colnames)
 
-    @assert df_ncol == length(unique_colnames) "The dataframe has $df_ncol columns, but only $(length(unique_colnames)) uniques column names. $(keys(filter(c -> values(c) != 1, colname_counts))) were duplicated"
+    @assert df_ncol == length(unique_colnames) "The dataframe has $df_ncol columns, but only $(length(unique_colnames)) unique column names. $(keys(filter(c -> values(c) != 1, colname_counts))) were duplicated"
 
     return nothing
 end
