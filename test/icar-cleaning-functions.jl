@@ -319,6 +319,7 @@ using DataFrames
     end
 
     @testset "Check serotype pre and post columns exist" begin
+        @test isnothing(check_aggregated_pre_post_counts_exist(cleaned_states_data))
         @test isnothing(check_pre_post_exists(cleaned_states_data))
 
         missing_pre_post_df = DataFrame(
@@ -382,7 +383,6 @@ using DataFrames
 
         @test isnothing(all_totals_check(correct_totals_row_df))
     end
-    #    all_totals_check,
     #    calculate_state_counts,
     #    calculate_state_seroprevalence
     #

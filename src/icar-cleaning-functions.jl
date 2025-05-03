@@ -11,6 +11,7 @@ export load_csv,
     check_missing_states,
     check_duplicated_states,
     check_allowed_serotypes,
+    check_aggregated_pre_post_counts_exist,
     check_pre_post_exists,
     has_totals_row,
     all_totals_check,
@@ -18,7 +19,6 @@ export load_csv,
     calculate_state_seroprevalence
 
 public collect_all_present_serotypes,
-    check_aggregated_pre_post_counts_exist,
     correct_state_name
 
 default_allowed_serotypes::Vector{String} = ["o", "a", "asia1"]
@@ -414,13 +414,17 @@ function check_pre_post_exists(
 end
 
 """
-    check_aggregated_pre_post_counts(
-        df::DataFrame,
-    )
+    check_aggregated_pre_post_counts_exist(
+		df::DataFrame,
+		columns = ["serotype_all_count_pre", "serotype_all_count_post"]
+	)
 
-Check if data contains aggregated counts of pre and post vaccinated individuals. Should only be used on dataframes that haven't yet renamed these columns to meet the standard pattern of "serotype_all_count_pre"
+Check if data contains aggregated counts of pre and post vaccinated individuals. Should only be used on dataframes that have renamed these columns to meet the standard pattern of "serotype_all_count_pre"
 """
-function check_aggregated_pre_post_counts_exist(df::DataFrame, columns = ["pre_count", "post_count"])
+function check_aggregated_pre_post_counts_exist(
+        df::DataFrame,
+        columns = ["serotype_all_count_pre", "serotype_all_count_post"]
+    )
     return @assert sum(map(c -> in(c, names(df)), columns)) == length(columns)
 end
 
