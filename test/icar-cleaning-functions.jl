@@ -266,8 +266,58 @@ using DataFrames
             )
         end
     end
-    #    check_duplicated_states,
-    #    check_allowed_serotypes,
+
+    @testset "Check serotypes" begin
+        check_serotype_data = check_allowed_serotypes(cleaned_states_data)
+        @test isnothing(check_serotype_data)
+
+        expected_serotypes = ["all", "all", "o", "o", "a", "a", "asia1", "asia1"]
+        @test isequal(
+            expected_serotypes,
+            FMDData.collect_all_present_serotypes(cleaned_states_data)
+        )
+
+        additional_missing_serotypes_df = DataFrame(
+            "serotype_a_pct_pre" => Float64[],
+            "serotype_a_pct_post" => Float64[],
+            "serotype_o_pct_pre" => Float64[],
+            "serotype_o_pct_post" => Float64[],
+            "serotype_test_pct_pre" => Float64[],
+        )
+        additional_missing_expected_serotypes = ["a", "a", "o", "o", "test"]
+
+        @test isequal(
+            additional_missing_expected_serotypes,
+            FMDData.collect_all_present_serotypes(additional_missing_serotypes_df)
+        )
+
+        all_matched_serotypes = unique(expected_serotypes)
+        all_matched_additional_missing_serotypes = unique(additional_missing_expected_serotypes)
+
+        @test isnothing(FMDData._check_all_required_serotypes(all_matched_serotypes))
+
+        try
+            FMDData._check_all_required_serotypes(all_matched_additional_missing_serotypes)
+        catch e
+            @test isequal(
+                e,
+                AssertionError("Found 2 allowed serotypes ([\"a\", \"o\"]). Required 4: [\"all\", \"o\", \"a\", \"asia1\"]")
+            )
+        end
+
+        @test isnothing(FMDData._check_no_disallowed_serotypes(all_matched_serotypes))
+
+        try
+            FMDData._check_no_disallowed_serotypes(all_matched_additional_missing_serotypes)
+        catch e
+            @test isequal(
+                e,
+                AssertionError("Found 1 disallowed serotypes ([\"test\"]).")
+            )
+        end
+
+    end
+
     #    check_pre_post_exists,
     #    has_totals_row,
     #    all_totals_check,
