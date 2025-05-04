@@ -1,4 +1,5 @@
 using DataFrames
+using Try
 
 @testset verbose = true "icar-cleaning-functions.jl" begin
 
@@ -6,19 +7,19 @@ using DataFrames
         filename = "missing-data.csv"
         not_a_dir = "./not-a-dir.txt"
 
-        @test try
-            load_csv("missing-data.tsv", not_a_dir)
-        catch e
-            isequal(e, ErrorException("$not_a_dir is not a valid directory"))
-        end
+
+        @test isequal(
+            load_csv("missing-data.tsv", not_a_dir),
+            Try.Err("$not_a_dir is not a valid directory")
+        )
 
         dir = "./"
 
-        @test try
-            load_csv(filename, dir)
-        catch e
-            isequal(e, ErrorException("$filename is not within the directory $dir"))
-        end
+
+        @test isequal(
+            load_csv(filename, dir),
+            Try.Err("$filename is not within the directory $dir")
+        )
 
         filename = "test-data.csv"
 

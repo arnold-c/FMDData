@@ -2,6 +2,8 @@ using CSV: read
 using DataFrames: DataFrame, select, subset, filter, rename, transform, transform!, ByRow, Not, Cols, nrow, AsTable, ncol
 using OrderedCollections: OrderedDict
 using StatsBase: mean
+using Try
+using TryExperimental
 
 export load_csv,
     clean_colnames,
@@ -40,11 +42,11 @@ function load_csv(
         dir::T1,
         output_format = DataFrame
     ) where {T1 <: AbstractString}
-    isdir(dir) || error("$dir is not a valid directory")
-    contains(filename, r".*\.csv$")    || error("$filename is not a csv file")
+    isdir(dir) || return Err("$dir is not a valid directory")
+    contains(filename, r".*\.csv$") || return Err("$filename is not a csv file")
 
     dir_files = filter(t -> contains(t, r".*\.csv$"), readdir(dir))
-    in(filename, dir_files) || error("$filename is not within the directory $dir")
+    in(filename, dir_files) || return Err("$filename is not within the directory $dir")
 
     return read(
         joinpath(dir, filename),
