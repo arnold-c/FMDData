@@ -708,6 +708,15 @@ function _calculate_state_seroprevalence(table, original_df; digits = 1)
     return NamedTuple{tuple(names...)}((vals...,))
 end
 
+"""
+    check_calculated_values_match_existing(
+        df::DataFrame,
+        allowed_serotypes::T = default_allowed_serotypes;
+        digits = 1
+    ) where {T <: AbstractVector{<:AbstractString}}
+
+Check whether the provided values of counts and seroprevalence values match the corresponding values calculated.
+"""
 function check_calculated_values_match_existing(
         df::DataFrame,
         allowed_serotypes::T = default_allowed_serotypes;
