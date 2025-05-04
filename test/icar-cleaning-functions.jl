@@ -415,45 +415,40 @@ using DataFrames
         @test isnothing(all_totals_check(correct_totals_row_df))
     end
 
-    # @testset "Calculate missing counts/seroprevs" begin
-    #     # no_missing_counts_df = DataFrame(
-    #     #     "states_ut" => ["a", "b", "c", "total"],
-    #     #     "serotype_all_count_pre" => [10, 10, 10, 30],
-    #     #     "serotype_all_count_post" => [10, 10, 10, 30],
-    #     #     "serotype_a_count_pre" => [10, 10, 10, 30],
-    #     #     "serotype_a_count_post" => [10, 10, 10, 30],
-    #     #     "serotype_a_pct_pre" => [0.2, 0.1, 0.1, 0.1],
-    #     #     "serotype_a_pct_post" => [0.8, 0.6, 0.5, 0.6],
-    #     # )
-    #     #
-    #     # a = calculate_state_counts(no_missing_counts_df)
-    #
-    #     missing_counts_df = DataFrame(
-    #         "states_ut" => ["a", "b", "c", "total"],
-    #         "serotype_all_count_pre" => [10, 10, 10, 30],
-    #         "serotype_all_count_post" => [10, 10, 10, 30],
-    #         "serotype_a_pct_pre" => [0.2, 0.1, 0.1, 0.1],
-    #         "serotype_a_pct_post" => [0.8, 0.6, 0.5, 0.6],
-    #     )
-    #
-    #     a = calculate_state_counts(missing_counts_df)
-    #
-    #     # a = calculate_state_seroprevalence(no_missing_counts_df)
-    #     #
-    #     # missing_seroprev_df = DataFrame(
-    #     #     "states_ut" => ["a", "b", "c", "total"],
-    #     #     "serotype_all_count_pre" => [10, 10, 10, 30],
-    #     #     "serotype_all_count_post" => [10, 10, 10, 30],
-    #     #     "serotype_a_count_pre" => [10, 10, 10, 30],
-    #     #     "serotype_a_count_post" => [10, 10, 10, 30],
-    #     # )
-    #     #
-    #     # a = calculate_state_seroprevalence(missing_seroprev_df)
-    #
-    # end
-    #    calculate_state_counts,
-    #    calculate_state_seroprevalence
-    #    contains_seroprev_results,
-    #    contains_count_results,
+    @testset "Calculate missing counts/seroprevs" begin
+        no_missing_counts_pcts_df = DataFrame(
+            "states_ut" => ["a", "b", "c", "total"],
+            "serotype_all_count_pre" => [10, 10, 10, 30],
+            "serotype_all_count_post" => [10, 10, 10, 30],
+            "serotype_a_count_pre" => [2, 1, 1, 4],
+            "serotype_a_count_post" => [8, 6, 5, 19],
+            "serotype_a_pct_pre" => [20.0, 10.0, 10.0, 13.3],
+            "serotype_a_pct_post" => [80.0, 60.0, 50.0, 63.3],
+        )
+
+        @test isequal(
+            DataFrame(
+                "serotype_a_count_pre_calculated" => [2, 1, 1, 4],
+                "serotype_a_count_post_calculated" => [8, 6, 5, 19],
+            ),
+            select(
+                calculate_state_counts(no_missing_counts_pcts_df),
+                Cols(r".*_calculated")
+            )
+        )
+
+        @test isequal(
+            DataFrame(
+                "serotype_a_pct_pre_calculated" => [20.0, 10.0, 10.0, 13.3],
+                "serotype_a_pct_post_calculated" => [80.0, 60.0, 50.0, 63.3],
+            ),
+            select(
+                calculate_state_seroprevalence(no_missing_counts_pcts_df),
+                Cols(r".*_calculated")
+            )
+        )
+
+
+    end
 
 end
