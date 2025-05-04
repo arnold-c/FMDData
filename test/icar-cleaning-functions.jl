@@ -384,8 +384,8 @@ using DataFrames
             "states_ut" => ["a", "b", "c", "total"],
             "serotype_all_count_pre" => [10, 10, 10, 30],
             "serotype_all_count_post" => [10, 10, 10, 30],
-            "serotype_a_count_pre" => [10, 10, 10, 32],
-            "serotype_a_count_post" => [10, 10, 10, 29],
+            "serotype_a_count_pre" => [2, 1, 1, 5],
+            "serotype_a_count_post" => [8, 6, 5, 20],
             "serotype_a_pct_pre" => [20.0, 10.0, 10.0, 13.1],
             "serotype_a_pct_post" => [80.0, 60.0, 50.0, 63.0],
         )
@@ -394,8 +394,8 @@ using DataFrames
             "states_ut" => ["a", "b", "c", "total"],
             "serotype_all_count_pre" => [10, 10, 10, 30],
             "serotype_all_count_post" => [10, 10, 10, 30],
-            "serotype_a_count_pre" => [10, 10, 10, 30],
-            "serotype_a_count_post" => [10, 10, 10, 30],
+            "serotype_a_count_pre" => [2, 1, 1, 4],
+            "serotype_a_count_post" => [8, 6, 5, 19],
             "serotype_a_pct_pre" => [20.0, 10.0, 10.0, 13.3],
             "serotype_a_pct_post" => [80.0, 60.0, 50.0, 63.3],
         )
@@ -409,7 +409,7 @@ using DataFrames
         try
             all_totals_check(incorrect_totals_row_df; atol = 0.1)
         catch e
-            @test isequal(e, ErrorException("OrderedCollections.OrderedDict{AbstractString, NamedTuple{(:provided, :calculated)}}(\"serotype_a_count_pre\" => (provided = 32, calculated = 30), \"serotype_a_count_post\" => (provided = 29, calculated = 30), \"serotype_a_pct_pre\" => (provided = 13.1, calculated = 13.3), \"serotype_a_pct_post\" => (provided = 63.0, calculated = 63.3))"))
+            @test isequal(e, ErrorException("OrderedCollections.OrderedDict{AbstractString, NamedTuple{(:provided, :calculated)}}(\"serotype_a_count_pre\" => (provided = 5, calculated = 4), \"serotype_a_count_post\" => (provided = 20, calculated = 19), \"serotype_a_pct_pre\" => (provided = 13.1, calculated = 13.3), \"serotype_a_pct_post\" => (provided = 63.0, calculated = 63.3))"))
         end
 
         @test isnothing(all_totals_check(correct_totals_row_df))
