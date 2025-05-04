@@ -1,6 +1,7 @@
 using CSV: read
 using DataFrames: DataFrame, select, subset, filter, rename, transform, transform!, ByRow, Not, Cols, nrow, AsTable, ncol
 using OrderedCollections: OrderedDict
+using StatsBase: mean
 
 export load_csv,
     clean_colnames,
@@ -11,6 +12,7 @@ export load_csv,
     check_missing_states,
     check_duplicated_states,
     check_allowed_serotypes,
+    check_seroprevalence_as_pct,
     check_aggregated_pre_post_counts_exist,
     check_pre_post_exists,
     has_totals_row,
@@ -414,6 +416,27 @@ function check_pre_post_exists(
 end
 
 """
+    check_seroprevalence_as_pct(df::DataFrame, reg::Regex)
+
+Check if all seroprevalence columns are reported as a percentage, and not as a proportion.
+"""
+function check_seroprevalence_as_pct(
+        df::DataFrame,
+        reg::Regex = Regex("serotype_(?|$(join(default_allowed_serotypes, "|")))_pct_(pre|post)\$")
+    )
+    prop_cols_dict = OrderedDict{Symbol, AbstractFloat}()
+    for (name, vals) in pairs(eachcol(select(df, Cols(reg))))
+        if round(mean(vals) / 100; digits = 1) < 0.1
+            prop_cols_dict[name] = round(mean(vals); digits = 2)
+        end
+    end
+    if !isempty(prop_cols_dict)
+        error("All `pct` columns should be a %, not a proportion. The following columns are likely reported as proportions with associated mean values: $prop_cols_dict")
+    end
+    return nothing
+end
+
+"""
     check_aggregated_pre_post_counts_exist(
 		df::DataFrame,
 		columns = ["serotype_all_count_pre", "serotype_all_count_post"]
@@ -633,7 +656,7 @@ function _calculate_state_counts(table, original_df)
     str_keys = String.(keys(table))
     timing = replace.(str_keys, r"serotype_.*_pct_(pre|post)$" => s"serotype_all_count_\1")
     vals = map(zip(table, timing)) do (seroprev, agg_counts_col)
-        original_view = @view(original_df[!, agg_counts_col])
+        original_view = original_df[!, agg_counts_col]
         vals = round.((seroprev / 100) .* original_view)
         return convert.(eltype(original_view), vals)
     end
