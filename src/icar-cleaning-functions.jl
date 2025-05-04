@@ -18,7 +18,8 @@ export load_csv,
     has_totals_row,
     all_totals_check,
     calculate_state_counts,
-    calculate_state_seroprevalence
+    calculate_state_seroprevalence,
+    check_calculated_values_match_existing
 
 public collect_all_present_serotypes,
     correct_state_name
@@ -705,4 +706,33 @@ function _calculate_state_seroprevalence(table, original_df; digits = 1)
 
     names = Symbol.(replace.(str_keys, r"(.*_)count(_.*)" => s"\1pct\2_calculated"))
     return NamedTuple{tuple(names...)}((vals...,))
+end
+
+function check_calculated_values_match_existing(
+        df::DataFrame,
+        allowed_serotypes::T = default_allowed_serotypes;
+        digits = 1
+    ) where {T <: AbstractVector{<:AbstractString}}
+    reg = Regex("serotype_($(join(allowed_serotypes, "|")))_(count|pct)_(pre|post)\$")
+
+    colnames = String.(names(df))
+    cols = filter(!isnothing, match.(reg, colnames))
+    miscalculation_dict = OrderedDict{AbstractString, AbstractString}()
+    for col in cols
+        original = col.match
+        calculated_col = original * "_calculated"
+        if in(calculated_col, colnames)
+            if df[!, original] != df[!, calculated_col]
+                original_vals = df[!, original]
+                calculated_vals = df[!, calculated_col]
+                diffidxs = findall(original_vals .!= calculated_vals)
+                miscalculation_dict[original] = "The following indices (row numbers) differ: $diffidxs. Original: $(original_vals[diffidxs]). Calculated: $(calculated_vals[diffidxs])"
+            end
+        end
+    end
+    if !isempty(miscalculation_dict)
+        return error("The following calculated columns have discrepancies relative to the provided columns: $miscalculation_dict")
+    end
+
+    return nothing
 end
