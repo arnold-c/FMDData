@@ -21,7 +21,8 @@ export all_cleaning_steps,
     check_pre_post_exists,
     has_totals_row,
     all_totals_check,
-    calculated_totals,
+    calculate_all_totals,
+    calculate_totals,
     totals_check,
     calculate_state_counts,
     calculate_state_seroprevalence,
@@ -568,17 +569,58 @@ function all_totals_check(
         df::DataFrame,
         column::Symbol = :states_ut,
         totals_key = "total",
-        allowed_serotypes = vcat("all", default_allowed_serotypes);
+        allowed_serotypes = vcat("all", default_allowed_serotypes),
+        reg = Regex("serotype_(?|$(join(allowed_serotypes, "|")))_(count|pct)_(pre|post)\$");
         atol = 0.1,
         digits = 1
     )
-    reg = Regex("serotype_(?|$(join(allowed_serotypes, "|")))_(count|pct)_(pre|post)\$")
-    totals_rn = findall(lowercase.(df[!, column]) .== totals_key)
-    length(totals_rn) == 1 || return Try.Err("Expected 1 row of totals. Found $(length(totals_rn)). Check the spelling in the states column :$column matches the provided `totals_key` \"$totals_key\"")
-    totals_rn = totals_rn[1]
+
+    totals_dict = Try.@? calculate_all_totals(
+        df,
+        column,
+        totals_key,
+        allowed_serotypes,
+        reg;
+        atol = atol,
+        digits = digits
+    )
+
+    totals_rn, selected_df = Try.@? _totals_row_selectors(
+        df,
+        column,
+        totals_key;
+        reg = reg
+    )
+
+    length(totals_dict) == ncol(selected_df) || return Try.Err("The number of totals calculated is $(length(totals_dict)), but there are $(ncol(selected_df)) columns selected to have totals calculated for")
+
+    Try.@? totals_check(
+        selected_df[totals_rn, :],
+        totals_dict,
+        column
+    )
+
+    return Try.Ok(nothing)
+end
+
+function calculate_all_totals(
+        df::DataFrame,
+        column::Symbol = :states_ut,
+        totals_key = "total",
+        allowed_serotypes = vcat("all", default_allowed_serotypes),
+        reg = Regex("serotype_(?|$(join(allowed_serotypes, "|")))_(count|pct)_(pre|post)\$");
+        atol = 0.1,
+        digits = 1
+    )
+    totals_rn, selected_df = Try.@? _totals_row_selectors(
+        df,
+        column,
+        totals_key;
+        reg = reg
+    )
+
     col_names = names(df)
     totals_dict = Dict{AbstractString, Real}()
-    selected_df = select(df, Cols(reg))
 
     for col_ind in eachindex(names(selected_df))
         col_name = col_names[col_ind]
@@ -594,15 +636,22 @@ function all_totals_check(
         _calculate_totals!(totals_dict, Try.unwrap(totals_check_args)...)
     end
 
-    length(totals_dict) == ncol(selected_df) || return Try.Err("The number of totals calculated is $(length(totals_dict)), but there are $(ncol(selected_df)) columns selected to have totals calculated for")
+    return Try.Ok(totals_dict)
+end
 
-    Try.@? totals_check(
-        selected_df[totals_rn, :],
-        totals_dict,
-        column
+function _totals_row_selectors(
+        df::DataFrame,
+        column::Symbol = :states_ut,
+        totals_key = "total";
+        allowed_serotypes = vcat("all", default_allowed_serotypes),
+        reg = Regex("serotype_(?|$(join(allowed_serotypes, "|")))_(count|pct)_(pre|post)\$")
+
     )
-
-    return Try.Ok(nothing)
+    totals_rn = findall(lowercase.(df[!, column]) .== totals_key)
+    length(totals_rn) == 1 || return Try.Err("Expected 1 row of totals. Found $(length(totals_rn)). Check the spelling in the states column :$column matches the provided `totals_key` \"$totals_key\"")
+    totals_rn = totals_rn[1]
+    selected_df = select(df, Cols(reg))
+    return Try.Ok((totals_rn, selected_df))
 end
 
 """
@@ -655,6 +704,18 @@ function _collect_totals_check_args(
     return Try.Ok((col, colname, denom_col, denom_total, atol, digits))
 end
 
+function calculate_totals(
+        col::Vector{T},
+        colname::String,
+    ) where {T <: Union{<:Union{<:Missing, <:Integer}, <:Integer}}
+    totals_dict = Dict{AbstractString, Real}()
+    return _calculate_totals!(
+        totals_dict,
+        col,
+        colname
+    )
+end
+
 function _calculate_totals!(
         totals_dict::Dict,
         col::Vector{T},
@@ -663,6 +724,29 @@ function _calculate_totals!(
     calculated_total = sum(skipmissing(col))
     totals_dict[colname] = calculated_total
     return nothing
+end
+
+function calculate_totals(
+        col::Vector{T},
+        colname::String,
+        denom_col::Vector{C},
+        denom_total,
+        atol = 0.1,
+        digits = 1
+    ) where {
+        T <: Union{<:Union{<:Missing, <:AbstractFloat}, <:AbstractFloat},
+        C <: Union{<:Union{<:Missing, <:Integer}, <:Integer},
+    }
+    totals_dict = Dict{AbstractString, Real}()
+    return _calculate_totals!(
+        totals_dict,
+        col,
+        colname,
+        denom_col,
+        denom_total,
+        atol,
+        digits
+    )
 end
 
 function _calculate_totals!(
