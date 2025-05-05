@@ -61,7 +61,15 @@ function all_cleaning_steps(
     Try.@? check_aggregated_pre_post_counts_exist(data)
     Try.@? check_pre_post_exists(data)
     Try.@? has_totals_row(data)
-    Try.@? all_totals_check(data)
+
+    if Try.iserr(all_totals_check(data))
+        totals = Try.@? calculate_all_totals(data)
+        push!(
+            data,
+            merge(Dict("states_ut" => "Total calculated"), totals);
+            promote = true
+        )
+    end
 
     calculated_state_counts_data = calculate_state_counts(data)
     calculated_state_seroprevs_data = calculate_state_seroprevalence(calculated_state_counts_data)
