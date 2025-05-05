@@ -44,34 +44,34 @@ function all_cleaning_steps(
     println("\n==========================================================================")
     println("Cleaning $(joinpath(input_dir, input_filename))\n")
 
-    data = load_csv(
+    data = Try.@? load_csv(
         input_filename,
         input_dir,
         load_format
-    ) |>
-        clean_colnames |>
-        rename_aggregated_pre_post_counts |>
-        correct_all_state_names
+    )
+    cleaned_colnames_data = Try.@? clean_colnames(data)
+    renamed_aggregate_counts_data = Try.@? rename_aggregated_pre_post_counts(cleaned_colnames_data)
+    corrected_state_name_data = Try.@? correct_all_state_names(renamed_aggregate_counts_data)
 
-    Try.@? check_duplicated_column_names(data)
-    Try.@? check_missing_states(data)
-    Try.@? check_duplicated_states(data)
-    Try.@? check_allowed_serotypes(data)
-    Try.@? check_seroprevalence_as_pct(data)
-    Try.@? check_aggregated_pre_post_counts_exist(data)
-    Try.@? check_pre_post_exists(data)
-    Try.@? has_totals_row(data)
+    Try.@? check_duplicated_column_names(corrected_state_name_data)
+    Try.@? check_missing_states(corrected_state_name_data)
+    Try.@? check_duplicated_states(corrected_state_name_data)
+    Try.@? check_allowed_serotypes(corrected_state_name_data)
+    Try.@? check_seroprevalence_as_pct(corrected_state_name_data)
+    Try.@? check_aggregated_pre_post_counts_exist(corrected_state_name_data)
+    Try.@? check_pre_post_exists(corrected_state_name_data)
+    Try.@? has_totals_row(corrected_state_name_data)
 
-    if Try.iserr(all_totals_check(data))
-        totals = Try.@? calculate_all_totals(data)
+    if Try.iserr(all_totals_check(corrected_state_name_data))
+        totals = Try.@? calculate_all_totals(corrected_state_name_data)
         push!(
-            data,
+            corrected_state_name_data,
             merge(Dict("states_ut" => "Total calculated"), totals);
             promote = true
         )
     end
 
-    calculated_state_counts_data = calculate_state_counts(data)
+    calculated_state_counts_data = calculate_state_counts(corrected_state_name_data)
     calculated_state_seroprevs_data = calculate_state_seroprevalence(calculated_state_counts_data)
     Try.@? check_calculated_values_match_existing(calculated_state_seroprevs_data)
 
@@ -100,9 +100,11 @@ function load_csv(
     dir_files = filter(t -> contains(t, r".*\.csv$"), readdir(dir))
     in(filename, dir_files) || return Err("$filename is not within the directory $dir")
 
-    return read(
-        joinpath(dir, filename),
-        output_format
+    return Try.Ok(
+        read(
+            joinpath(dir, filename),
+            output_format
+        )
     )
 end
 
@@ -141,7 +143,7 @@ function clean_colnames(
 
     length(cols_with_dissallowed_chars) == 0 || return Err("$(keys(cols_with_dissallowed_chars)) are columns with disallowed characters.\n$(cols_with_dissallowed_chars)")
 
-    return clean_df
+    return Try.Ok(clean_df)
 end
 
 """
@@ -158,9 +160,11 @@ function rename_aggregated_pre_post_counts(
         original_regex::Regex = r"^(pre|post)_count",
         substitution_string::SubstitutionString = s"serotype_all_count_\1"
     )
-    return rename(
-        s -> replace(s, original_regex => substitution_string),
-        df
+    return Try.Ok(
+        rename(
+            s -> replace(s, original_regex => substitution_string),
+            df
+        )
     )
 end
 
@@ -179,10 +183,12 @@ function correct_all_state_names(
         states_dict::Dict = FMDData.states_dict
     )
 
-    return transform(
-        df,
-        column => ByRow(s -> correct_state_name(s, states_dict));
-        renamecols = false
+    return Try.Ok(
+        transform(
+            df,
+            column => ByRow(s -> correct_state_name(s, states_dict));
+            renamecols = false
+        )
     )
 end
 
@@ -206,7 +212,7 @@ function correct_state_name(
 
     possible_state_keys = keys(states_dict)
     in(input_name, possible_state_keys) ||
-        return Err("State name `$input_name` doesn't exist in current dictionary match. Confirm if this is a new state or uncharacterized misspelling")
+        return error("State name `$input_name` doesn't exist in current dictionary match. Confirm if this is a new state or uncharacterized misspelling")
 
     return states_dict[input_name]
 end
