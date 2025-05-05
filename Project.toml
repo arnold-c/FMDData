@@ -1,0 +1,38 @@
+name = "FMDData"
+uuid = "f1138820-6a92-4c49-b49d-950677c172bf"
+authors = ["arnold-c <24391445+arnold-c@users.noreply.github.com>"]
+version = "0.1.0"
+
+[deps]
+CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+DrWatson = "634d3b9d-ee7a-5ddf-bec9-22491ea816e1"
+Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
+LoggingExtras = "e6f89c97-d47a-5376-807f-9c37f3926c36"
+OrderedCollections = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
+StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
+Try = "bf1d0ff0-c4a9-496b-85f0-2b0d71c4f32a"
+TryExperimental = "ae3b139e-64da-4858-8f55-5617df0d650e"
+
+[compat]
+Aqua = "0.8.11"
+CSV = "0.10.15"
+DataFrames = "1.7.0"
+DrWatson = "2.18.0"
+JET = "0.9.19"
+Logging = "1.11.0"
+LoggingExtras = "1.1.0"
+OrderedCollections = "1.8.0"
+StatsBase = "0.34.4"
+Test = "1.11.0"
+Try = "0.1.1"
+TryExperimental = "0.1.0"
+julia = ">= 1.11"
+
+[extras]
+Aqua = "3c88cf16-eb10-579e-8560-4a9242c79595"
+JET = "c3a54625-cd67-489e-a8e7-0a5a0ff4e31b"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Aqua", "JET", "Test"]
