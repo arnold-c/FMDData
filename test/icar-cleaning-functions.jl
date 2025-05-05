@@ -103,14 +103,10 @@ using Try
             "flag-this_column^" => Int64[]
         )
 
-        try
-            clean_colnames(special_char_df)
-        catch e
-            @test isequal(
-                e,
-                AssertionError("[\"flag-this_column^\"] are columns with disallowed characters.\nDict{String, Vector{RegexMatch}}(\"flag-this_column^\" => [RegexMatch(\"-\"), RegexMatch(\"^\")])")
-            )
-        end
+        @test isequal(
+            clean_colnames(special_char_df),
+            Try.Err("[\"flag-this_column^\"] are columns with disallowed characters.\nDict{String, Vector{RegexMatch}}(\"flag-this_column^\" => [RegexMatch(\"-\"), RegexMatch(\"^\")])")
+        )
     end
 
     renamed_aggregated_counts_df = rename_aggregated_pre_post_counts(cleaned_colname_data)
@@ -142,22 +138,18 @@ using Try
             @test in(n, [values(FMDData.states_dict)..., "Total"])
         end
 
-        try
+        @test isequal(
             FMDData.correct_state_name(
                 "New State",
                 FMDData.states_dict
-            )
-        catch e
-            @test isequal(
-                e,
-                ErrorException("State name `New State` doesn't exist in current dictionary match. Confirm if this is a new state or uncharacterized misspelling")
-            )
-        end
+            ),
+            Try.Err("State name `New State` doesn't exist in current dictionary match. Confirm if this is a new state or uncharacterized misspelling")
+        )
     end
 
     @testset "Check duplicate columns" begin
         check_duplicate_column_names_data = check_duplicated_column_names(cleaned_states_data)
-        @test isnothing(check_duplicate_column_names_data)
+        @test Try.isok(check_duplicate_column_names_data)
 
         similar_column_names_df = DataFrame(
             "states_ut" => String[],
@@ -169,14 +161,10 @@ using Try
             makeunique = true
         )
 
-        try
-            FMDData._check_similar_column_names(similar_column_names_df)
-        catch e
-            @test isequal(
-                e,
-                ErrorException("Similar column names were found in the data:\nOrderedCollections.OrderedDict(\"states_ut\" => [\"states_ut_1\"], \"seroprevalance_all_count_pre\" => [\"seroprevalance_all_count_pre_1\"])")
-            )
-        end
+        @test isequal(
+            FMDData._check_similar_column_names(similar_column_names_df),
+            Try.Err("Similar column names were found in the data: OrderedCollections.OrderedDict(\"states_ut\" => [\"states_ut_1\"], \"seroprevalance_all_count_pre\" => [\"seroprevalance_all_count_pre_1\"]).")
+        )
 
         similar_column_names_df_2 = DataFrame(
             "states_ut_1_2" => String[],
@@ -189,24 +177,16 @@ using Try
             "seroprevalance_all_count_pre_test" => Int64[],
         )
 
-        try
-            FMDData._check_similar_column_names(similar_column_names_df_2)
-        catch e
-            @test isequal(
-                e,
-                ErrorException("Similar column names were found in the data:\nOrderedCollections.OrderedDict(\"states_u\" => [\"states_ut\", \"states_ut_1\", \"states_ut_1_2\"], \"seroprevalance_all_count_pre\" => [\"seroprevalance_all_count_pre_test\"])")
-            )
-        end
+        @test isequal(
+            FMDData._check_similar_column_names(similar_column_names_df_2),
+            Try.Err("Similar column names were found in the data: OrderedCollections.OrderedDict(\"states_u\" => [\"states_ut\", \"states_ut_1\", \"states_ut_1_2\"], \"seroprevalance_all_count_pre\" => [\"seroprevalance_all_count_pre_test\"]).")
+        )
 
 
-        try
-            check_duplicated_column_names(similar_column_names_df)
-        catch e
-            @test isequal(
-                e,
-                ErrorException("Similar column names were found in the data:\nOrderedCollections.OrderedDict(\"states_ut\" => [\"states_ut_1\"], \"seroprevalance_all_count_pre\" => [\"seroprevalance_all_count_pre_1\"])")
-            )
-        end
+        @test isequal(
+            check_duplicated_column_names(similar_column_names_df),
+            Try.Err("Similar column names were found in the data: OrderedCollections.OrderedDict(\"states_ut\" => [\"states_ut_1\"], \"seroprevalance_all_count_pre\" => [\"seroprevalance_all_count_pre_1\"]).")
+        )
 
         duplicate_column_vals_df = DataFrame(
             :a => 1:10,
@@ -216,14 +196,11 @@ using Try
             :e => 2:11,
         )
 
-        try
-            check_duplicated_columns(duplicate_column_vals_df)
-        catch e
-            @test isequal(
-                e,
-                ErrorException("Found columns with identical values: [[:a, :c], [:b, :e]]")
-            )
-        end
+
+        @test isequal(
+            check_duplicated_columns(duplicate_column_vals_df),
+            Try.Err("Found columns with identical values: [[:a, :c], [:b, :e]]")
+        )
 
         unique_column_vals_df = DataFrame(
             :a => 1:10,
@@ -231,46 +208,36 @@ using Try
             :c => 3:12,
         )
 
-        @test isnothing(check_duplicated_columns(unique_column_vals_df))
+        @test Try.isok(check_duplicated_columns(unique_column_vals_df))
 
     end
 
     @testset "Check missing states" begin
-        check_missing_states_data = check_missing_states(cleaned_states_data)
-        @test isnothing(check_missing_states_data)
+        @test Try.isok(check_missing_states(cleaned_states_data))
 
         missing_states_df = DataFrame("states_ut" => ["a", "b", missing, "a", missing])
 
-        try
-            check_missing_states(missing_states_df)
-        catch e
-            @test isequal(
-                e,
-                AssertionError("There are 2 values in the states_ut column that are of type `Missing`")
-            )
-        end
+        @test isequal(
+            check_missing_states(missing_states_df),
+            Try.Err("There are 2 values in the states_ut column that are of type `Missing`")
+        )
 
     end
 
     @testset "Check duplicated states" begin
-        check_duplicated_states_data = check_duplicated_states(cleaned_states_data)
-        @test isnothing(check_duplicated_states_data)
+        @test Try.isok(check_duplicated_states(cleaned_states_data))
 
         duplicated_states_df = DataFrame("states_ut" => ["a", "b", "c", "a"])
 
-        try
-            check_duplicated_states(duplicated_states_df)
-        catch e
-            @test isequal(
-                e,
-                AssertionError("The dataframe has 4 state values, but only 3 unique state values. (\"a\",) were duplicated")
-            )
-        end
+
+        @test isequal(
+            check_duplicated_states(duplicated_states_df),
+            Try.Err("The dataframe has 4 state values, but only 3 unique state values. (\"a\",) were duplicated")
+        )
     end
 
     @testset "Check serotypes" begin
-        check_serotype_data = check_allowed_serotypes(cleaned_states_data)
-        @test isnothing(check_serotype_data)
+        @test Try.isok(check_allowed_serotypes(cleaned_states_data))
 
         expected_serotypes = ["all", "all", "o", "o", "a", "a", "asia1", "asia1"]
         @test isequal(
@@ -295,27 +262,26 @@ using Try
         all_matched_serotypes = unique(expected_serotypes)
         all_matched_additional_missing_serotypes = unique(additional_missing_expected_serotypes)
 
-        @test isnothing(FMDData._check_all_required_serotypes(all_matched_serotypes))
+        @test Try.isok(FMDData._check_all_required_serotypes(all_matched_serotypes))
 
-        try
-            FMDData._check_all_required_serotypes(all_matched_additional_missing_serotypes)
-        catch e
-            @test isequal(
-                e,
-                AssertionError("Found 2 allowed serotypes ([\"a\", \"o\"]). Required 4: [\"all\", \"o\", \"a\", \"asia1\"]")
-            )
-        end
 
-        @test isnothing(FMDData._check_no_disallowed_serotypes(all_matched_serotypes))
+        @test isequal(
+            FMDData._check_all_required_serotypes(all_matched_additional_missing_serotypes),
+            Try.Err("Found 2 allowed serotypes ([\"a\", \"o\"]). Required 4: [\"all\", \"o\", \"a\", \"asia1\"].")
+        )
 
-        try
-            FMDData._check_no_disallowed_serotypes(all_matched_additional_missing_serotypes)
-        catch e
-            @test isequal(
-                e,
-                AssertionError("Found 1 disallowed serotypes ([\"test\"]).")
-            )
-        end
+        @test Try.isok(FMDData._check_no_disallowed_serotypes(all_matched_serotypes))
+
+
+        @test isequal(
+            FMDData._check_no_disallowed_serotypes(all_matched_additional_missing_serotypes),
+            Try.Err("Found 1 disallowed serotypes ([\"test\"]).")
+        )
+
+        @test isequal(
+            check_allowed_serotypes(additional_missing_serotypes_df),
+            Try.Err("Found 2 allowed serotypes ([\"a\", \"o\"]). Required 4: [\"all\", \"o\", \"a\", \"asia1\"]. Found 1 disallowed serotypes ([\"test\"]).")
+        )
 
     end
 
@@ -336,23 +302,20 @@ using Try
             renamecols = false
         )
 
-        @test isnothing(check_seroprevalence_as_pct(seroprevs_as_pct_df))
+        @test Try.isok(check_seroprevalence_as_pct(seroprevs_as_pct_df))
 
-        try
-            check_seroprevalence_as_pct(seroprevs_as_props_df)
-        catch e
-            @test isequal(
-                e,
-                ErrorException("All `pct` columns should be a %, not a proportion. The following columns are likely reported as proportions with associated mean values: OrderedCollections.OrderedDict{Symbol, AbstractFloat}(:serotype_a_pct_pre => 0.12, :serotype_a_pct_post => 0.62)")
-            )
-        end
+
+        @test isequal(
+            check_seroprevalence_as_pct(seroprevs_as_props_df),
+            Try.Err("All `pct` columns should be a %, not a proportion. The following columns are likely reported as proportions with associated mean values: OrderedCollections.OrderedDict{Symbol, AbstractFloat}(:serotype_a_pct_pre => 0.12, :serotype_a_pct_post => 0.62)")
+        )
 
 
     end
 
     @testset "Check serotype pre and post columns exist" begin
-        @test isnothing(check_aggregated_pre_post_counts_exist(cleaned_states_data))
-        @test isnothing(check_pre_post_exists(cleaned_states_data))
+        @test Try.isok(check_aggregated_pre_post_counts_exist(cleaned_states_data))
+        @test Try.isok(check_pre_post_exists(cleaned_states_data))
 
         missing_pre_post_df = DataFrame(
             "serotype_a_pct_pre" => Float64[],
@@ -363,23 +326,28 @@ using Try
             "serotype_asia1_pct_post" => Float64[],
         )
 
-        try
-            check_pre_post_exists(missing_pre_post_df)
-        catch e
-            @test isequal(
-                e,
-                ErrorException("All serotype results should have both 'Pre' and 'Post' results columns, only. Instead, the following serotype results have the associated data columns:\nOrderedCollections.OrderedDict{AbstractString, Vector{AbstractString}}(\"serotype_a_pct\" => AbstractString[\"pre\"], \"serotype_a_count\" => AbstractString[\"post\"])")
-            )
-        end
+        @test isequal(
+            check_aggregated_pre_post_counts_exist(missing_pre_post_df),
+            Try.Err("The aggregated count columns [\"serotype_all_count_pre\", \"serotype_all_count_post\"] do not exist in the data")
+        )
+
+
+        @test isequal(
+            check_pre_post_exists(missing_pre_post_df),
+            Try.Err("All serotype results should have both 'Pre' and 'Post' results columns, only. Instead, the following serotype results have the associated data columns:\nOrderedCollections.OrderedDict{AbstractString, Vector{AbstractString}}(\"serotype_a_pct\" => AbstractString[\"pre\"], \"serotype_a_count\" => AbstractString[\"post\"])")
+        )
 
     end
 
     @testset "Totals row checks" begin
-        @test has_totals_row(cleaned_states_data)
+        @test Try.isok(has_totals_row(cleaned_states_data))
 
         missing_totals_df = subset(cleaned_states_data, :states_ut => ByRow(s -> !(lowercase(s) in ["totals", "total"])))
 
-        @test !has_totals_row(missing_totals_df)
+        @test isequal(
+            has_totals_row(missing_totals_df),
+            Try.Err("Totals row not found in the data using the possible row keys [\"total\", \"totals\"] in the column :states_ut")
+        )
 
         incorrect_totals_row_df = DataFrame(
             "states_ut" => ["a", "b", "c", "total"],
@@ -401,19 +369,22 @@ using Try
             "serotype_a_pct_post" => [80.0, 60.0, 50.0, 63.3],
         )
 
-        try
-            all_totals_check(missing_totals_df)
-        catch e
-            @test isequal(e, AssertionError("Expected 1 row of totals. Found 0. Check the spelling in the states column :states_ut matches the provided `totals_key` \"total\""))
-        end
 
-        try
-            all_totals_check(incorrect_totals_row_df; atol = 0.1)
-        catch e
-            @test isequal(e, ErrorException("OrderedCollections.OrderedDict{AbstractString, NamedTuple{(:provided, :calculated)}}(\"serotype_a_count_pre\" => (provided = 5, calculated = 4), \"serotype_a_count_post\" => (provided = 20, calculated = 19), \"serotype_a_pct_pre\" => (provided = 13.1, calculated = 13.3), \"serotype_a_pct_post\" => (provided = 63.0, calculated = 63.3))"))
-        end
+        @test isequal(
+            all_totals_check(missing_totals_df),
+            Try.Err("Expected 1 row of totals. Found 0. Check the spelling in the states column :states_ut matches the provided `totals_key` \"total\"")
+        )
 
-        @test isnothing(all_totals_check(correct_totals_row_df))
+
+        @test isequal(
+            all_totals_check(incorrect_totals_row_df; atol = 0.1),
+            Try.Err(
+                "There were discrepancies in the totals calculated and those provided in the data: OrderedCollections.OrderedDict{AbstractString, NamedTuple{(:provided, :calculated)}}(\"serotype_a_count_pre\" => (provided = 5, calculated = 4), \"serotype_a_count_post\" => (provided = 20, calculated = 19), \"serotype_a_pct_pre\" => (provided = 13.1, calculated = 13.3), \"serotype_a_pct_post\" => (provided = 63.0, calculated = 63.3))"
+            )
+        )
+
+
+        @test Try.isok(all_totals_check(correct_totals_row_df))
     end
 
     @testset "Calculate missing counts/seroprevs" begin
@@ -449,13 +420,13 @@ using Try
             )
         )
 
-        @test isnothing(
+        @test Try.isok(
             check_calculated_values_match_existing(
                 calculate_state_counts(no_missing_counts_pcts_df)
             )
         )
 
-        try
+        @test isequal(
             check_calculated_values_match_existing(
                 DataFrame(
                     "serotype_a_count_pre" => [2, 1, 1, 4],
@@ -467,13 +438,9 @@ using Try
                     "serotype_a_pct_pre_calculated" => [20.0, 12.0, 10.0, 13.3],
                     "serotype_a_pct_post_calculated" => [80.0, 60.0, 50.0, 63.3],
                 )
-            )
-        catch e
-            @test isequal(
-                e,
-                ErrorException("The following calculated columns have discrepancies relative to the provided columns: OrderedCollections.OrderedDict{AbstractString, AbstractString}(\"serotype_a_count_pre\" => \"The following indices (row numbers) differ: [2]. Original: [1]. Calculated: [0]\", \"serotype_a_pct_pre\" => \"The following indices (row numbers) differ: [2]. Original: [10.0]. Calculated: [12.0]\")")
-            )
-        end
+            ),
+            Try.Err("The following calculated columns have discrepancies relative to the provided columns: OrderedCollections.OrderedDict{AbstractString, AbstractString}(\"serotype_a_count_pre\" => \"The following indices (row numbers) differ: [2]. Original: [1]. Calculated: [0]\", \"serotype_a_pct_pre\" => \"The following indices (row numbers) differ: [2]. Original: [10.0]. Calculated: [12.0]\")")
+        )
     end
 
 end

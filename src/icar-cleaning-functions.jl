@@ -87,7 +87,7 @@ function clean_colnames(
         cols_with_dissallowed_chars
     )
 
-    @assert length(cols_with_dissallowed_chars) == 0 "$(keys(cols_with_dissallowed_chars)) are columns with disallowed characters.\n$(cols_with_dissallowed_chars)"
+    length(cols_with_dissallowed_chars) == 0 || return Err("$(keys(cols_with_dissallowed_chars)) are columns with disallowed characters.\n$(cols_with_dissallowed_chars)")
 
     return clean_df
 end
@@ -154,7 +154,7 @@ function correct_state_name(
 
     possible_state_keys = keys(states_dict)
     in(input_name, possible_state_keys) ||
-        error("State name `$input_name` doesn't exist in current dictionary match. Confirm if this is a new state or uncharacterized misspelling")
+        return Err("State name `$input_name` doesn't exist in current dictionary match. Confirm if this is a new state or uncharacterized misspelling")
 
     return states_dict[input_name]
 end
@@ -169,9 +169,12 @@ end
 Wrapper function around the two internal functions `_check_identical_column_names()` and `_check_similar_column_names()`. If a DataFrame is created then all identical column names should result in an error before it is created, but potentially they may be coerced to be made unique so a similarity check should be performed.
 """
 function check_duplicated_column_names(df::DataFrame)
-    _check_identical_column_names(df)
-    _check_similar_column_names(df)
-    return nothing
+    identical_check = _check_identical_column_names(df)
+    similar_check = _check_similar_column_names(df)
+    if !Try.iserr(identical_check) && !Try.iserr(similar_check)
+        return Ok(nothing)
+    end
+    return Try.Err(_combine_error_messages([identical_check, similar_check]))
 end
 
 """
@@ -188,9 +191,9 @@ function _check_identical_column_names(df::DataFrame)
 
     colname_counts = _calculate_string_occurences(colnames, unique_colnames)
 
-    @assert df_ncol == length(unique_colnames) "The dataframe has $df_ncol columns, but only $(length(unique_colnames)) unique column names. $(keys(filter(c -> values(c) != 1, colname_counts))) were duplicated"
+    df_ncol == length(unique_colnames) || return Err("The dataframe has $df_ncol columns, but only $(length(unique_colnames)) unique column names. $(keys(filter(c -> values(c) != 1, colname_counts))) were duplicated.")
 
-    return nothing
+    return Try.Ok(nothing)
 end
 
 function _calculate_string_occurences(
@@ -218,7 +221,7 @@ function _check_similar_column_names(df::DataFrame)
     for (i, nm) in pairs(colnames)
         for (_, next_nm) in pairs(colnames[(i + 1):end])
             if nm == next_nm
-                error("Has duplicate names. Run the function _check_identical_column_names() before running this function")
+                return Err("Has duplicate names. Run the function _check_identical_column_names() before running this function.")
             end
             if contains(next_nm, nm)
                 if haskey(duplicates, nm)
@@ -243,10 +246,43 @@ function _check_similar_column_names(df::DataFrame)
         end
     end
     if !isempty(duplicates)
-        error("Similar column names were found in the data:\n$(sort!(duplicates; by = first))")
+        return Err("Similar column names were found in the data: $(sort!(duplicates; by = first)).")
     end
-    return nothing
+    return Ok(nothing)
 end
+
+"""
+    _combine_error_messages(arr_of_errs::AbstractVector{T}) where {T <: Try.InternalPrelude.AbstractResult}
+
+Internal function that accepts a vector of `Try` results e.g., `Ok()` and `Err()`, and concatenates them to be passed up the call stack.
+"""
+function _combine_error_messages(arr_of_errs::AbstractVector{T}) where {T <: Try.InternalPrelude.AbstractResult}
+    return String(
+        strip(
+            mapreduce(
+                _unwrap_err_or_empty_str,
+                (acc, next_val) -> acc * " " * next_val,
+                arr_of_errs
+            )
+        )
+    )
+end
+
+"""
+    _unwrap_err_or_empty_str(res)
+
+Internal function to check if result is an error and if so, return the unwrapped (error message) value. If the result is an Ok() result, return an empty string that will be used to during concatenation of error messages.
+"""
+function _unwrap_err_or_empty_str(res::Union{Ok{<:T}, Err{<:E}}) where {T <: AbstractString, E}
+    Try.iserr(res) && return Try.unwrap_err(res)
+    return Try.unwrap(res)
+end
+
+function _unwrap_err_or_empty_str(res::Union{Ok{Nothing}, Err{<:E}}) where {E}
+    Try.iserr(res) && return Try.unwrap_err(res)
+    return ""
+end
+
 
 """
     check_duplicated_columns(df::DataFrame)
@@ -255,7 +291,7 @@ Check if any columns have identical values
 """
 function check_duplicated_columns(df::DataFrame)
     df_ncol = ncol(df)
-    df_ncol < 2 && return nothing
+    df_ncol < 2 && return Try.Ok(nothing)
 
     duplicate_columns_dict = Dict{AbstractVector, AbstractVector}()
     for (k, v) in pairs(eachcol(df))
@@ -268,11 +304,11 @@ function check_duplicated_columns(df::DataFrame)
     filter!(cols -> length(cols.second) > 1, duplicate_columns_dict)
     if !isempty(duplicate_columns_dict)
         duplicated_columns = [v for (_, v) in pairs(duplicate_columns_dict)]
-        error(
+        return Try.Err(
             "Found columns with identical values: $(duplicated_columns)"
         )
     end
-    return nothing
+    return Try.Ok(nothing)
 end
 
 """
@@ -288,7 +324,8 @@ function check_missing_states(
         column::Symbol = :states_ut,
     )
     nmissing = sum(ismissing.(df[!, column]))
-    return @assert nmissing == 0 "There are $nmissing values in the $column column that are of type `Missing`"
+    nmissing == 0 || return Try.Err("There are $nmissing values in the $column column that are of type `Missing`")
+    return Try.Ok(nothing)
 end
 
 """
@@ -308,9 +345,9 @@ function check_duplicated_states(
     unique_states = unique(states)
     state_counts = _calculate_string_occurences(states, unique_states)
 
-    @assert nstates == length(unique_states) "The dataframe has $nstates state values, but only $(length(unique_states)) unique state values. $(String.(keys(filter(c -> values(c) != 1, state_counts)))) were duplicated"
+    nstates == length(unique_states) || return Try.Err("The dataframe has $nstates state values, but only $(length(unique_states)) unique state values. $(String.(keys(filter(c -> values(c) != 1, state_counts)))) were duplicated")
 
-    return nothing
+    return Try.Ok(nothing)
 end
 
 
@@ -329,9 +366,12 @@ function check_allowed_serotypes(
         reg::Regex = r"serotype_(.*)_(?|count|pct)_(pre|post)"
     )
     all_matched_serotypes = unique(collect_all_present_serotypes(df, reg))
-    _check_all_required_serotypes(all_matched_serotypes, allowed_serotypes)
-    _check_no_disallowed_serotypes(all_matched_serotypes, allowed_serotypes)
-    return nothing
+    required_check = _check_all_required_serotypes(all_matched_serotypes, allowed_serotypes)
+    disallowed_check = _check_no_disallowed_serotypes(all_matched_serotypes, allowed_serotypes)
+    if !Try.iserr(required_check) && !Try.iserr(disallowed_check)
+        return Ok(nothing)
+    end
+    return Try.Err(_combine_error_messages([required_check, disallowed_check]))
 end
 
 """
@@ -363,8 +403,8 @@ function _check_all_required_serotypes(
         allowed_serotypes::T = vcat("all", default_allowed_serotypes)
     ) where {T <: AbstractVector{<:AbstractString}}
     matched_serotypes = unique(filter(m -> in(m, allowed_serotypes), all_matched_serotypes))
-    @assert length(matched_serotypes) == length(allowed_serotypes) "Found $(length(matched_serotypes)) allowed serotypes ($matched_serotypes). Required $(length(allowed_serotypes)): $allowed_serotypes"
-    return nothing
+    length(matched_serotypes) == length(allowed_serotypes) || return Try.Err("Found $(length(matched_serotypes)) allowed serotypes ($matched_serotypes). Required $(length(allowed_serotypes)): $allowed_serotypes.")
+    return Try.Ok(nothing)
 end
 
 """
@@ -380,8 +420,8 @@ function _check_no_disallowed_serotypes(
         allowed_serotypes::T = vcat("all", default_allowed_serotypes)
     ) where {T <: AbstractVector{<:AbstractString}}
     matched_serotypes = unique(filter(m -> !in(m, allowed_serotypes), all_matched_serotypes))
-    @assert length(matched_serotypes) == 0 "Found $(length(matched_serotypes)) disallowed serotypes ($matched_serotypes)."
-    return nothing
+    length(matched_serotypes) == 0 || return Try.Err("Found $(length(matched_serotypes)) disallowed serotypes ($matched_serotypes).")
+    return Try.Ok(nothing)
 
 end
 
@@ -412,10 +452,10 @@ function check_pre_post_exists(
     end
 
     if !isempty(missing_dict)
-        error("All serotype results should have both 'Pre' and 'Post' results columns, only. Instead, the following serotype results have the associated data columns:\n$missing_dict")
+        return Try.Err("All serotype results should have both 'Pre' and 'Post' results columns, only. Instead, the following serotype results have the associated data columns:\n$missing_dict")
     end
 
-    return nothing
+    return Try.Ok(nothing)
 end
 
 """
@@ -434,9 +474,9 @@ function check_seroprevalence_as_pct(
         end
     end
     if !isempty(prop_cols_dict)
-        error("All `pct` columns should be a %, not a proportion. The following columns are likely reported as proportions with associated mean values: $prop_cols_dict")
+        return Try.Err("All `pct` columns should be a %, not a proportion. The following columns are likely reported as proportions with associated mean values: $prop_cols_dict")
     end
-    return nothing
+    return Try.Ok(nothing)
 end
 
 """
@@ -451,7 +491,8 @@ function check_aggregated_pre_post_counts_exist(
         df::DataFrame,
         columns = ["serotype_all_count_pre", "serotype_all_count_post"]
     )
-    return @assert sum(map(c -> in(c, names(df)), columns)) == length(columns)
+    sum(map(c -> in(c, names(df)), columns)) == length(columns) || return Try.Err("The aggregated count columns $columns do not exist in the data")
+    return Try.Ok(nothing)
 end
 
 
@@ -471,7 +512,8 @@ function has_totals_row(
         column::Symbol = :states_ut,
         possible_keys = ["total", "totals"]
     )
-    return length(filter(s -> in(s, possible_keys), lowercase.(df[!, column]))) > 0
+    length(filter(s -> in(s, possible_keys), lowercase.(df[!, column]))) > 0 || return Try.Err("Totals row not found in the data using the possible row keys $possible_keys in the column :$column")
+    return Try.Ok(nothing)
 end
 
 """
@@ -488,7 +530,7 @@ function all_totals_check(
         digits = 1
     )
     totals = subset(df, column => s -> lowercase.(s) .== totals_key)
-    @assert nrow(totals) == 1 "Expected 1 row of totals. Found $(nrow(totals)). Check the spelling in the states column :$column matches the provided `totals_key` \"$totals_key\""
+    nrow(totals) == 1 || return Try.Err("Expected 1 row of totals. Found $(nrow(totals)). Check the spelling in the states column :$column matches the provided `totals_key` \"$totals_key\"")
     totals_rn = indexin((totals_key,), lowercase.(df[!, column]))
     col_names = names(df)
     errors_dict = OrderedDict{AbstractString, NamedTuple{(:provided, :calculated)}}()
@@ -506,12 +548,13 @@ function all_totals_check(
             allowed_serotypes,
             atol,
         )
-        _totals_check!(errors_dict, totals_check_args...)
+        Try.iserr(totals_check_args) && return totals_check_args
+        _totals_check!(errors_dict, Try.unwrap(totals_check_args)...)
     end
     if !isempty(errors_dict)
-        error(errors_dict)
+        return Try.Err("There were discrepancies in the totals calculated and those provided in the data: $errors_dict")
     end
-    return nothing
+    return Try.Ok(nothing)
 end
 
 """
@@ -537,7 +580,7 @@ function _collect_totals_check_args(
         colname::String,
         _...
     ) where {T <: Union{Union{<:Missing, <:Integer}, <:Integer}}
-    return (col, totals[1, colname], colname)
+    return Try.Ok((col, totals[1, colname], colname))
 end
 
 function _collect_totals_check_args(
@@ -555,7 +598,7 @@ function _collect_totals_check_args(
     # (pre|post) is the only capture group, providing the timing used to collect the correct state column for weighting the seroprevalence sums
     reg = Regex("serotype_(?|$(join(allowed_serotypes, "|")))_pct_(pre|post)\$")
     denom_type_matches = match(reg, colname)
-    @assert length(denom_type_matches) == 1 "For column $colname, $(length(denom_type_matches)) possible denominators found, but only expected 1: $(denom_type_matches.captures)"
+    length(denom_type_matches) == 1 || return Try.Err("For column $colname, $(length(denom_type_matches)) possible denominators found, but only expected 1: $(denom_type_matches.captures)")
     denom_type = denom_type_matches[1]
     denom_colname = "serotype_all_count_$denom_type"
 
@@ -563,7 +606,7 @@ function _collect_totals_check_args(
     denom_col = df[Not(totals_rn), denom_colname]
     denom_total = sum(skipmissing(denom_col))
 
-    return (col, totals[1, colname], colname, denom_col, denom_total, atol, digits)
+    return Try.Ok((col, totals[1, colname], colname, denom_col, denom_total, atol, digits))
 end
 
 """
@@ -742,8 +785,8 @@ function check_calculated_values_match_existing(
         end
     end
     if !isempty(miscalculation_dict)
-        return error("The following calculated columns have discrepancies relative to the provided columns: $miscalculation_dict")
+        return Try.Err("The following calculated columns have discrepancies relative to the provided columns: $miscalculation_dict")
     end
 
-    return nothing
+    return Try.Ok(nothing)
 end
