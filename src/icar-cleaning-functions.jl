@@ -1,10 +1,12 @@
-using DrWatson: datadir
+using DrWatson: datadir, scriptsdir
 using CSV: read, write
 using DataFrames: DataFrame, DataFrameRow, select, subset, filter, rename, transform, transform!, ByRow, Not, Cols, nrow, AsTable, ncol
 using OrderedCollections: OrderedDict
 using StatsBase: mean
 using Try
 using TryExperimental
+using Logging
+using LoggingExtras
 
 export all_cleaning_steps,
     load_csv,
@@ -62,17 +64,35 @@ function all_cleaning_steps(
     Try.@? check_pre_post_exists(corrected_state_name_data)
     Try.@? has_totals_row(corrected_state_name_data)
 
-    if Try.iserr(all_totals_check(corrected_state_name_data))
-        totals = Try.@? calculate_all_totals(corrected_state_name_data)
-        push!(
-            corrected_state_name_data,
-            merge(Dict("states_ut" => "Total calculated"), totals);
-            promote = true
-        )
+
+    filebase = match(r"(.*)\.csv", input_filename).captures[1]
+    logger = FileLogger(scriptsdir("icar-cleaning", "logfiles", "$filebase.log"))
+
+    function log_try_error(res)
+        if Try.iserr(res)
+            @error(Try.unwrap_err(res))
+        end
+        return nothing
+    end
+
+    with_logger(logger) do
+        if Try.iserr(all_totals_check(corrected_state_name_data))
+            log_try_error(all_totals_check(corrected_state_name_data))
+            totals = Try.@? calculate_all_totals(corrected_state_name_data)
+            push!(
+                corrected_state_name_data,
+                merge(Dict("states_ut" => "Total calculated"), totals);
+                promote = true
+            )
+        end
     end
 
     calculated_state_counts_data = calculate_state_counts(corrected_state_name_data)
     calculated_state_seroprevs_data = calculate_state_seroprevalence(calculated_state_counts_data)
+    log_try_error(check_calculated_values_match_existing(calculated_state_seroprevs_data))
+
+    log_try_error(write_csv(output_filename, output_dir, calculated_state_seroprevs_data))
+
     Try.@? check_calculated_values_match_existing(calculated_state_seroprevs_data)
 
     Try.@? write_csv(output_filename, output_dir, calculated_state_seroprevs_data)
