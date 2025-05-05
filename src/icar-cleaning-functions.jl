@@ -39,7 +39,7 @@ function all_cleaning_steps(
         input_filename::T1,
         input_dir::T1,
         output_filename::T1 = "clean_$input_filename",
-        output_dir::T1 = datadir();
+        output_dir::T1 = datadir("icar-seroprevalence");
         load_format = DataFrame
     ) where {T1 <: AbstractString}
 
@@ -66,7 +66,7 @@ function all_cleaning_steps(
 
 
     filebase = match(r"(.*)\.csv", input_filename).captures[1]
-    logger = FileLogger(scriptsdir("icar-cleaning", "logfiles", "$filebase.log"))
+    logger = FileLogger(joinpath(output_dir, "logfiles", "$filebase.log"))
 
     function log_try_error(res)
         if Try.iserr(res)
