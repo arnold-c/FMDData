@@ -1,6 +1,6 @@
 using DrWatson: datadir
 using CSV: read, write
-using DataFrames: DataFrame, select, subset, filter, rename, transform, transform!, ByRow, Not, Cols, nrow, AsTable, ncol
+using DataFrames: DataFrame, DataFrameRow, select, subset, filter, rename, transform, transform!, ByRow, Not, Cols, nrow, AsTable, ncol
 using OrderedCollections: OrderedDict
 using StatsBase: mean
 using Try
@@ -21,6 +21,8 @@ export all_cleaning_steps,
     check_pre_post_exists,
     has_totals_row,
     all_totals_check,
+    calculated_totals,
+    totals_check,
     calculate_state_counts,
     calculate_state_seroprevalence,
     check_calculated_values_match_existing
@@ -566,35 +568,40 @@ function all_totals_check(
         df::DataFrame,
         column::Symbol = :states_ut,
         totals_key = "total",
-        allowed_serotypes = default_allowed_serotypes;
+        allowed_serotypes = vcat("all", default_allowed_serotypes);
         atol = 0.1,
         digits = 1
     )
-    totals = subset(df, column => s -> lowercase.(s) .== totals_key)
-    nrow(totals) == 1 || return Try.Err("Expected 1 row of totals. Found $(nrow(totals)). Check the spelling in the states column :$column matches the provided `totals_key` \"$totals_key\"")
-    totals_rn = indexin((totals_key,), lowercase.(df[!, column]))
+    reg = Regex("serotype_(?|$(join(allowed_serotypes, "|")))_(count|pct)_(pre|post)\$")
+    totals_rn = findall(lowercase.(df[!, column]) .== totals_key)
+    length(totals_rn) == 1 || return Try.Err("Expected 1 row of totals. Found $(length(totals_rn)). Check the spelling in the states column :$column matches the provided `totals_key` \"$totals_key\"")
+    totals_rn = totals_rn[1]
     col_names = names(df)
-    errors_dict = OrderedDict{AbstractString, NamedTuple{(:provided, :calculated)}}()
-    for col_ind in eachindex(names(df))
+    totals_dict = Dict{AbstractString, Real}()
+    selected_df = select(df, Cols(reg))
+
+    for col_ind in eachindex(names(selected_df))
         col_name = col_names[col_ind]
-        if col_name == "states_ut"
-            continue
-        end
         totals_check_args = _collect_totals_check_args(
-            df[Not(totals_rn), col_ind],
-            totals,
-            names(df)[col_ind],
-            df,
+            selected_df[Not(totals_rn), col_ind],
+            names(selected_df)[col_ind],
+            selected_df,
             totals_rn,
             allowed_serotypes,
             atol,
         )
         Try.iserr(totals_check_args) && return totals_check_args
-        _totals_check!(errors_dict, Try.unwrap(totals_check_args)...)
+        _calculate_totals!(totals_dict, Try.unwrap(totals_check_args)...)
     end
-    if !isempty(errors_dict)
-        return Try.Err("There were discrepancies in the totals calculated and those provided in the data: $errors_dict")
-    end
+
+    length(totals_dict) == ncol(selected_df) || return Try.Err("The number of totals calculated is $(length(totals_dict)), but there are $(ncol(selected_df)) columns selected to have totals calculated for")
+
+    Try.@? totals_check(
+        selected_df[totals_rn, :],
+        totals_dict,
+        column
+    )
+
     return Try.Ok(nothing)
 end
 
@@ -617,16 +624,14 @@ Returns a tuple of variables to be unpacked and passed to `totals_check()`
 """
 function _collect_totals_check_args(
         col::Vector{T},
-        totals::DataFrame,
         colname::String,
         _...
     ) where {T <: Union{Union{<:Missing, <:Integer}, <:Integer}}
-    return Try.Ok((col, totals[1, colname], colname))
+    return Try.Ok((col, colname))
 end
 
 function _collect_totals_check_args(
         col::Vector{T},
-        totals::DataFrame,
         colname::String,
         df::DataFrame,
         totals_rn,
@@ -647,7 +652,56 @@ function _collect_totals_check_args(
     denom_col = df[Not(totals_rn), denom_colname]
     denom_total = sum(skipmissing(denom_col))
 
-    return Try.Ok((col, totals[1, colname], colname, denom_col, denom_total, atol, digits))
+    return Try.Ok((col, colname, denom_col, denom_total, atol, digits))
+end
+
+function _calculate_totals!(
+        totals_dict::Dict,
+        col::Vector{T},
+        colname::String,
+    ) where {T <: Union{<:Union{<:Missing, <:Integer}, <:Integer}}
+    calculated_total = sum(skipmissing(col))
+    totals_dict[colname] = calculated_total
+    return nothing
+end
+
+function _calculate_totals!(
+        totals_dict::Dict,
+        col::Vector{T},
+        colname::String,
+        denom_col::Vector{C},
+        denom_total,
+        atol = 0.1,
+        digits = 1
+    ) where {
+        T <: Union{<:Union{<:Missing, <:AbstractFloat}, <:AbstractFloat},
+        C <: Union{<:Union{<:Missing, <:Integer}, <:Integer},
+    }
+    calculated_total = round(sum(skipmissing(col .* denom_col)) / denom_total; digits = digits)
+    totals_dict[colname] = calculated_total
+    return nothing
+end
+
+function totals_check(
+        totals::DataFrameRow,
+        calculated_totals::Dict,
+        column::Symbol = :states_ut
+    )
+    errors_dict = OrderedDict{AbstractString, NamedTuple{(:provided, :calculated)}}()
+
+    for colname in names(totals)
+        provided_total = totals[colname]
+        calculated_total = calculated_totals[colname]
+        if provided_total != calculated_total
+            errors_dict[colname] = (provided_total, calculated_total)
+        end
+    end
+
+    if !isempty(errors_dict)
+        return Try.Err("There were discrepancies in the totals calculated and those provided in the data: $errors_dict")
+    end
+
+    return Try.Ok(nothing)
 end
 
 """
