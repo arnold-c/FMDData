@@ -1,11 +1,13 @@
-using CSV: read
+using DrWatson: datadir
+using CSV: read, write
 using DataFrames: DataFrame, select, subset, filter, rename, transform, transform!, ByRow, Not, Cols, nrow, AsTable, ncol
 using OrderedCollections: OrderedDict
 using StatsBase: mean
 using Try
 using TryExperimental
 
-export load_csv,
+export all_cleaning_steps,
+    load_csv,
     clean_colnames,
     rename_aggregated_pre_post_counts,
     correct_all_state_names,
@@ -27,6 +29,45 @@ public collect_all_present_serotypes,
     correct_state_name
 
 default_allowed_serotypes::Vector{String} = ["o", "a", "asia1"]
+
+function all_cleaning_steps(
+        input_filename::T1,
+        input_dir::T1,
+        output_filename::T1 = "clean_$input_filename",
+        output_dir::T1 = datadir();
+        load_format = DataFrame
+    ) where {T1 <: AbstractString}
+
+    println("\n==========================================================================")
+    println("Cleaning $(joinpath(input_dir, input_filename))\n")
+
+    data = load_csv(
+        input_filename,
+        input_dir,
+        load_format
+    ) |>
+        clean_colnames |>
+        rename_aggregated_pre_post_counts |>
+        correct_all_state_names
+
+    Try.@? check_duplicated_column_names(data)
+    Try.@? check_missing_states(data)
+    Try.@? check_duplicated_states(data)
+    Try.@? check_allowed_serotypes(data)
+    Try.@? check_seroprevalence_as_pct(data)
+    Try.@? check_aggregated_pre_post_counts_exist(data)
+    Try.@? check_pre_post_exists(data)
+    Try.@? has_totals_row(data)
+    Try.@? all_totals_check(data)
+
+    calculated_state_counts_data = calculate_state_counts(data)
+    calculated_state_seroprevs_data = calculate_state_seroprevalence(calculated_state_counts_data)
+    Try.@? check_calculated_values_match_existing(calculated_state_seroprevs_data)
+
+    Try.@? write_csv(output_filename, output_dir, calculated_state_seroprevs_data)
+
+    return Try.Ok("Cleaning of $input_filename successful. Written to $output_filename.")
+end
 
 """
     load_csv(
@@ -788,5 +829,20 @@ function check_calculated_values_match_existing(
         return Try.Err("The following calculated columns have discrepancies relative to the provided columns: $miscalculation_dict")
     end
 
+    return Try.Ok(nothing)
+end
+
+function write_csv(
+        filename::T1,
+        dir::T1,
+        data::DataFrame
+    ) where {T1 <: AbstractString}
+    isdir(dir) || return Err("$dir is not a valid directory")
+    contains(filename, r".*\.csv$") || return Err("$filename is not a csv file")
+
+    write(
+        joinpath(dir, filename),
+        data
+    )
     return Try.Ok(nothing)
 end
