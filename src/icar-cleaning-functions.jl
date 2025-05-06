@@ -28,7 +28,10 @@ export all_cleaning_steps,
     totals_check,
     calculate_state_counts,
     calculate_state_seroprevalence,
-    check_calculated_values_match_existing
+    check_calculated_values_match_existing,
+    select_calculated_totals!,
+    select_calculated_cols!
+
 
 public collect_all_present_serotypes,
     correct_state_name
@@ -996,6 +999,91 @@ function check_calculated_values_match_existing(
     end
     if !isempty(miscalculation_dict)
         return Try.Err("The following calculated columns have discrepancies relative to the provided columns: $miscalculation_dict")
+    end
+
+    return Try.Ok(nothing)
+end
+
+"""
+    select_calculated_totals!(
+    	df::DataFrame,
+    	column::Symbol = :states_ut,
+    	totals_key = "total",
+    	calculated_totals_key = "total calculated"
+    )
+
+If the cleaned data contains both a provided and a calculated totals row then return strip the provided one and rename the calculated.
+"""
+function select_calculated_totals!(
+        df::DataFrame,
+        column::Symbol = :states_ut,
+        totals_key = "total",
+        calculated_totals_key = "total calculated"
+    )
+    has_provided_totals = totals_key in lowercase.(df[!, column])
+    has_calculated_totals = calculated_totals_key in lowercase.(df[!, column])
+    if has_provided_totals && !has_calculated_totals
+        return Try.Ok("Only has provided totals. Continuing")
+    end
+    if has_calculated_totals && !has_provided_totals
+        return Try.Err("Data contains the calculated totals row, but not the provided one")
+    end
+    if !has_provided_totals && !has_calculated_totals
+        return Try.Err("Data contains neither calculated or provided totals rows with a key in the column :$column")
+    end
+
+    provided_totals_rn = findall(lowercase.(df[!, column]) .== totals_key)
+    length(provided_totals_rn) == 1 || return Try.Err("Expected to only find one row titled $totals_key, but instead found $(length(provided_totals_rn))")
+    provided_totals_rn = provided_totals_rn[1]
+
+    calculated_totals_rn = findall(lowercase.(df[!, column]) .== totals_key)
+    length(calculated_totals_rn) == 1 || return Try.Err("Expected to only find one row titled $calculated_totals_key, but instead found $(length(calculated_totals_rn))")
+    calculated_totals_rn = calculated_totals_rn[1]
+
+    popat!(df, provided_totals_rn)
+    df[calculated_totals_rn, column] = titlecase("Total")
+
+    return Try.Ok(nothing)
+end
+
+"""
+	select_calculated_cols!(
+        df::DataFrame,
+        allowed_serotypes = vcat("all", default_allowed_serotypes),
+        reg::Regex
+    )
+
+Checks if the data contains both provided and calculated columns that refer to the same variables. If the calculated column is a % seroprevalence, keep the calculated values. If the calculated column is a column of counts, keep the provided as they are deemed to be more accurate (counts require no calculation and should be a direct recording/reporting of the underlying data). The cleaning function `check_calculated_values_match_existing()` should have been run before to ensure there are no surprises during this processing step i.e., accidentally deleting columns that should be retained.
+"""
+function select_calculated_cols!(
+        df::DataFrame,
+        allowed_serotypes = vcat("all", default_allowed_serotypes),
+        reg::Regex = Regex(
+            "serotype_(?:$(join(allowed_serotypes, "|")))_(count|pct)_(?:pre|post)\$"
+        )
+    )
+    colnames = names(df)
+    all_matched_cols = filter(!isnothing, match.(reg, colnames))
+
+    for col in all_matched_cols
+        colnm = col.match
+        colcap = col.captures
+
+        length(colcap) == 1 || return Try.Err("Only 1 capture group should exist for the match $colnm. Found $(length(colcap)): $colcap.")
+        colcap = colcap[1]
+        colcap in ["count", "pct"] || return Try.Err("The capture group is not expected. It should be one of [\"count\", \"pct\"], but instead it is $colcap")
+
+        calculated_col = colnm * "_calculated"
+        calculated_present = calculated_col in colnames
+
+        if calculated_present && colcap == "count"
+            select!(df, Not(calculated_col))
+        end
+
+        if calculated_present && colcap == "pct"
+            select!(df, Not(colnm))
+            rename!(df, calculated_col => colnm)
+        end
     end
 
     return Try.Ok(nothing)

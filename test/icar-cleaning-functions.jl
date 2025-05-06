@@ -468,4 +468,62 @@ using Try
         )
     end
 
+    @testset "Select totals row" begin
+
+        both_totals_df = DataFrame(
+            "states_ut" => ["a", "Total", "Total calculated"],
+            "vals" => [1, 2, 3]
+        )
+
+        @test isequal(
+            select_calculated_totals!(both_totals_df),
+            Try.Ok(nothing)
+        )
+
+        @test isequal(
+            both_totals_df,
+            DataFrame(
+                "states_ut" => ["a", "Total"],
+                "vals" => [1, 3]
+            )
+        )
+
+    end
+
+    @testset "Select serotype colums" begin
+
+        df = DataFrame(
+            "states_ut" => ["a", "b", "c", "total"],
+            "serotype_all_count_pre" => [10, 10, 10, 30],
+            "serotype_all_count_post" => [10, 10, 10, 30],
+            "serotype_a_count_pre" => [2, 1, 1, 4],
+            "serotype_a_count_post" => [8, 6, 5, 19],
+            "serotype_a_pct_pre" => [20.0, 10.0, 10.0, 13.3],
+            "serotype_a_pct_post" => [80.0, 60.0, 50.0, 63.3],
+            "serotype_a_count_pre_calculated" => [2, 1, 1, 4],
+            "serotype_a_pct_pre_calculated" => [20.0, 10.0, 10.0, 13.3],
+        )
+
+        out = select_calculated_cols!(df)
+
+        @test isequal(
+            out,
+            Try.Ok(nothing)
+        )
+
+        @test isequal(
+            names(df),
+            [
+                "states_ut",
+                "serotype_all_count_pre",
+                "serotype_all_count_post",
+                "serotype_a_count_pre",
+                "serotype_a_count_post",
+                "serotype_a_pct_post",
+                "serotype_a_pct_pre",
+            ]
+        )
+
+    end
+
 end
