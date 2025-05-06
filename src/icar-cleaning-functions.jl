@@ -203,13 +203,13 @@ function correct_all_state_names(
         states_dict::Dict = FMDData.states_dict
     )
 
-    return Try.Ok(
-        transform(
-            df,
-            column => ByRow(s -> correct_state_name(s, states_dict));
-            renamecols = false
-        )
+    corrected_df = transform(
+        df,
+        column => ByRow(s -> Try.unwrap(correct_state_name(s, states_dict)));
+        renamecols = false
     )
+
+    return Try.Ok(corrected_df)
 end
 
 """
@@ -227,14 +227,14 @@ function correct_state_name(
     possible_state_values = values(states_dict)
 
     if in(input_name, possible_state_values) || lowercase(input_name) == "total"
-        return input_name
+        return Try.Ok(input_name)
     end
 
     possible_state_keys = keys(states_dict)
     in(input_name, possible_state_keys) ||
         return Try.Err("State name `$input_name` doesn't exist in current dictionary match. Confirm if this is a new state or uncharacterized misspelling")
 
-    return states_dict[input_name]
+    return Try.Ok(states_dict[input_name])
 end
 
 """
