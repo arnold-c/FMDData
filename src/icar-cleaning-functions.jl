@@ -89,9 +89,6 @@ function all_cleaning_steps(
 
     calculated_state_counts_data = calculate_state_counts(corrected_state_name_data)
     calculated_state_seroprevs_data = calculate_state_seroprevalence(calculated_state_counts_data)
-    log_try_error(check_calculated_values_match_existing(calculated_state_seroprevs_data))
-
-    log_try_error(write_csv(output_filename, output_dir, calculated_state_seroprevs_data))
 
     Try.@? check_calculated_values_match_existing(calculated_state_seroprevs_data)
 
@@ -232,7 +229,7 @@ function correct_state_name(
 
     possible_state_keys = keys(states_dict)
     in(input_name, possible_state_keys) ||
-        return error("State name `$input_name` doesn't exist in current dictionary match. Confirm if this is a new state or uncharacterized misspelling")
+        return Try.Err("State name `$input_name` doesn't exist in current dictionary match. Confirm if this is a new state or uncharacterized misspelling")
 
     return states_dict[input_name]
 end

@@ -23,7 +23,7 @@ using Try
 
         filename = "test-data.csv"
 
-        data = load_csv(
+        data = Try.@? load_csv(
             filename,
             dir,
             DataFrame
@@ -75,12 +75,12 @@ using Try
 
     dir = "./"
     filename = "test-data.csv"
-    data = load_csv(
+    data = Try.@? load_csv(
         filename,
         dir,
         DataFrame
     )
-    cleaned_colname_data = clean_colnames(data)
+    cleaned_colname_data = Try.@? clean_colnames(data)
 
     @testset "Column name cleaning" begin
         @test isequal(
@@ -109,7 +109,7 @@ using Try
         )
     end
 
-    renamed_aggregated_counts_df = rename_aggregated_pre_post_counts(cleaned_colname_data)
+    renamed_aggregated_counts_df = Try.@? rename_aggregated_pre_post_counts(cleaned_colname_data)
     @testset "Rename aggregated Pre/Post counts" begin
         @test isequal(
             names(renamed_aggregated_counts_df),
@@ -127,7 +127,7 @@ using Try
         )
     end
 
-    cleaned_states_data = correct_all_state_names(
+    cleaned_states_data = Try.@? correct_all_state_names(
         renamed_aggregated_counts_df,
         :states_ut,
         FMDData.states_dict
