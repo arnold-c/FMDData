@@ -595,7 +595,15 @@ function has_totals_row(
 end
 
 """
-    all_totals_check(df::DataFrame, totals_key = "total")
+    all_totals_check(
+        df::DataFrame,
+        column::Symbol = :states_ut,
+        totals_key = "total",
+        allowed_serotypes = vcat("all", default_allowed_serotypes),
+        reg::Regex,
+        atol = 0.1,
+        digits = 1
+    )
 
 Check if all provided values in the provided totals row are correct. If the column is a count, then calculate an unweighted sum. If the column is the seroprevalence, calculated the sum weighted by the relevant counts (pre- or post-vaccination counts).
 """
@@ -604,7 +612,7 @@ function all_totals_check(
         column::Symbol = :states_ut,
         totals_key = "total",
         allowed_serotypes = vcat("all", default_allowed_serotypes),
-        reg = Regex("serotype_(?|$(join(allowed_serotypes, "|")))_(count|pct)_(pre|post)\$");
+        reg::Regex = Regex("serotype_(?|$(join(allowed_serotypes, "|")))_(count|pct)_(pre|post)\$");
         atol = 0.1,
         digits = 1
     )
