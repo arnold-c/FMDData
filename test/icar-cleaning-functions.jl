@@ -488,6 +488,76 @@ using Try
             )
         )
 
+        both_totals_unordered_df = DataFrame(
+            "states_ut" => ["a", "Total calculated", "Total"],
+            "vals" => [1, 3, 2]
+        )
+
+        @test isequal(
+            select_calculated_totals!(both_totals_unordered_df),
+            Try.Ok(nothing)
+        )
+
+        @test isequal(
+            both_totals_unordered_df,
+            DataFrame(
+                "states_ut" => ["a", "Total"],
+                "vals" => [1, 3]
+            )
+        )
+
+        @test isequal(
+            select_calculated_totals!(
+                DataFrame(
+                    "states_ut" => ["total", "total"],
+                    "vals" => [1, 2]
+                )
+            ),
+            Try.Err("Expected to only find one row titled \"total\", but instead found 2")
+        )
+
+        @test isequal(
+            select_calculated_totals!(
+                DataFrame(
+                    "states_ut" => ["total calculated", "total calculated"],
+                    "vals" => [1, 2]
+                )
+            ),
+            Try.Err("Expected to only find one row titled \"total calculated\", but instead found 2")
+        )
+
+        @test isequal(
+            select_calculated_totals!(
+                DataFrame(
+                    "states_ut" => ["a", "Total"],
+                    "vals" => [1, 2]
+                )
+            ),
+            Try.Ok("Only has provided totals. Continuing")
+        )
+
+        @test isequal(
+            select_calculated_totals!(
+                DataFrame(
+                    "states_ut" => ["a", "Total calculated"],
+                    "vals" => [1, 3]
+                )
+            ),
+            Try.Err("Data contains the calculated totals row, but not the provided one")
+        )
+
+        @test isequal(
+            select_calculated_totals!(
+                DataFrame(
+                    "states_ut" => ["a", "b"],
+                    "alterative_column" => ["total", "total calculated"],
+                    "vals" => [1, 2]
+                )
+            ),
+            Try.Err("Data contains neither calculated or provided totals rows with a key in the column :states_ut")
+        )
+
+
     end
 
     @testset "Select serotype colums" begin

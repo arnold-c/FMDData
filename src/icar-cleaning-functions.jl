@@ -1020,8 +1020,22 @@ function select_calculated_totals!(
         totals_key = "total",
         calculated_totals_key = "total calculated"
     )
-    has_provided_totals = totals_key in lowercase.(df[!, column])
-    has_calculated_totals = calculated_totals_key in lowercase.(df[!, column])
+    provided_totals_rn = findall(lowercase.(df[!, column]) .== totals_key)
+    length(provided_totals_rn) <= 1 || return Try.Err("Expected to only find one row titled \"$totals_key\", but instead found $(length(provided_totals_rn))")
+
+    calculated_totals_rn = findall(lowercase.(df[!, column]) .== calculated_totals_key)
+    length(calculated_totals_rn) <= 1 || return Try.Err("Expected to only find one row titled \"$calculated_totals_key\", but instead found $(length(calculated_totals_rn))")
+
+    has_provided_totals = false
+    if length(provided_totals_rn) == 1
+        provided_totals_rn = provided_totals_rn[1]
+        has_provided_totals = true
+    end
+    has_calculated_totals = false
+    if length(calculated_totals_rn) == 1
+        calculated_totals_rn = calculated_totals_rn[1]
+        has_calculated_totals = true
+    end
     if has_provided_totals && !has_calculated_totals
         return Try.Ok("Only has provided totals. Continuing")
     end
@@ -1032,16 +1046,9 @@ function select_calculated_totals!(
         return Try.Err("Data contains neither calculated or provided totals rows with a key in the column :$column")
     end
 
-    provided_totals_rn = findall(lowercase.(df[!, column]) .== totals_key)
-    length(provided_totals_rn) == 1 || return Try.Err("Expected to only find one row titled $totals_key, but instead found $(length(provided_totals_rn))")
-    provided_totals_rn = provided_totals_rn[1]
 
-    calculated_totals_rn = findall(lowercase.(df[!, column]) .== totals_key)
-    length(calculated_totals_rn) == 1 || return Try.Err("Expected to only find one row titled $calculated_totals_key, but instead found $(length(calculated_totals_rn))")
-    calculated_totals_rn = calculated_totals_rn[1]
-
-    popat!(df, provided_totals_rn)
     df[calculated_totals_rn, column] = titlecase("Total")
+    popat!(df, provided_totals_rn)
 
     return Try.Ok(nothing)
 end
