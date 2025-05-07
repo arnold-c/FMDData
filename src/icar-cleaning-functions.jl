@@ -205,9 +205,15 @@ function correct_all_state_names(
 
     corrected_df = transform(
         df,
-        column => ByRow(s -> Try.unwrap(correct_state_name(s, states_dict)));
+        column => ByRow(s -> Try.and_then(String, correct_state_name(s, states_dict)));
         renamecols = false
     )
+
+    name_errors_idxs = isa.(corrected_df[!, column], Try.Err)
+    if sum(name_errors_idxs) > 0
+        name_errors = convert(Vector{Try.Err}, corrected_df[name_errors_idxs, column])
+        return Try.Err(_combine_error_messages(name_errors))
+    end
 
     return Try.Ok(corrected_df)
 end
@@ -232,7 +238,7 @@ function correct_state_name(
 
     possible_state_keys = keys(states_dict)
     in(input_name, possible_state_keys) ||
-        return Try.Err("State name `$input_name` doesn't exist in current dictionary match. Confirm if this is a new state or uncharacterized misspelling")
+        return Try.Err("State name `$input_name` doesn't exist in current dictionary match. Confirm if this is a new state or uncharacterized misspelling.")
 
     return Try.Ok(states_dict[input_name])
 end

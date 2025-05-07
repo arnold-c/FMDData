@@ -139,11 +139,26 @@ using Try
         end
 
         @test isequal(
+            correct_all_state_names(
+                DataFrame(
+                    "states_ut" => ["ab", "b", "c", "d"]
+                ),
+                :states_ut,
+                Dict(
+                    "a" => "a_new",
+                    "b" => "b_new",
+                    "c" => "c_new"
+                )
+            ),
+            Try.Err("State name `ab` doesn't exist in current dictionary match. Confirm if this is a new state or uncharacterized misspelling. State name `d` doesn't exist in current dictionary match. Confirm if this is a new state or uncharacterized misspelling.")
+        )
+
+        @test isequal(
             FMDData.correct_state_name(
                 "New State",
                 FMDData.states_dict
             ),
-            Try.Err("State name `New State` doesn't exist in current dictionary match. Confirm if this is a new state or uncharacterized misspelling")
+            Try.Err("State name `New State` doesn't exist in current dictionary match. Confirm if this is a new state or uncharacterized misspelling.")
         )
     end
 
