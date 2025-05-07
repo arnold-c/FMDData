@@ -1,2 +1,4 @@
-┌ Error: There were discrepancies in the totals calculated and those provided in the data: OrderedDict{AbstractString, NamedTuple{(:provided, :calculated)}}("serotype_all_count_pre" => (provided = 44860, calculated = 44796), "serotype_o_pct_pre" => (provided = 30.9, calculated = 31.0))
-└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/icar-cleaning-functions.jl:73
+┌ Warning: There were discrepancies in the totals calculated and those provided in the data: OrderedCollections.OrderedDict{AbstractString, NamedTuple{(:provided, :calculated)}}("serotype_all_count_pre" => (provided = 44860, calculated = 44796), "serotype_o_pct_pre" => (provided = 30.9, calculated = 31.0))
+└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/utils.jl:16
+┌ Warning: Using calculated totals
+└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/icar-cleaning-functions.jl:1106
