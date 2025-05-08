@@ -12,5 +12,6 @@ import Aqua
     #     Aqua.test_all(FMDData)
     # end
 
-    include("../test/icar-cleaning-functions.jl")
+    include("./icar-cleaning-functions.jl")
+    # include("./icar-processing-functions.jl")
 end
