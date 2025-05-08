@@ -48,3 +48,42 @@ add_sample_year!(
     2022
 )
 
+#%%
+nadcp_2_2022 = @? load_csv(
+    "clean_2022_Annual-Report_NADCP-2.csv",
+    datadir("icar-seroprevalence")
+)
+
+nadcp_2_2021 = @? load_csv(
+    "clean_2021_Annual-Report_NADCP-2.csv",
+    datadir("icar-seroprevalence")
+)
+
+#%%
+n2022 = deepcopy(nadcp_2_2022)
+n2021 = deepcopy(nadcp_2_2021)
+
+add_sample_year!(
+    n2022,
+    n2021,
+    2022,
+    2021
+)
+
+n2022
+
+#%%
+calculate_state_seroprevalence(n2022)
+
+match(
+    Regex("serotype_(?:$(join(FMDData.default_allowed_serotypes, "|")))_count_(pre|post)"),
+    "serotype_o_count_pre_calculated"
+)
+
+
+#%%
+reg = Regex("serotype_(?:$(join(FMDData.default_allowed_serotypes, "|")))_count_(pre|post).*")
+replace(
+    "serotype_o_count_pre",
+    reg => s"serotype_all_count_\1"
+)

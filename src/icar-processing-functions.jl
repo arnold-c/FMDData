@@ -34,3 +34,76 @@ function add_sample_year!(
     return Try.Ok(nothing)
 end
 
+function add_sample_year!(
+        later_df::DataFrame,
+        initial_df::DataFrame,
+        later_year::I,
+        initial_year::I;
+        year_column = :sample_year,
+        statename_column = :states_ut,
+        allowed_serotypes = vcat("all", default_allowed_serotypes),
+        reg::Regex = Regex(
+            "serotype_(?:$(join(allowed_serotypes, "|")))_count_(pre|post).*"
+        ),
+        digits = 1
+
+    ) where {I <: Integer}
+    later_colnames = names(later_df)
+    initial_colnames = names(initial_df)
+    common_colnames = intersect(later_colnames, initial_colnames)
+    common_states = intersect(
+        later_df[!, statename_column],
+        initial_df[!, statename_column]
+    )
+
+    initial_df[!, year_column] .= initial_year
+    later_df[!, year_column] .= later_year
+
+    common_count_colnames = filter(s -> contains(s, reg), common_colnames)
+
+
+    for col_name in common_count_colnames
+        for state_name in common_states
+            later_state_idx = findfirst(
+                s -> s .== state_name,
+                later_df[!, statename_column]
+            )
+            initial_state_idx = findfirst(
+                s -> s .== state_name,
+                initial_df[!, statename_column]
+            )
+            ismissing(later_df[later_state_idx, col_name]) &&
+                return Try.Err("State $state_name and column $col_name value is missing in the follow-up dataset.")
+            initial_value = if ismissing(initial_df[initial_state_idx, col_name])
+                convert(eltype(initial_df[!, col_name]), 0)
+            else
+                initial_df[initial_state_idx, col_name]
+            end
+
+            later_df[later_state_idx, col_name] = later_df[later_state_idx, col_name] - initial_value
+        end
+    end
+
+    pct_reg = Regex(
+        replace(
+            reg.pattern,
+            r"(.*)all|(.*)" => s"\1\2",
+        )
+    )
+    @show pct_reg
+
+    transform!(
+        later_df,
+        AsTable(Cols(pct_reg)) .=> (
+            t -> _calculate_state_seroprevalence(
+                t,
+                later_df;
+                reg = pct_reg,
+                digits = digits
+            )
+        ) => AsTable;
+        renamecols = true
+    )
+
+    return Try.Ok(nothing)
+end

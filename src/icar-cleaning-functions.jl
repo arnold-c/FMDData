@@ -991,14 +991,16 @@ A wrapper function around the internal `_calculate_state_seroprevalence()` funct
 function calculate_state_seroprevalence(
         df::DataFrame,
         allowed_serotypes::T = default_allowed_serotypes;
+        reg = Regex("serotype_(?:$(join(allowed_serotypes, "|")))_count_(pre|post).*"),
         digits = 1
     ) where {T <: AbstractVector{<:AbstractString}}
-    reg = Regex("serotype_($(join(allowed_serotypes, "|")))_count_(pre|post)\$")
     return hcat(
         df,
         select(
             df,
-            AsTable(Cols(reg)) .=> (t -> _calculate_state_seroprevalence(t, df; digits = 1)) => AsTable;
+            AsTable(Cols(reg)) .=> (
+                t -> _calculate_state_seroprevalence(t, df; reg = reg, digits = digits)
+            ) => AsTable;
             renamecols = true
         )
     )
@@ -1010,9 +1012,14 @@ end
 An internal function to handle the calculation of the state/serotype counts based upon the provided state/serotype seroprevalence values and total state counts.
 Because DataFrames handles tables as named tuples, we can extract information about the columns being passed from the regex selection and then use substitution strings to collect a view of the correct column of total state counts.
 """
-function _calculate_state_seroprevalence(table, original_df; digits = 1)
+function _calculate_state_seroprevalence(
+        table,
+        original_df;
+        reg = Regex("serotype_(?:$(join(allowed_serotypes, "|")))_count_(pre|post).*"),
+        digits = 1
+    )
     str_keys = String.(keys(table))
-    timing = replace.(str_keys, r"serotype_.*_count_(pre|post)$" => s"serotype_all_count_\1")
+    timing = replace.(str_keys, reg => s"serotype_all_count_\1")
     vals = map(
         ((serotype_count, agg_counts_col),) -> round.((serotype_count ./ @view(original_df[!, agg_counts_col])) .* 100; digits = digits),
         zip(table, timing)
