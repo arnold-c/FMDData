@@ -1,4 +1,4 @@
-using DataFrames: DataFrame, DataFrameRow, select, select!, subset, filter, rename, rename!, transform, transform!, ByRow, Not, Cols, nrow, AsTable, ncol
+using DataFrames: AbstractDataFrame, DataFrame, DataFrameRow, select, select!, subset, filter, rename, rename!, transform, transform!, ByRow, Not, Cols, nrow, AsTable, ncol
 using OrderedCollections: OrderedDict
 using StatsBase: mean
 using Try
@@ -26,19 +26,17 @@ function add_report_year!(
 end
 
 function add_sample_year!(
-        df::DataFrame,
-        year::I;
+        df_year_pair::Pair{T, I};
         year_column = :sample_year
-    ) where {I <: Integer}
+    ) where {T <: AbstractDataFrame, I <: Integer}
+    df, year = df_year_pair
     df[!, year_column] .= year
     return Try.Ok(nothing)
 end
 
 function add_sample_year!(
-        later_df::DataFrame,
-        initial_df::DataFrame,
-        later_year::I,
-        initial_year::I;
+        later_df_year_pair::Pair{T, I},
+        initial_df_year_pair::Pair{T, I};
         year_column = :sample_year,
         statename_column = :states_ut,
         allowed_serotypes = vcat("all", default_allowed_serotypes),
@@ -47,7 +45,10 @@ function add_sample_year!(
         ),
         digits = 1
 
-    ) where {I <: Integer}
+    ) where {T <: AbstractDataFrame, I <: Integer}
+    initial_df, initial_year = initial_df_year_pair
+    later_df, later_year = later_df_year_pair
+
     later_colnames = names(later_df)
     initial_colnames = names(initial_df)
     common_colnames = intersect(later_colnames, initial_colnames)
