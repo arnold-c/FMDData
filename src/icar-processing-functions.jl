@@ -49,6 +49,8 @@ function add_sample_year!(
     initial_df, initial_year = initial_df_year_pair
     later_df, later_year = later_df_year_pair
 
+    initial_year < later_year || return Try.Err("The initial year provided ($initial_year) is not before the later year ($later_year)")
+
     later_colnames = names(later_df)
     initial_colnames = names(initial_df)
     common_colnames = intersect(later_colnames, initial_colnames)
