@@ -1,4 +1,4 @@
-using DataFrames: AbstractDataFrame, DataFrame, DataFrameRow, select, select!, subset, filter, rename, rename!, transform, transform!, ByRow, Not, Cols, nrow, AsTable, ncol
+using DataFrames: AbstractDataFrame, DataFrame, DataFrameRow, select, select!, subset, subset!, filter, rename, rename!, transform, transform!, ByRow, Not, Cols, nrow, AsTable, ncol
 using OrderedCollections: OrderedDict
 using StatsBase: mean
 using Try
@@ -6,7 +6,8 @@ using TryExperimental
 
 export add_round_name!,
     add_report_year!,
-    add_sample_year!
+    add_sample_year!,
+    infer_later_year_values!
 
 function add_round_name!(
         df::DataFrame,
@@ -48,9 +49,9 @@ function add_sample_year!(
     return Try.Ok(nothing)
 end
 
-function add_sample_year!(
-        later_df_year_pair::Pair{T, I},
-        initial_df_year_pair::Pair{T, I};
+function infer_later_year_values!(
+        later_df::T,
+        initial_df::T;
         year_column = :sample_year,
         statename_column = :states_ut,
         allowed_serotypes = vcat("all", default_allowed_serotypes),
@@ -59,12 +60,7 @@ function add_sample_year!(
         ),
         digits = 1
 
-    ) where {T <: AbstractDataFrame, I <: Integer}
-    initial_df, initial_year = initial_df_year_pair
-    later_df, later_year = later_df_year_pair
-
-    initial_year < later_year || return Try.Err("The initial year provided ($initial_year) is not before the later year ($later_year)")
-
+    ) where {T <: AbstractDataFrame}
     later_colnames = names(later_df)
     initial_colnames = names(initial_df)
     common_colnames = intersect(later_colnames, initial_colnames)
@@ -142,15 +138,7 @@ function add_sample_year!(
     )
     select_calculated_cols!(later_df)
 
-    initial_df[!, year_column] .= initial_year
-    later_df[!, year_column] .= later_year
-
-
-    # transform!(
-    #     later_df,
-    #     Cols(pct_reg) => ByRow(p => replace(p, NaN => missing))
-    # )
-
+    _remove_states_without_data!(later_df)
 
     return Try.Ok(nothing)
 end
