@@ -574,8 +574,8 @@ function check_seroprevalence_as_pct(
     )
     prop_cols_dict = OrderedDict{Symbol, AbstractFloat}()
     for (name, vals) in pairs(eachcol(select(df, Cols(reg))))
-        if round(mean(skipmissing(vals)) / 100; digits = 1) < 0.1
-            prop_cols_dict[name] = round(mean(skipmissing(vals)); digits = 2)
+        if round(mean(skip_missing_and_nan(vals)) / 100; digits = 1) < 0.1
+            prop_cols_dict[name] = round(mean(skip_missing_and_nan(vals)); digits = 2)
         end
     end
     if !isempty(prop_cols_dict)
@@ -811,7 +811,7 @@ function _calculate_totals!(
         col::Vector{T},
         colname::String,
     ) where {T <: Union{<:Union{<:Missing, <:Integer}, <:Integer}}
-    calculated_total = sum(skipmissing(col))
+    calculated_total = sum(skip_missing_and_nan(col))
     totals_dict[colname] = calculated_total
     return nothing
 end
@@ -851,7 +851,10 @@ function _calculate_totals!(
         T <: Union{<:Union{<:Missing, <:AbstractFloat}, <:AbstractFloat},
         C <: Union{<:Union{<:Missing, <:Integer}, <:Integer},
     }
-    calculated_total = round(sum(skipmissing(col .* denom_col)) / denom_total; digits = digits)
+    calculated_total = round(
+        sum(skip_missing_and_nan(col .* denom_col)) / denom_total;
+        digits = digits
+    )
     totals_dict[colname] = calculated_total
     return nothing
 end
@@ -936,7 +939,9 @@ function _totals_check!(
         T <: Union{<:Union{<:Missing, <:AbstractFloat}, <:AbstractFloat},
         C <: Union{<:Union{<:Missing, <:Integer}, <:Integer},
     }
-    calculated_total = round(sum(skipmissing(col .* denom_col)) / denom_total; digits = digits)
+    calculated_total = round(
+        sum(skip_missing_and_nan(col .* denom_col)) / denom_total; digits = digits
+    )
     if !isapprox(calculated_total, provided_total; atol = atol)
         errors_dict[colname] = (provided_total, calculated_total)
     end
