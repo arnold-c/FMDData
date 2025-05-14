@@ -59,11 +59,7 @@ function add_sample_year!(
         initial_df[!, statename_column]
     )
 
-    initial_df[!, year_column] .= initial_year
-    later_df[!, year_column] .= later_year
-
     common_count_colnames = filter(s -> contains(s, reg), common_colnames)
-
 
     for col_name in common_count_colnames
         for state_name in common_states
@@ -75,8 +71,10 @@ function add_sample_year!(
                 s -> s .== state_name,
                 initial_df[!, statename_column]
             )
+
             ismissing(later_df[later_state_idx, col_name]) &&
                 return Try.Err("State $state_name and column $col_name value is missing in the follow-up dataset.")
+
             initial_value = if ismissing(initial_df[initial_state_idx, col_name])
                 convert(eltype(initial_df[!, col_name]), 0)
             else
@@ -87,13 +85,27 @@ function add_sample_year!(
         end
     end
 
+    # Only calculate for count columns
+    totals_dict = _log_try_error(calculate_all_totals(later_df; reg = reg))
+    totals_check_state = all_totals_check(totals_dict, later_df; reg = reg)
+
+    if Try.iserr(totals_check_state)
+        push!(
+            later_df,
+            merge(Dict("states_ut" => "Total calculated"), totals_dict);
+            promote = true,
+            cols = :subset
+        )
+        select_calculated_totals!(later_df)
+    end
+
+    # Calculate state serotype pct values
     pct_reg = Regex(
         replace(
             reg.pattern,
             r"(.*)all|(.*)" => s"\1\2",
         )
     )
-    @show pct_reg
 
     transform!(
         later_df,
@@ -107,6 +119,24 @@ function add_sample_year!(
         ) => AsTable;
         renamecols = true
     )
+    rename!(
+        n -> replace(
+            n,
+            r"(.*_calculated)_calculated" => s"\1"
+        ),
+        later_df,
+    )
+    select_calculated_cols!(later_df)
+
+    initial_df[!, year_column] .= initial_year
+    later_df[!, year_column] .= later_year
+
+
+    # transform!(
+    #     later_df,
+    #     Cols(pct_reg) => ByRow(p => replace(p, NaN => missing))
+    # )
+
 
     return Try.Ok(nothing)
 end
