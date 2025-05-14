@@ -636,38 +636,38 @@ end
 Check if all provided values in the provided totals row are correct. If the column is a count, then calculate an unweighted sum. If the column is the seroprevalence, calculated the sum weighted by the relevant counts (pre- or post-vaccination counts).
 """
 function all_totals_check(
-        df::DataFrame,
+        df::DataFrame;
         column::Symbol = :states_ut,
         totals_key = "total",
         allowed_serotypes = vcat("all", default_allowed_serotypes),
-        reg::Regex = Regex("serotype_(?|$(join(allowed_serotypes, "|")))_(count|pct)_(pre|post)\$");
+        reg::Regex = Regex("serotype_(?|$(join(allowed_serotypes, "|")))_(count|pct)_(pre|post)\$"),
         atol = 0.1,
         digits = 1
     )
 
     totals_dict = Try.@? calculate_all_totals(
-        df,
-        column,
-        totals_key,
-        allowed_serotypes,
-        reg;
+        df;
+        column = column,
+        totals_key = totals_key,
+        allowed_serotypes = allowed_serotypes,
+        reg = reg,
         atol = atol,
         digits = digits
     )
 
     return all_totals_check(
         totals_dict,
-        df,
-        column,
-        totals_key,
-        allowed_serotypes,
-        reg
+        df;
+        column = column,
+        totals_key = totals_key,
+        allowed_serotypes = allowed_serotypes,
+        reg = reg
     )
 end
 
 function all_totals_check(
         totals_dict::Dict,
-        df::DataFrame,
+        df::DataFrame;
         column::Symbol = :states_ut,
         totals_key = "total",
         allowed_serotypes = vcat("all", default_allowed_serotypes),
@@ -694,11 +694,11 @@ function all_totals_check(
 end
 
 function calculate_all_totals(
-        df::DataFrame,
+        df::DataFrame;
         column::Symbol = :states_ut,
         totals_key = "total",
         allowed_serotypes = vcat("all", default_allowed_serotypes),
-        reg = Regex("serotype_(?|$(join(allowed_serotypes, "|")))_(count|pct)_(pre|post)\$");
+        reg::Regex = Regex("serotype_(?|$(join(allowed_serotypes, "|")))_(count|pct)_(pre|post)\$"),
         atol = 0.1,
         digits = 1
     )
