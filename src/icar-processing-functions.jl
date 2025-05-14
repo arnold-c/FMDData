@@ -25,6 +25,20 @@ function add_report_year!(
     return Try.Ok(nothing)
 end
 
+function add_sample_year!(df_year_pairs...)
+    sample_year_errs = OrderedDict()
+    for pair in df_year_pairs
+        res = add_sample_year!(pair)
+        if Try.iserr(res)
+            push!(sample_year_errs, res)
+        end
+    end
+    if !isempty(sample_year_errs)
+        Try.Err(_combine_error_messages(sample_year_errs))
+    end
+    return Try.Ok(nothing)
+end
+
 function add_sample_year!(
         df_year_pair::Pair{T, I};
         year_column = :sample_year
