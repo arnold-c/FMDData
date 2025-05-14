@@ -154,3 +154,24 @@ function add_sample_year!(
 
     return Try.Ok(nothing)
 end
+
+function _remove_states_without_data!(
+        df;
+        column::Symbol = :states_ut,
+        allowed_serotypes = vcat("all", default_allowed_serotypes),
+        reg::Regex = Regex("serotype_(?|$(join(default_allowed_serotypes, "|")))_(?|count|pct)_(?|pre|post).*")
+    )
+    states = String[]
+    for row in eachrow(df)
+        state = row[column]
+        row_total = sum(skip_missing_and_nan(row[Cols(reg)]))
+        if row_total == 0.0
+            push!(states, state)
+        end
+    end
+    subset!(
+        df,
+        column => ByRow(c -> !(c in states)),
+    )
+    return nothing
+end
