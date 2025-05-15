@@ -30,7 +30,8 @@ export all_cleaning_steps,
     calculate_state_seroprevalence,
     check_calculated_values_match_existing,
     select_calculated_totals!,
-    select_calculated_cols!
+    select_calculated_cols!,
+    write_csv
 
 
 public collect_all_present_serotypes,

@@ -202,5 +202,5 @@ function _remove_states_without_data!(
 end
 
 function combine_round_dfs(dfs::DataFrame...)
-    return vcat(dfs...)
+    return Try.Ok(vcat(dfs...))
 end

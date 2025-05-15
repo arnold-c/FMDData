@@ -4,6 +4,8 @@ using DrWatson
 
 using FMDData
 using Try
+using Logging
+using LoggingExtras
 
 # "2019_Annual-Report_A-N-Islands.csv"
 # "2019_Annual-Report_Andhra-Pradesh.csv"
@@ -38,57 +40,162 @@ using Try
 # "2022_Annual-Report_Organized-farms.csv"
 
 #%%
-cumulative_nadcp_2_2022 = @? load_csv(
-    "clean_2022_Annual-Report_NADCP-2.csv",
-    icar_cleaned_dir()
-)
+icar_processed_logdir = icar_processed_dir("logfiles")
+isdir(icar_processed_logdir) || mkpath(icar_processed_logdir)
+logfile = joinpath(icar_processed_logdir, "nadcp_2.log")
+logger = FileLogger(logfile)
 
-nadcp_2_2021 = @? load_csv(
-    "clean_2021_Annual-Report_NADCP-2.csv",
-    icar_cleaned_dir()
-)
+with_logger(logger) do
+    cumulative_nadcp_2_2022 = @? load_csv(
+        "clean_2022_Annual-Report_NADCP-2.csv",
+        icar_cleaned_dir()
+    )
 
-nadcp_2_2022 = @? infer_later_year_values(
-    cumulative_nadcp_2_2022,
-    nadcp_2_2021,
-)
+    nadcp_2_2021 = FMDData._log_try_error(
+        load_csv(
+            "clean_2021_Annual-Report_NADCP-2.csv",
+            icar_cleaned_dir()
+        )
+    )
 
-add_sample_year!(
-    cumulative_nadcp_2_2022 => "Combined",
-    nadcp_2_2022 => 2022,
-    nadcp_2_2021 => 2021
-)
+    nadcp_2_2022 = FMDData._log_try_error(
+        infer_later_year_values(
+            cumulative_nadcp_2_2022,
+            nadcp_2_2021,
+        )
+    )
 
-add_report_year!(
-    cumulative_nadcp_2_2022 => 2022,
-    nadcp_2_2022 => 2022,
-    nadcp_2_2021 => 2021
-)
+    FMDData._log_try_error(
+        add_sample_year!(
+            cumulative_nadcp_2_2022 => "Combined",
+            nadcp_2_2022 => 2022,
+            nadcp_2_2021 => 2021
+        )
+    )
 
-add_round_name!(
-    cumulative_nadcp_2_2022 => "NADCP 2",
-    nadcp_2_2022 => "NADCP 2",
-    nadcp_2_2021 => "NADCP 2"
-)
+    FMDData._log_try_error(
+        add_report_year!(
+            cumulative_nadcp_2_2022 => 2022,
+            nadcp_2_2022 => 2022,
+            nadcp_2_2021 => 2021
+        )
+    )
 
-add_test_type!(
-    cumulative_nadcp_2_2022 => "SPCE",
-    nadcp_2_2022 => "SPCE",
-    nadcp_2_2021 => "SPCE"
-)
+    FMDData._log_try_error(
+        add_round_name!(
+            cumulative_nadcp_2_2022 => "NADCP 2",
+            nadcp_2_2022 => "NADCP 2",
+            nadcp_2_2021 => "NADCP 2"
+        )
+    )
 
-add_test_threshold!(
-    cumulative_nadcp_2_2022 => "1.65 log10 @ 50% inhibition",
-    nadcp_2_2022 => "1.65 log10 @ 50% inhibition",
-    nadcp_2_2021 => "1.65 log10 @ 50% inhibition"
-)
+    FMDData._log_try_error(
+        add_test_type!(
+            cumulative_nadcp_2_2022 => "SPCE",
+            nadcp_2_2022 => "SPCE",
+            nadcp_2_2021 => "SPCE"
+        )
+    )
 
-nadcp_2 = combine_round_dfs(
-    cumulative_nadcp_2_2022, nadcp_2_2022, nadcp_2_2021
-)
+    FMDData._log_try_error(
+        add_test_threshold!(
+            cumulative_nadcp_2_2022 => "1.65 log10 @ 35% inhibition",
+            nadcp_2_2022 => "1.65 log10 @ 35% inhibition",
+            nadcp_2_2021 => "1.65 log10 @ 35% inhibition"
+        )
+    )
 
-FMDData.write_csv("nadcp_2_2022.csv", icar_processed_dir(), nadcp_2_2022)
-FMDData.write_csv("nadcp_2_2021.csv", icar_processed_dir(), nadcp_2_2021)
-FMDData.write_csv("nadcp_2.csv", icar_processed_dir(), nadcp_2)
+    nadcp_2 = FMDData._log_try_error(
+        combine_round_dfs(
+            cumulative_nadcp_2_2022, nadcp_2_2022, nadcp_2_2021
+        )
+    )
+
+    FMDData._log_try_error(write_csv("nadcp_2_2022.csv", icar_processed_dir(), nadcp_2_2022))
+    FMDData._log_try_error(write_csv("nadcp_2_2021.csv", icar_processed_dir(), nadcp_2_2021))
+    FMDData._log_try_error(write_csv("nadcp_2.csv", icar_processed_dir(), nadcp_2))
+end
 
 #%%
+logfile = joinpath(icar_processed_logdir, "nadcp_1.log")
+logger = FileLogger(logfile)
+
+with_logger(logger) do
+
+    cumulative_nadcp_1_2021 = FMDData._log_try_error(
+        load_csv(
+            "clean_2022_Annual-Report_NADCP-2.csv",
+            icar_cleaned_dir()
+        )
+    )
+
+    nadcp_1_2020 = FMDData._log_try_error(
+        load_csv(
+            "clean_2021_Annual-Report_NADCP-2.csv",
+            icar_cleaned_dir()
+        )
+    )
+
+    nadcp_1_2021 = FMDData._log_try_error(
+        infer_later_year_values(
+            cumulative_nadcp_1_2021,
+            nadcp_1_2020,
+        )
+    )
+
+    FMDData._log_try_error(
+        add_sample_year!(
+            cumulative_nadcp_1_2021 => "Combined",
+            nadcp_1_2021 => 2021,
+            nadcp_1_2020 => 2020
+        )
+    )
+
+    FMDData._log_try_error(
+        add_report_year!(
+            cumulative_nadcp_1_2021 => 2021,
+            nadcp_1_2021 => 2021,
+            nadcp_1_2020 => 2020
+        )
+    )
+
+    FMDData._log_try_error(
+        add_round_name!(
+            cumulative_nadcp_1_2021 => "NADCP 1",
+            nadcp_1_2021 => "NADCP 1",
+            nadcp_1_2020 => "NADCP 1"
+        )
+    )
+
+    FMDData._log_try_error(
+        add_test_type!(
+            cumulative_nadcp_1_2021 => "SPCE",
+            nadcp_1_2021 => "SPCE",
+            nadcp_1_2020 => "SPCE"
+        )
+    )
+
+    FMDData._log_try_error(
+        add_test_threshold!(
+            cumulative_nadcp_1_2021 => "1.8 log10 @ 50% inhibition",
+            nadcp_1_2021 => "1.8 log10 @ 50% inhibition",
+            nadcp_1_2020 => "1.8 log10 @ 50% inhibition"
+        )
+    )
+
+    nadcp_1 = FMDData._log_try_error(
+        combine_round_dfs(
+            cumulative_nadcp_1_2021, nadcp_1_2021, nadcp_1_2020
+        )
+    )
+
+    FMDData._log_try_error(
+        write_csv("nadcp_1_2021.csv", icar_processed_dir(), nadcp_1_2021)
+    )
+    FMDData._log_try_error(
+        write_csv("nadcp_1_2020.csv", icar_processed_dir(), nadcp_1_2020)
+    )
+    FMDData._log_try_error(
+        write_csv("nadcp_1.csv", icar_processed_dir(), nadcp_1)
+    )
+end
