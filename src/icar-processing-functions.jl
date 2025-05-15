@@ -4,7 +4,8 @@ using StatsBase: mean
 using Try
 using TryExperimental
 
-export add_test_threshold!,
+export add_all_metadata!,
+    add_test_threshold!,
     add_test_type!,
     add_round_name!,
     add_report_year!,
@@ -12,6 +13,36 @@ export add_test_threshold!,
     add_metadata_col!,
     infer_later_year_values,
     combine_round_dfs
+
+function add_all_metadata!(
+        df_pair::Pair{T, D}
+    ) where {T <: DataFrame, D <: OrderedDict{<:Symbol, <:Any}}
+
+    df, dict = df_pair
+
+    acceptable_metadata = (
+        :sample_year,
+        :report_year,
+        :round_name,
+        :test_type,
+        :test_threshold,
+    )
+
+    unaccepted_metadata = OrderedDict()
+    for k in keys(dict)
+        !(k in acceptable_metadata) && push!(unaccepted_metadata, k)
+    end
+    isempty(unaccepted_metadata) ||
+        return Try.Err("Metadata provided that is not accepted: $unaccepted_metadata")
+
+    for metadata in acceptable_metadata
+        if haskey(dict, metadata)
+            @? add_metadata_col!(metadata, df => dict[metadata])
+        end
+    end
+
+    return Try.Ok(nothing)
+end
 
 function add_test_threshold!(
         df_round_pairs::Pair{T, S}...;
