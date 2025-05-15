@@ -675,7 +675,7 @@ function all_totals_check(
 end
 
 function all_totals_check(
-        totals_dict::Dict,
+        totals_dict::OrderedDict,
         df::DataFrame;
         column::Symbol = :states_ut,
         totals_key = "total",
@@ -719,7 +719,7 @@ function calculate_all_totals(
     )
 
     col_names = names(df)
-    totals_dict = Dict{AbstractString, Real}()
+    totals_dict = OrderedDict{AbstractString, Real}()
 
     for col_ind in eachindex(names(selected_df))
         col_name = col_names[col_ind]
@@ -807,7 +807,7 @@ function calculate_totals(
         col::Vector{T},
         colname::String,
     ) where {T <: Union{<:Union{<:Missing, <:Integer}, <:Integer}}
-    totals_dict = Dict{AbstractString, Real}()
+    totals_dict = OrderedDict{AbstractString, Real}()
     return _calculate_totals!(
         totals_dict,
         col,
@@ -816,7 +816,7 @@ function calculate_totals(
 end
 
 function _calculate_totals!(
-        totals_dict::Dict,
+        totals_dict::OrderedDict,
         col::Vector{T},
         colname::String,
     ) where {T <: Union{<:Union{<:Missing, <:Integer}, <:Integer}}
@@ -836,7 +836,7 @@ function calculate_totals(
         T <: Union{<:Union{<:Missing, <:AbstractFloat}, <:AbstractFloat},
         C <: Union{<:Union{<:Missing, <:Integer}, <:Integer},
     }
-    totals_dict = Dict{AbstractString, Real}()
+    totals_dict = OrderedDict{AbstractString, Real}()
     return _calculate_totals!(
         totals_dict,
         col,
@@ -849,7 +849,7 @@ function calculate_totals(
 end
 
 function _calculate_totals!(
-        totals_dict::Dict,
+        totals_dict::OrderedDict,
         col::Vector{T},
         colname::String,
         denom_col::Vector{C},
@@ -870,7 +870,7 @@ end
 
 function totals_check(
         totals::DataFrameRow,
-        calculated_totals::Dict,
+        calculated_totals::OrderedDict,
         column::Symbol = :states_ut
     )
     errors_dict = OrderedDict{AbstractString, NamedTuple{(:provided, :calculated)}}()
