@@ -131,6 +131,7 @@ function infer_later_year_values!(
         select_calculated_totals!(later_df)
     end
 
+
     # Calculate state serotype pct values
     pct_reg = update_regex(
         reg,
@@ -159,15 +160,19 @@ function infer_later_year_values!(
     )
     select_calculated_cols!(later_df)
 
+    count_pct_reg = update_regex(
+        reg,
+        r"(.*)count(.*)",
+        s"\1(?:count|pct)\2",
+
+    )
+
     _remove_states_without_data!(
         later_df;
-        reg = update_regex(
-            reg,
-            r"(.*)count(.*)",
-            s"\1(?:count|pct)\2",
-
-        )
+        reg = count_pct_reg
     )
+
+    _log_try_error(all_totals_check(later_df; reg = count_pct_reg))
 
     return Try.Ok(nothing)
 end
