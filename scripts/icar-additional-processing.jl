@@ -38,52 +38,57 @@ using Try
 # "2022_Annual-Report_Organized-farms.csv"
 
 #%%
-data = @? load_csv(
-    "clean_2022_Annual-Report_Organized-farms.csv",
-    datadir("icar-seroprevalence")
-)
-
-add_sample_year!(
-    data,
-    2022
-)
-
-#%%
-nadcp_2_2022 = @? load_csv(
+cumulative_nadcp_2_2022 = @? load_csv(
     "clean_2022_Annual-Report_NADCP-2.csv",
-    datadir("icar-seroprevalence")
+    icar_cleaned_dir()
 )
 
 nadcp_2_2021 = @? load_csv(
     "clean_2021_Annual-Report_NADCP-2.csv",
-    datadir("icar-seroprevalence")
+    icar_cleaned_dir()
 )
 
-#%%
-n2022 = deepcopy(nadcp_2_2022)
-n2021 = deepcopy(nadcp_2_2021)
+nadcp_2_2022 = @? infer_later_year_values(
+    cumulative_nadcp_2_2022,
+    nadcp_2_2021,
+)
 
 add_sample_year!(
-    n2022,
-    n2021,
-    2022,
-    2021
+    cumulative_nadcp_2_2022 => "Combined",
+    nadcp_2_2022 => 2022,
+    nadcp_2_2021 => 2021
 )
 
-n2022
+add_report_year!(
+    cumulative_nadcp_2_2022 => 2022,
+    nadcp_2_2022 => 2022,
+    nadcp_2_2021 => 2021
+)
+
+add_round_name!(
+    cumulative_nadcp_2_2022 => "NADCP 2",
+    nadcp_2_2022 => "NADCP 2",
+    nadcp_2_2021 => "NADCP 2"
+)
+
+add_test_type!(
+    cumulative_nadcp_2_2022 => "SPCE",
+    nadcp_2_2022 => "SPCE",
+    nadcp_2_2021 => "SPCE"
+)
+
+add_test_threshold!(
+    cumulative_nadcp_2_2022 => "1.65 log10 @ 50% inhibition",
+    nadcp_2_2022 => "1.65 log10 @ 50% inhibition",
+    nadcp_2_2021 => "1.65 log10 @ 50% inhibition"
+)
+
+nadcp_2 = combine_round_dfs(
+    cumulative_nadcp_2_2022, nadcp_2_2022, nadcp_2_2021
+)
+
+FMDData.write_csv("nadcp_2_2022.csv", icar_processed_dir(), nadcp_2_2022)
+FMDData.write_csv("nadcp_2_2021.csv", icar_processed_dir(), nadcp_2_2021)
+FMDData.write_csv("nadcp_2.csv", icar_processed_dir(), nadcp_2)
 
 #%%
-calculate_state_seroprevalence(n2022)
-
-match(
-    Regex("serotype_(?:$(join(FMDData.default_allowed_serotypes, "|")))_count_(pre|post)"),
-    "serotype_o_count_pre_calculated"
-)
-
-
-#%%
-reg = Regex("serotype_(?:$(join(FMDData.default_allowed_serotypes, "|")))_count_(pre|post).*")
-replace(
-    "serotype_o_count_pre",
-    reg => s"serotype_all_count_\1"
-)
