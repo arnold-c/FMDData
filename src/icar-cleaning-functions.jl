@@ -41,9 +41,9 @@ default_allowed_serotypes::Vector{String} = ["o", "a", "asia1"]
 
 function all_cleaning_steps(
         input_filename::T1,
-        input_dir::T1,
+        input_dir::T1;
         output_filename::T1 = "clean_$input_filename",
-        output_dir::T1 = icar_cleaned_dir();
+        output_dir::T1 = icar_cleaned_dir(),
         load_format = DataFrame
     ) where {T1 <: AbstractString}
 
