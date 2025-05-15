@@ -3,7 +3,8 @@ using Try: Try
 using Skipper: Skipper
 export input_dir,
     icar_inputs_dir,
-    skip_missing_and_nan
+    skip_missing_and_nan,
+    update_regex
 
 input_dir(args...) = DrWatson.projectdir("inputs", args...)
 icar_inputs_dir(args...) = input_dir("ICAR-Reports", "extracted-seroprevalence-tables", args...)
@@ -28,3 +29,17 @@ function _log_try_error(res, type::Symbol = :Error; unwrap_ok = true)
 end
 
 skip_missing_and_nan = Skipper.skip(x -> ismissing(x) || isnan(x))
+
+function update_regex(
+        original_reg::Regex,
+        find_reg::Regex,
+        subsitution_str::SubstitutionString
+    )
+    new_reg = Regex(
+        replace(
+            original_reg.pattern,
+            find_reg => subsitution_str,
+        )
+    )
+    return new_reg
+end

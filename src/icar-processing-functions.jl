@@ -110,11 +110,10 @@ function infer_later_year_values!(
     end
 
     # Calculate state serotype pct values
-    pct_reg = Regex(
-        replace(
-            reg.pattern,
-            r"(.*)all|(.*)" => s"\1\2",
-        )
+    pct_reg = update_regex(
+        reg,
+        r"(.*)all|(.*)",
+        s"\1\2",
     )
 
     transform!(
@@ -138,7 +137,15 @@ function infer_later_year_values!(
     )
     select_calculated_cols!(later_df)
 
-    _remove_states_without_data!(later_df)
+    _remove_states_without_data!(
+        later_df;
+        reg = update_regex(
+            reg,
+            r"(.*)count(.*)",
+            s"\1(?:count|pct)\2",
+
+        )
+    )
 
     return Try.Ok(nothing)
 end
@@ -147,7 +154,7 @@ function _remove_states_without_data!(
         df;
         column::Symbol = :states_ut,
         allowed_serotypes = vcat("all", default_allowed_serotypes),
-        reg::Regex = Regex("serotype_(?|$(join(default_allowed_serotypes, "|")))_(?|count|pct)_(?|pre|post).*")
+        reg::Regex = Regex("serotype_(?:$(join(default_allowed_serotypes, "|")))_(?:count|pct)_(?:pre|post).*")
     )
     states = String[]
     for row in eachrow(df)
