@@ -1004,7 +1004,7 @@ A wrapper function around the internal `_calculate_state_seroprevalence()` funct
 function calculate_state_seroprevalence(
         df::DataFrame,
         allowed_serotypes::T = default_allowed_serotypes;
-        reg = Regex("serotype_(?:$(join(allowed_serotypes, "|")))_count_(pre|post).*"),
+        reg = Regex("serotype_(?:$(join(allowed_serotypes, "|")))_count_(pre|post)\$"),
         digits = 1
     ) where {T <: AbstractVector{<:AbstractString}}
     return hcat(
@@ -1028,7 +1028,7 @@ Because DataFrames handles tables as named tuples, we can extract information ab
 function _calculate_state_seroprevalence(
         table,
         original_df;
-        reg = Regex("serotype_(?:$(join(allowed_serotypes, "|")))_count_(pre|post).*"),
+        reg = Regex("serotype_(?:$(join(allowed_serotypes, "|")))_count_(pre|post)\$"),
         digits = 1
     )
     str_keys = String.(keys(table))
@@ -1166,7 +1166,7 @@ function select_calculated_cols!(
         end
 
         if calculated_present && colcap == "pct"
-            @warn "Using calculated seroprevalence values"
+            @warn "Using calculated seroprevalence values for column $colnm"
             select!(df, Not(colnm))
             rename!(df, calculated_col => colnm)
         end
