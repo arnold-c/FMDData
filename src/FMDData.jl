@@ -13,8 +13,9 @@ using DrWatson: srcdir
 using Preferences: set_preferences!, delete_preferences!
 
 # Don't run precompilation steps if in temporary test environment
+delete_preferences!(FMDData, "show_warnings"; force = true)
+set_preferences!(FMDData, "show_warnings" => false)
 if isdir(icar_inputs_dir())
-    set_preferences!(FMDData, "show_warnings" => false)
 
     @setup_workload begin
         @compile_workload begin
