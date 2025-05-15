@@ -42,12 +42,20 @@ function all_cleaning_steps(
         input_filename::T1,
         input_dir::T1,
         output_filename::T1 = "clean_$input_filename",
-        output_dir::T1 = datadir("icar-seroprevalence");
+        output_dir::T1 = icar_cleaned_dir();
         load_format = DataFrame
     ) where {T1 <: AbstractString}
 
     println("\n==========================================================================")
     println("Cleaning $(joinpath(input_dir, input_filename))\n")
+
+    if !isdir(output_dir)
+        mkpath(output_dir)
+    end
+    logpath = joinpath(output_dir, "logfiles")
+    if !isdir(logpath)
+        mkpath(logpath)
+    end
 
     filebase = match(r"(.*)\.csv", input_filename).captures[1]
     logfile = joinpath(output_dir, "logfiles", "$filebase.log")
@@ -1172,7 +1180,7 @@ function write_csv(
         dir::T1,
         data::DataFrame
     ) where {T1 <: AbstractString}
-    isdir(dir) || return Err("$dir is not a valid directory")
+    isdir(dir) || mkpath(dir)
     contains(filename, r".*\.csv$") || return Err("$filename is not a csv file")
 
     write(

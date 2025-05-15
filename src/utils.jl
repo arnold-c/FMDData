@@ -3,11 +3,17 @@ using Try: Try
 using Skipper: Skipper
 export input_dir,
     icar_inputs_dir,
+    icar_outputs_dir,
+    icar_cleaned_dir,
+    icar_processed_dir,
     skip_missing_and_nan,
     update_regex
 
 input_dir(args...) = DrWatson.projectdir("inputs", args...)
 icar_inputs_dir(args...) = input_dir("ICAR-Reports", "extracted-seroprevalence-tables", args...)
+icar_outputs_dir(args...) = DrWatson.datadir("icar-seroprevalence", args...)
+icar_cleaned_dir(args...) = icar_outputs_dir("cleaned", args...)
+icar_processed_dir(args...) = icar_outputs_dir("processed", args...)
 
 function _log_try_error(res, type::Symbol = :Error; unwrap_ok = true)
     @assert type in [:Error, :Warn, :Info]
