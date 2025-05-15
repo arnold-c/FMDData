@@ -33,6 +33,7 @@ export all_cleaning_steps,
     select_calculated_totals!,
     select_calculated_cols!,
     sort_columns!,
+    sort_states!,
     write_csv
 
 
@@ -1258,6 +1259,28 @@ function sort_columns!(
 
     select!(df, ordered_names)
 
+    return Try.Ok(nothing)
+end
+
+"""
+	sort_states!(
+        df::DataFrame;
+        statename_column = :states_ut,
+        totals_key = "total"
+    )
+
+Sort the dataframe by alphabetical order of the states and list the totals row at the bottom. Preserves the original order of rows if there are duplicates.
+"""
+function sort_states!(
+        df::DataFrame;
+        statename_column = :states_ut,
+        totals_key = "total"
+    )
+    sort!(
+        df,
+        statename_column,
+        by = n -> (lowercase(n) == totals_key, n)
+    )
     return Try.Ok(nothing)
 end
 
