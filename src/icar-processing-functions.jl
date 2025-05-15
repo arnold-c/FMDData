@@ -4,43 +4,48 @@ using StatsBase: mean
 using Try
 using TryExperimental
 
-export add_round_name!,
+export add_test_threshold!,
+    add_test_type!,
+    add_round_name!,
     add_report_year!,
     add_sample_year!,
     add_metadata_col!,
     infer_later_year_values!
 
-function add_round_name!(df_round_pairs...; round_column = :round)
-    return add_metadata_col!(round_column, df_round_pairs...)
+function add_test_threshold!(
+        df_round_pairs::Pair{T, S}...;
+        threshold_column = :test_threshold
+    ) where {T <: AbstractDataFrame, S <: AbstractString}
+    return add_metadata_col!(threshold_column, df_round_pairs...)
+end
+
+function add_test_type!(
+        df_round_pairs::Pair{T, S}...;
+        test_column = :test_type
+    ) where {T <: AbstractDataFrame, S <: AbstractString}
+    return add_metadata_col!(test_column, df_round_pairs...)
 end
 
 function add_round_name!(
-        df_round_pair::Pair{T, S};
+        df_round_pairs::Pair{T, S}...;
         round_column = :round
     ) where {T <: AbstractDataFrame, S <: AbstractString}
-    return add_metadata_col!(year_column, df_round_pair)
-end
-
-function add_report_year!(df_year_pairs...; year_column = :report_year)
-    return add_metadata_col!(year_column, df_year_pairs...)
+    return add_metadata_col!(round_column, df_round_pairs...)
 end
 
 function add_report_year!(
-        df_year_pair::Pair{T, I};
+        df_year_pairs::Pair{T, I}...;
         year_column = :report_year
     ) where {T <: AbstractDataFrame, I <: Integer}
-    return add_metadata_col!(year_column, df_year_pair)
-end
-
-function add_sample_year!(df_year_pairs...; year_column = :sample_year)
     return add_metadata_col!(year_column, df_year_pairs...)
 end
 
+
 function add_sample_year!(
-        df_year_pair::Pair{T, I};
+        df_year_pairs::Pair{T, I}...;
         year_column = :sample_year
     ) where {T <: AbstractDataFrame, I <: Integer}
-    return add_metadata_col!(year_column, df_year_pair)
+    return add_metadata_col!(year_column, df_year_pairs...)
 end
 
 function add_metadata_col!(metadata_column, df_metadata_pairs...)
