@@ -10,7 +10,8 @@ export add_test_threshold!,
     add_report_year!,
     add_sample_year!,
     add_metadata_col!,
-    infer_later_year_values!
+    infer_later_year_values,
+    combine_round_dfs
 
 function add_test_threshold!(
         df_round_pairs::Pair{T, S}...;
@@ -42,9 +43,9 @@ end
 
 
 function add_sample_year!(
-        df_year_pairs::Pair{T, I}...;
+        df_year_pairs...;
         year_column = :sample_year
-    ) where {T <: AbstractDataFrame, I <: Integer}
+    )
     return add_metadata_col!(year_column, df_year_pairs...)
 end
 
@@ -71,8 +72,8 @@ function add_metadata_col!(
     return Try.Ok(nothing)
 end
 
-function infer_later_year_values!(
-        later_df::T,
+function infer_later_year_values(
+        cumulative_later_df::T,
         initial_df::T;
         year_column = :sample_year,
         statename_column = :states_ut,
@@ -83,6 +84,7 @@ function infer_later_year_values!(
         digits = 1
 
     ) where {T <: AbstractDataFrame}
+    later_df = deepcopy(cumulative_later_df)
     later_colnames = names(later_df)
     initial_colnames = names(initial_df)
     common_colnames = intersect(later_colnames, initial_colnames)
@@ -118,7 +120,7 @@ function infer_later_year_values!(
     end
 
     # Only calculate for count columns
-    totals_dict = _log_try_error(calculate_all_totals(later_df; reg = reg))
+    totals_dict = @? calculate_all_totals(later_df; reg = reg)
     totals_check_state = all_totals_check(totals_dict, later_df; reg = reg)
 
     if Try.iserr(totals_check_state)
@@ -151,6 +153,7 @@ function infer_later_year_values!(
         ) => AsTable;
         renamecols = true
     )
+
     rename!(
         n -> replace(
             n,
@@ -172,9 +175,9 @@ function infer_later_year_values!(
         reg = count_pct_reg
     )
 
-    _log_try_error(all_totals_check(later_df; reg = count_pct_reg))
+    @? all_totals_check(later_df; reg = count_pct_reg)
 
-    return Try.Ok(nothing)
+    return Try.Ok(later_df)
 end
 
 function _remove_states_without_data!(
@@ -196,4 +199,8 @@ function _remove_states_without_data!(
         column => ByRow(c -> !(c in states)),
     )
     return nothing
+end
+
+function combine_round_dfs(dfs::DataFrame...)
+    return vcat(dfs...)
 end
