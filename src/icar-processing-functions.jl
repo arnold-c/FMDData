@@ -7,45 +7,62 @@ using TryExperimental
 export add_round_name!,
     add_report_year!,
     add_sample_year!,
+    add_metadata_col!,
     infer_later_year_values!
 
-function add_round_name!(
-        df::DataFrame,
-        round_name::String,
-        round_name_column::Symbol = :round
-    )
-    df[!, round_name_column] .= round_name
-    return Try.Ok(nothing)
-end
-function add_report_year!(
-        df::DataFrame,
-        year::I;
-        year_column = :report_year
-    ) where {I <: Integer}
-    df[!, year_column] .= year
-    return Try.Ok(nothing)
+function add_round_name!(df_round_pairs...; round_column = :round)
+    return add_metadata_col!(round_column, df_round_pairs...)
 end
 
-function add_sample_year!(df_year_pairs...)
-    sample_year_errs = OrderedDict()
-    for pair in df_year_pairs
-        res = add_sample_year!(pair)
-        if Try.iserr(res)
-            push!(sample_year_errs, res)
-        end
-    end
-    if !isempty(sample_year_errs)
-        Try.Err(_combine_error_messages(sample_year_errs))
-    end
-    return Try.Ok(nothing)
+function add_round_name!(
+        df_round_pair::Pair{T, S};
+        round_column = :round
+    ) where {T <: AbstractDataFrame, S <: AbstractString}
+    return add_metadata_col!(year_column, df_round_pair)
+end
+
+function add_report_year!(df_year_pairs...; year_column = :report_year)
+    return add_metadata_col!(year_column, df_year_pairs...)
+end
+
+function add_report_year!(
+        df_year_pair::Pair{T, I};
+        year_column = :report_year
+    ) where {T <: AbstractDataFrame, I <: Integer}
+    return add_metadata_col!(year_column, df_year_pair)
+end
+
+function add_sample_year!(df_year_pairs...; year_column = :sample_year)
+    return add_metadata_col!(year_column, df_year_pairs...)
 end
 
 function add_sample_year!(
         df_year_pair::Pair{T, I};
         year_column = :sample_year
     ) where {T <: AbstractDataFrame, I <: Integer}
-    df, year = df_year_pair
-    df[!, year_column] .= year
+    return add_metadata_col!(year_column, df_year_pair)
+end
+
+function add_metadata_col!(metadata_column, df_metadata_pairs...)
+    metadata_errs = OrderedDict()
+    for pair in df_metadata_pairs
+        res = add_metadata_col!(metadata_column, pair)
+        if Try.iserr(res)
+            push!(metadata_errs, res)
+        end
+    end
+    if !isempty(metadata_errs)
+        Try.Err(_combine_error_messages(metadata_errs))
+    end
+    return Try.Ok(nothing)
+end
+
+function add_metadata_col!(
+        metadata_column::Symbol,
+        df_metadata_pair::Pair{T, I},
+    ) where {T <: AbstractDataFrame, I <: Union{<:Integer, <:AbstractFloat, <:AbstractString}}
+    df, metadata = df_metadata_pair
+    df[!, metadata_column] .= metadata
     return Try.Ok(nothing)
 end
 
