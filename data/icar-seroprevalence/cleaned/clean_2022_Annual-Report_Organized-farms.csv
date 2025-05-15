@@ -1,16 +1,16 @@
-states_ut,serotype_all_count_pre,serotype_all_count_post,serotype_o_pct_pre,serotype_o_pct_post,serotype_a_pct_pre,serotype_a_pct_post,serotype_asia1_pct_pre,serotype_asia1_pct_post,serotype_o_count_pre_calculated,serotype_o_count_post_calculated,serotype_a_count_pre_calculated,serotype_a_count_post_calculated,serotype_asia1_count_pre_calculated,serotype_asia1_count_post_calculated,serotype_o_pct_pre_calculated_calculated,serotype_o_pct_post_calculated_calculated,serotype_a_pct_pre_calculated_calculated,serotype_a_pct_post_calculated_calculated,serotype_asia1_pct_pre_calculated_calculated,serotype_asia1_pct_post_calculated_calculated
-Andhra Pradesh,501,326,98.6,97.9,96.2,96.6,98.6,100.0,494,319,482,315,494,326,98.6,97.9,96.2,96.6,98.6,100.0
-Kerala,1305,1295,90.9,91.8,88.4,91.7,90.6,92.0,1186,1189,1154,1188,1182,1191,90.9,91.8,88.4,91.7,90.6,92.0
-Chhattisgarh,93,68,78.5,100.0,68.8,100.0,74.2,100.0,73,68,64,68,69,68,78.5,100.0,68.8,100.0,74.2,100.0
-Uttar Pradesh,570,339,84.2,90.3,91.9,90.0,93.0,97.9,480,306,524,305,530,332,84.2,90.3,91.9,90.0,93.0,97.9
-Himachal Pradesh,103,144,96.1,95.8,97.1,97.2,96.1,96.5,99,138,100,140,99,139,96.1,95.8,97.1,97.2,96.1,96.5
-Madhya Pradesh,401,398,92.5,99.5,90.8,97.7,92.5,97.5,371,396,364,389,371,388,92.5,99.5,90.8,97.7,92.5,97.5
-Tamil Nadu,547,500,97.6,98.8,92.7,97.6,97.4,98.8,534,494,507,488,533,494,97.6,98.8,92.7,97.6,97.4,98.8
-Haryana,644,868,93.6,98.5,93.3,98.7,93.0,98.8,603,855,601,857,599,858,93.6,98.5,93.3,98.7,93.0,98.8
-Odisha,21,21,28.6,90.5,23.8,90.5,19.0,85.7,6,19,5,19,4,18,28.6,90.5,23.8,90.5,19.0,85.7
-Telangana,14,96,14.3,99.0,0.0,95.8,0.0,99.0,2,95,0,92,0,95,14.3,99.0,0.0,95.8,0.0,99.0
-Maharashtra,283,240,92.2,100.0,91.9,100.0,91.5,100.0,261,240,260,240,259,240,92.2,100.0,91.9,100.0,91.5,100.0
-Gujarat,379,562,100.0,100.0,98.7,94.3,93.1,95.0,379,562,374,530,353,534,100.0,100.0,98.7,94.3,93.1,95.0
-Uttarakhand,44,44,93.2,95.5,93.2,95.5,100.0,100.0,41,42,41,42,44,44,93.2,95.5,93.2,95.5,100.0,100.0
-Karnataka,370,339,94.1,99.4,94.9,99.4,94.3,99.4,348,337,351,337,349,337,94.1,99.4,94.9,99.4,94.3,99.4
-Total,5275,5240,92.5,96.6,91.5,95.6,92.6,96.6,4879,5062,4827,5009,4885,5062,92.5,96.6,91.5,95.6,92.6,96.6
+states_ut,serotype_all_count_pre,serotype_all_count_post,serotype_o_pct_pre,serotype_o_pct_post,serotype_a_pct_pre,serotype_a_pct_post,serotype_asia1_pct_pre,serotype_asia1_pct_post,serotype_o_count_pre_calculated,serotype_o_count_post_calculated,serotype_a_count_pre_calculated,serotype_a_count_post_calculated,serotype_asia1_count_pre_calculated,serotype_asia1_count_post_calculated
+Andhra Pradesh,501,326,98.6,97.9,96.2,96.6,98.6,100.0,494,319,482,315,494,326
+Kerala,1305,1295,90.9,91.8,88.4,91.7,90.6,92.0,1186,1189,1154,1188,1182,1191
+Chhattisgarh,93,68,78.5,100.0,68.8,100.0,74.2,100.0,73,68,64,68,69,68
+Uttar Pradesh,570,339,84.2,90.3,91.9,90.0,93.0,97.9,480,306,524,305,530,332
+Himachal Pradesh,103,144,96.1,95.8,97.1,97.2,96.1,96.5,99,138,100,140,99,139
+Madhya Pradesh,401,398,92.5,99.5,90.8,97.7,92.5,97.5,371,396,364,389,371,388
+Tamil Nadu,547,500,97.6,98.8,92.7,97.6,97.4,98.8,534,494,507,488,533,494
+Haryana,644,868,93.6,98.5,93.3,98.7,93.0,98.8,603,855,601,857,599,858
+Odisha,21,21,28.6,90.5,23.8,90.5,19.0,85.7,6,19,5,19,4,18
+Telangana,14,96,14.3,99.0,0.0,95.8,0.0,99.0,2,95,0,92,0,95
+Maharashtra,283,240,92.2,100.0,91.9,100.0,91.5,100.0,261,240,260,240,259,240
+Gujarat,379,562,100.0,100.0,98.7,94.3,93.1,95.0,379,562,374,530,353,534
+Uttarakhand,44,44,93.2,95.5,93.2,95.5,100.0,100.0,41,42,41,42,44,44
+Karnataka,370,339,94.1,99.4,94.9,99.4,94.3,99.4,348,337,351,337,349,337
+Total,5275,5240,92.5,96.6,91.5,95.6,92.6,96.6,4879,5062,4827,5009,4885,5062
