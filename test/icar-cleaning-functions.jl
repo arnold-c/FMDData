@@ -1,5 +1,6 @@
 using DataFrames
 using Try
+using OrderedCollections: OrderedDict
 
 @testset verbose = true "icar-cleaning-functions.jl" begin
 
@@ -13,7 +14,7 @@ using Try
             Try.Err("$not_a_dir is not a valid directory")
         )
 
-        dir = "./"
+        dir = test_dir()
 
 
         @test isequal(
@@ -73,7 +74,7 @@ using Try
 
     end
 
-    dir = "./"
+    dir = test_dir()
     filename = "test-data.csv"
     data = Try.@? load_csv(
         filename,
@@ -177,7 +178,7 @@ using Try
 
         @test isequal(
             FMDData._check_similar_column_names(similar_column_names_df),
-            Try.Err("Similar column names were found in the data: OrderedCollections.OrderedDict(\"states_ut\" => [\"states_ut_1\"], \"seroprevalance_all_count_pre\" => [\"seroprevalance_all_count_pre_1\"]).")
+            Try.Err("Similar column names were found in the data: OrderedDict(\"states_ut\" => [\"states_ut_1\"], \"seroprevalance_all_count_pre\" => [\"seroprevalance_all_count_pre_1\"]).")
         )
 
         similar_column_names_df_2 = DataFrame(
@@ -193,13 +194,13 @@ using Try
 
         @test isequal(
             FMDData._check_similar_column_names(similar_column_names_df_2),
-            Try.Err("Similar column names were found in the data: OrderedCollections.OrderedDict(\"states_u\" => [\"states_ut\", \"states_ut_1\", \"states_ut_1_2\"], \"seroprevalance_all_count_pre\" => [\"seroprevalance_all_count_pre_test\"]).")
+            Try.Err("Similar column names were found in the data: OrderedDict(\"states_u\" => [\"states_ut\", \"states_ut_1\", \"states_ut_1_2\"], \"seroprevalance_all_count_pre\" => [\"seroprevalance_all_count_pre_test\"]).")
         )
 
 
         @test isequal(
             check_duplicated_column_names(similar_column_names_df),
-            Try.Err("Similar column names were found in the data: OrderedCollections.OrderedDict(\"states_ut\" => [\"states_ut_1\"], \"seroprevalance_all_count_pre\" => [\"seroprevalance_all_count_pre_1\"]).")
+            Try.Err("Similar column names were found in the data: OrderedDict(\"states_ut\" => [\"states_ut_1\"], \"seroprevalance_all_count_pre\" => [\"seroprevalance_all_count_pre_1\"]).")
         )
 
         duplicate_column_vals_df = DataFrame(
@@ -330,7 +331,7 @@ using Try
 
         @test isequal(
             check_seroprevalence_as_pct(seroprevs_as_props_df),
-            Try.Err("All `pct` columns should be a %, not a proportion. The following columns are likely reported as proportions with associated mean values: OrderedCollections.OrderedDict{Symbol, AbstractFloat}(:serotype_a_pct_pre => 0.12, :serotype_a_pct_post => 0.62)")
+            Try.Err("All `pct` columns should be a %, not a proportion. The following columns are likely reported as proportions with associated mean values: OrderedDict{Symbol, AbstractFloat}(:serotype_a_pct_pre => 0.12, :serotype_a_pct_post => 0.62)")
         )
 
         @test Try.isok(check_seroprevalence_as_pct(seroprevs_with_missing_df))
@@ -357,7 +358,7 @@ using Try
 
         @test isequal(
             check_pre_post_exists(missing_pre_post_df),
-            Try.Err("All serotype results should have both 'Pre' and 'Post' results columns, only. Instead, the following serotype results have the associated data columns:\nOrderedCollections.OrderedDict{AbstractString, Vector{AbstractString}}(\"serotype_a_pct\" => AbstractString[\"pre\"], \"serotype_a_count\" => AbstractString[\"post\"])")
+            Try.Err("All serotype results should have both 'Pre' and 'Post' results columns, only. Instead, the following serotype results have the associated data columns:\nOrderedDict{AbstractString, Vector{AbstractString}}(\"serotype_a_pct\" => AbstractString[\"pre\"], \"serotype_a_count\" => AbstractString[\"post\"])")
         )
 
     end
@@ -401,13 +402,13 @@ using Try
         @test isequal(
             all_totals_check(incorrect_totals_row_df; atol = 0.1),
             Try.Err(
-                "There were discrepancies in the totals calculated and those provided in the data: OrderedCollections.OrderedDict{AbstractString, NamedTuple{(:provided, :calculated)}}(\"serotype_a_count_pre\" => (provided = 5, calculated = 4), \"serotype_a_count_post\" => (provided = 20, calculated = 19), \"serotype_a_pct_pre\" => (provided = 13.1, calculated = 13.3), \"serotype_a_pct_post\" => (provided = 63.0, calculated = 63.3))"
+                "There were discrepancies in the totals calculated and those provided in the data: OrderedDict{AbstractString, NamedTuple{(:provided, :calculated)}}(\"serotype_a_count_pre\" => (provided = 5, calculated = 4), \"serotype_a_count_post\" => (provided = 20, calculated = 19), \"serotype_a_pct_pre\" => (provided = 13.1, calculated = 13.3), \"serotype_a_pct_post\" => (provided = 63.0, calculated = 63.3))"
             )
         )
 
         @test Try.isok(all_totals_check(correct_totals_row_df))
 
-        incorrect_totals_calculated = Dict(
+        incorrect_totals_calculated = OrderedDict(
             "serotype_all_count_pre" => 30,
             "serotype_all_count_post" => 30,
             "serotype_a_count_pre" => 4,
@@ -422,7 +423,7 @@ using Try
                 incorrect_totals_row_df[end, Not(:states_ut)],
                 incorrect_totals_calculated
             ),
-            Try.Err("There were discrepancies in the totals calculated and those provided in the data: OrderedCollections.OrderedDict{AbstractString, NamedTuple{(:provided, :calculated)}}(\"serotype_a_count_pre\" => (provided = 5, calculated = 4), \"serotype_a_count_post\" => (provided = 20, calculated = 19), \"serotype_a_pct_pre\" => (provided = 13.1, calculated = 13.3), \"serotype_a_pct_post\" => (provided = 63.0, calculated = 63.3))")
+            Try.Err("There were discrepancies in the totals calculated and those provided in the data: OrderedDict{AbstractString, NamedTuple{(:provided, :calculated)}}(\"serotype_a_count_pre\" => (provided = 5, calculated = 4), \"serotype_a_count_post\" => (provided = 20, calculated = 19), \"serotype_a_pct_pre\" => (provided = 13.1, calculated = 13.3), \"serotype_a_pct_post\" => (provided = 63.0, calculated = 63.3))")
         )
 
     end
@@ -479,7 +480,7 @@ using Try
                     "serotype_a_pct_post_calculated" => [80.0, 60.0, 50.0, 63.3],
                 )
             ),
-            Try.Err("The following calculated columns have discrepancies relative to the provided columns: OrderedCollections.OrderedDict{AbstractString, AbstractString}(\"serotype_a_count_pre\" => \"The following indices (row numbers) differ: [2]. Original: [1]. Calculated: [0]\", \"serotype_a_pct_pre\" => \"The following indices (row numbers) differ: [2]. Original: [10.0]. Calculated: [12.0]\")")
+            Try.Err("The following calculated columns have discrepancies relative to the provided columns: OrderedDict{AbstractString, AbstractString}(\"serotype_a_count_pre\" => \"The following indices (row numbers) differ: [2]. Original: [1]. Calculated: [0]\", \"serotype_a_pct_pre\" => \"The following indices (row numbers) differ: [2]. Original: [10.0]. Calculated: [12.0]\")")
         )
     end
 
@@ -575,7 +576,7 @@ using Try
 
     end
 
-    @testset "Select serotype colums" begin
+    @testset "Select serotype columns" begin
 
         df = DataFrame(
             "states_ut" => ["a", "b", "c", "total"],
@@ -673,6 +674,31 @@ using Try
             )
         )
 
-    end
+        missing_count_df = DataFrame(
+            "states_ut" => ["a", "b", "c", "total"],
+            "serotype_all_count_pre" => [10, 10, 10, 30],
+            "serotype_all_count_post" => [10, 10, 10, 30],
+            "serotype_a_count_post" => [8, 6, 5, 19],
+            "serotype_a_pct_pre" => [20.0, 10.0, 10.0, 13.3],
+            "serotype_a_pct_post" => [80.0, 60.0, 50.0, 63.3],
+            "serotype_a_count_pre_calculated" => [2, 1, 1, 4],
+            "serotype_a_pct_pre_calculated" => [20.0, 10.0, 10.0, 13.3],
+        )
 
+        select_calculated_cols!(missing_count_df)
+
+        @test isequal(
+            names(missing_count_df),
+            [
+                "states_ut",
+                "serotype_all_count_pre",
+                "serotype_all_count_post",
+                "serotype_a_count_post",
+                "serotype_a_pct_post",
+                "serotype_a_count_pre",
+                "serotype_a_pct_pre",
+            ]
+        )
+
+    end
 end
