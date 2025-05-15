@@ -1,14 +1,14 @@
 ┌ Warning: Using calculated totals
-└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/icar-cleaning-functions.jl:1112
+└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/icar-cleaning-functions.jl:1126
 ┌ Warning: Using calculated seroprevalence values for column serotype_o_pct_pre
-└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/icar-cleaning-functions.jl:1169
+└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/icar-cleaning-functions.jl:1170
 ┌ Warning: Using calculated seroprevalence values for column serotype_o_pct_post
-└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/icar-cleaning-functions.jl:1169
+└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/icar-cleaning-functions.jl:1170
 ┌ Warning: Using calculated seroprevalence values for column serotype_a_pct_pre
-└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/icar-cleaning-functions.jl:1169
+└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/icar-cleaning-functions.jl:1170
 ┌ Warning: Using calculated seroprevalence values for column serotype_a_pct_post
-└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/icar-cleaning-functions.jl:1169
+└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/icar-cleaning-functions.jl:1170
 ┌ Warning: Using calculated seroprevalence values for column serotype_asia1_pct_pre
-└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/icar-cleaning-functions.jl:1169
+└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/icar-cleaning-functions.jl:1170
 ┌ Warning: Using calculated seroprevalence values for column serotype_asia1_pct_post
-└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/icar-cleaning-functions.jl:1169
+└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/icar-cleaning-functions.jl:1170

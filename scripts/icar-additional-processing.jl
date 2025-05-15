@@ -4,6 +4,7 @@ using DrWatson
 
 using FMDData
 using Try
+using OrderedCollections: OrderedDict
 using Logging
 using LoggingExtras
 
@@ -66,42 +67,38 @@ with_logger(logger) do
     )
 
     FMDData._log_try_error(
-        add_sample_year!(
-            cumulative_nadcp_2_2022 => "Combined",
-            nadcp_2_2022 => 2022,
-            nadcp_2_2021 => 2021
+        add_all_metadata!(
+            cumulative_nadcp_2_2022 => OrderedDict(
+                :sample_year => "Combined",
+                :report_year => 2022,
+                :round_name => "NADCP 2",
+                :test_type => "SPCE",
+                :test_threshold => "1.65 log10 @ 35% inhibition"
+            )
         )
     )
 
     FMDData._log_try_error(
-        add_report_year!(
-            cumulative_nadcp_2_2022 => 2022,
-            nadcp_2_2022 => 2022,
-            nadcp_2_2021 => 2021
+        add_all_metadata!(
+            nadcp_2_2022 => OrderedDict(
+                :sample_year => 2022,
+                :report_year => 2022,
+                :round_name => "NADCP 2",
+                :test_type => "SPCE",
+                :test_threshold => "1.65 log10 @ 35% inhibition"
+            )
         )
     )
 
     FMDData._log_try_error(
-        add_round_name!(
-            cumulative_nadcp_2_2022 => "NADCP 2",
-            nadcp_2_2022 => "NADCP 2",
-            nadcp_2_2021 => "NADCP 2"
-        )
-    )
-
-    FMDData._log_try_error(
-        add_test_type!(
-            cumulative_nadcp_2_2022 => "SPCE",
-            nadcp_2_2022 => "SPCE",
-            nadcp_2_2021 => "SPCE"
-        )
-    )
-
-    FMDData._log_try_error(
-        add_test_threshold!(
-            cumulative_nadcp_2_2022 => "1.65 log10 @ 35% inhibition",
-            nadcp_2_2022 => "1.65 log10 @ 35% inhibition",
-            nadcp_2_2021 => "1.65 log10 @ 35% inhibition"
+        add_all_metadata!(
+            nadcp_2_2021 => OrderedDict(
+                :sample_year => 2021,
+                :report_year => 2021,
+                :round_name => "NADCP 2",
+                :test_type => "SPCE",
+                :test_threshold => "1.65 log10 @ 35% inhibition"
+            )
         )
     )
 
@@ -124,14 +121,14 @@ with_logger(logger) do
 
     cumulative_nadcp_1_2021 = FMDData._log_try_error(
         load_csv(
-            "clean_2022_Annual-Report_NADCP-2.csv",
+            "clean_2021_Annual-Report_NADCP-1.csv",
             icar_cleaned_dir()
         )
     )
 
     nadcp_1_2020 = FMDData._log_try_error(
         load_csv(
-            "clean_2021_Annual-Report_NADCP-2.csv",
+            "clean_2020_Annual-Report_NADCP-1.csv",
             icar_cleaned_dir()
         )
     )
@@ -144,42 +141,38 @@ with_logger(logger) do
     )
 
     FMDData._log_try_error(
-        add_sample_year!(
-            cumulative_nadcp_1_2021 => "Combined",
-            nadcp_1_2021 => 2021,
-            nadcp_1_2020 => 2020
+        add_all_metadata!(
+            cumulative_nadcp_2_2021 => OrderedDict(
+                :sample_year => "Combined",
+                :report_year => 2021,
+                :round_name => "NADCP 1",
+                :test_type => "SPCE",
+                :test_threshold => "1.8 log10 @ 50% inhibition"
+            )
         )
     )
 
     FMDData._log_try_error(
-        add_report_year!(
-            cumulative_nadcp_1_2021 => 2021,
-            nadcp_1_2021 => 2021,
-            nadcp_1_2020 => 2020
+        add_all_metadata!(
+            nadcp_2_2021 => OrderedDict(
+                :sample_year => 2021,
+                :report_year => 2021,
+                :round_name => "NADCP 1",
+                :test_type => "SPCE",
+                :test_threshold => "1.8 log10 @ 50% inhibition"
+            )
         )
     )
 
     FMDData._log_try_error(
-        add_round_name!(
-            cumulative_nadcp_1_2021 => "NADCP 1",
-            nadcp_1_2021 => "NADCP 1",
-            nadcp_1_2020 => "NADCP 1"
-        )
-    )
-
-    FMDData._log_try_error(
-        add_test_type!(
-            cumulative_nadcp_1_2021 => "SPCE",
-            nadcp_1_2021 => "SPCE",
-            nadcp_1_2020 => "SPCE"
-        )
-    )
-
-    FMDData._log_try_error(
-        add_test_threshold!(
-            cumulative_nadcp_1_2021 => "1.8 log10 @ 50% inhibition",
-            nadcp_1_2021 => "1.8 log10 @ 50% inhibition",
-            nadcp_1_2020 => "1.8 log10 @ 50% inhibition"
+        add_all_metadata!(
+            nadcp_2_2020 => OrderedDict(
+                :sample_year => 2020,
+                :report_year => 2020,
+                :round_name => "NADCP 1",
+                :test_type => "SPCE",
+                :test_threshold => "1.8 log10 @ 50% inhibition"
+            )
         )
     )
 
