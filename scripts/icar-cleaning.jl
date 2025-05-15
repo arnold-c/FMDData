@@ -3,8 +3,6 @@ using DrWatson
 @quickactivate "FMDData"
 
 using FMDData
-using Try
-using Logging, LoggingExtras
 
 # "2019_Annual-Report_A-N-Islands.csv"
 # "2019_Annual-Report_Andhra-Pradesh.csv"
