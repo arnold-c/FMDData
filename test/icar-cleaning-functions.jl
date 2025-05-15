@@ -169,16 +169,16 @@ using OrderedCollections: OrderedDict
         similar_column_names_df = DataFrame(
             "states_ut" => String[],
             "states_ut" => String[],
-            "seroprevalance_all_count_pre" => Int64[],
-            "seroprevalance_all_count_post" => Int64[],
-            "seroprevalance_all_pct_pre" => Float64[],
-            "seroprevalance_all_count_pre" => Int64[],
+            "serotype_all_count_pre" => Int64[],
+            "serotype_all_count_post" => Int64[],
+            "serotype_all_pct_pre" => Float64[],
+            "serotype_all_count_pre" => Int64[],
             makeunique = true
         )
 
         @test isequal(
             FMDData._check_similar_column_names(similar_column_names_df),
-            Try.Err("Similar column names were found in the data: OrderedDict(\"states_ut\" => [\"states_ut_1\"], \"seroprevalance_all_count_pre\" => [\"seroprevalance_all_count_pre_1\"]).")
+            Try.Err("Similar column names were found in the data: OrderedDict(\"states_ut\" => [\"states_ut_1\"], \"serotype_all_count_pre\" => [\"serotype_all_count_pre_1\"]).")
         )
 
         similar_column_names_df_2 = DataFrame(
@@ -186,21 +186,21 @@ using OrderedCollections: OrderedDict
             "states_ut" => String[],
             "states_ut_1" => String[],
             "states_u" => String[],
-            "seroprevalance_all_count_pre" => Int64[],
-            "seroprevalance_all_count_post" => Int64[],
-            "seroprevalance_all_pct_pre" => Float64[],
-            "seroprevalance_all_count_pre_test" => Int64[],
+            "serotype_all_count_pre" => Int64[],
+            "serotype_all_count_post" => Int64[],
+            "serotype_all_pct_pre" => Float64[],
+            "serotype_all_count_pre_test" => Int64[],
         )
 
         @test isequal(
             FMDData._check_similar_column_names(similar_column_names_df_2),
-            Try.Err("Similar column names were found in the data: OrderedDict(\"states_u\" => [\"states_ut\", \"states_ut_1\", \"states_ut_1_2\"], \"seroprevalance_all_count_pre\" => [\"seroprevalance_all_count_pre_test\"]).")
+            Try.Err("Similar column names were found in the data: OrderedDict(\"states_u\" => [\"states_ut\", \"states_ut_1\", \"states_ut_1_2\"], \"serotype_all_count_pre\" => [\"serotype_all_count_pre_test\"]).")
         )
 
 
         @test isequal(
             check_duplicated_column_names(similar_column_names_df),
-            Try.Err("Similar column names were found in the data: OrderedDict(\"states_ut\" => [\"states_ut_1\"], \"seroprevalance_all_count_pre\" => [\"seroprevalance_all_count_pre_1\"]).")
+            Try.Err("Similar column names were found in the data: OrderedDict(\"states_ut\" => [\"states_ut_1\"], \"serotype_all_count_pre\" => [\"serotype_all_count_pre_1\"]).")
         )
 
         duplicate_column_vals_df = DataFrame(
@@ -697,6 +697,45 @@ using OrderedCollections: OrderedDict
                 "serotype_a_pct_post",
                 "serotype_a_count_pre",
                 "serotype_a_pct_pre",
+            ]
+        )
+    end
+
+    @testset "Sort dataframe columns" begin
+
+        unsorted_df = DataFrame(
+            "states_ut" => String[],
+            "serotype_all_count_pre" => Int64[],
+            "serotype_all_count_post" => Int64[],
+            "serotype_o_pct_pre" => Float64[],
+            "serotype_o_count_pre" => Int64[],
+            "serotype_o_count_post" => Int64[],
+            "serotype_a_pct_pre" => Float64[],
+            "serotype_asia1_pct_pre" => Float64[],
+            "serotype_asia1_pct_post" => Float64[],
+            "serotype_a_count_pre" => Int64[],
+            "serotype_asia1_count_pre" => Int64[],
+        )
+
+        @test isequal(
+            sort_columns!(unsorted_df),
+            Try.Ok(nothing)
+        )
+
+        @test isequal(
+            names(unsorted_df),
+            [
+                "states_ut",
+                "serotype_all_count_pre",
+                "serotype_all_count_post",
+                "serotype_o_count_pre",
+                "serotype_o_pct_pre",
+                "serotype_o_count_post",
+                "serotype_a_count_pre",
+                "serotype_a_pct_pre",
+                "serotype_asia1_count_pre",
+                "serotype_asia1_pct_pre",
+                "serotype_asia1_pct_post",
             ]
         )
 
