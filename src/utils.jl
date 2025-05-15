@@ -1,6 +1,8 @@
 using DrWatson: DrWatson
 using Try: Try
 using Skipper: Skipper
+using Preferences: @load_preference
+
 export input_dir,
     icar_inputs_dir,
     icar_outputs_dir,
@@ -16,16 +18,20 @@ icar_outputs_dir(args...) = DrWatson.datadir("icar-seroprevalence", args...)
 icar_cleaned_dir(args...) = icar_outputs_dir("cleaned", args...)
 icar_processed_dir(args...) = icar_outputs_dir("processed", args...)
 
+show_warnings = @load_preference("show_warnings", true)
+
 function _log_try_error(res, type::Symbol = :Error; unwrap_ok = true)
     @assert type in [:Error, :Warn, :Info]
     if Try.iserr(res)
         if type == :Error
-            @error Try.unwrap_err(res)
+            show_warnings && @error Try.unwrap_err(res)
             Try.unwrap_err(res)
         elseif type == :Warn
-            return @warn Try.unwrap_err(res)
+            show_warnings && @warn Try.unwrap_err(res)
+            return Try.unwrap_err(res)
         elseif type == :Info
-            return @info Try.unwrap_err(res)
+            show_warnings && @info Try.unwrap_err(res)
+            return Try.unwrap_err(res)
         end
     end
 

@@ -7,6 +7,7 @@ using Try
 using TryExperimental
 using Logging
 using LoggingExtras
+using Preferences: @load_preference
 
 export all_cleaning_steps,
     load_csv,
@@ -39,6 +40,8 @@ public collect_all_present_serotypes,
 
 default_allowed_serotypes::Vector{String} = ["o", "a", "asia1"]
 
+show_warnings = @load_preference("show_warnings", true)
+
 function all_cleaning_steps(
         input_filename::T1,
         input_dir::T1;
@@ -47,8 +50,10 @@ function all_cleaning_steps(
         load_format = DataFrame
     ) where {T1 <: AbstractString}
 
-    println("\n==========================================================================")
-    println("Cleaning $(joinpath(input_dir, input_filename))\n")
+    if show_warnings
+        println("\n==========================================================================")
+        println("Cleaning $(joinpath(input_dir, input_filename))\n")
+    end
 
     if !isdir(output_dir)
         mkpath(output_dir)
@@ -1123,7 +1128,7 @@ function select_calculated_totals!(
         return Try.Err("Data contains neither calculated or provided totals rows with a key in the column :$column")
     end
 
-    @warn "Using calculated totals"
+    show_warnings && @warn "Using calculated totals"
     df[calculated_totals_rn, column] = titlecase("Total")
     popat!(df, provided_totals_rn)
 
@@ -1162,16 +1167,32 @@ function select_calculated_cols!(
         calculated_col = colnm * "_calculated"
         calculated_present = calculated_col in colnames
 
+        # If both count column type has both provided and calculated columns, only keep provided
         if calculated_present && colcap == "count"
             select!(df, Not(calculated_col))
         end
 
         if calculated_present && colcap == "pct"
-            @warn "Using calculated seroprevalence values for column $colnm"
+            show_warnings && @warn "Using calculated seroprevalence values for column $colnm"
             select!(df, Not(colnm))
             rename!(df, calculated_col => colnm)
         end
     end
+
+    # Columns that only have a calculated count column (and not a provided one) should be renamed to remove "_calculated"
+    count_reg = update_regex(
+        reg,
+        r"(.*)\|pct(.*)\$",
+        s"(\1\2)_calculated",
+    )
+
+    rename!(
+        n -> replace(
+            n,
+            count_reg => s"\1"
+        ),
+        df,
+    )
 
     return Try.Ok(nothing)
 end

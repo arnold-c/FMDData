@@ -10,9 +10,12 @@ include("./icar-processing-functions.jl")
 
 using PrecompileTools: @setup_workload, @compile_workload
 using DrWatson: srcdir
+using Preferences: set_preferences!, delete_preferences!
 
 # Don't run precompilation steps if in temporary test environment
 if isdir(icar_inputs_dir())
+    set_preferences!(FMDData, "show_warnings" => false)
+
     @setup_workload begin
         @compile_workload begin
             all_cleaning_steps(
@@ -60,15 +63,18 @@ if isdir(icar_inputs_dir())
                 )
             )
         end
+        # Clean up files from precompile steps
+        dir_files = filter(t -> contains(t, r".*\.csv$"), readdir(srcdir()))
+        for file in dir_files
+            rm(srcdir(file))
+        end
+        rm(srcdir("logfiles"); recursive = true)
     end
-
-    # Clean up files from precompile steps
-    dir_files = filter(t -> contains(t, r".*\.csv$"), readdir(srcdir()))
-    for file in dir_files
-        rm(srcdir(file))
-    end
-    rm(srcdir("logfiles"); recursive = true)
 end
+
+# Reset preferences to show warnings during package use
+delete_preferences!(FMDData, "show_warnings"; force = true)
+set_preferences!(FMDData, "show_warnings" => true)
 
 # Include to help LSP work in files outside of the src/ dir
 @static if false
