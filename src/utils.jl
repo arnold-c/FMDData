@@ -7,6 +7,7 @@ export input_dir,
     icar_cleaned_dir,
     icar_processed_dir,
     skip_missing_and_nan,
+    skip_nothing,
     update_regex
 
 input_dir(args...) = DrWatson.projectdir("inputs", args...)
@@ -35,6 +36,7 @@ function _log_try_error(res, type::Symbol = :Error; unwrap_ok = true)
 end
 
 skip_missing_and_nan = Skipper.skip(x -> ismissing(x) || isnan(x))
+skip_nothing = Skipper.skip(x -> isnothing(x))
 
 function update_regex(
         original_reg::Regex,
