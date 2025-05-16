@@ -25,7 +25,6 @@ export all_cleaning_steps,
     has_totals_row,
     all_totals_check,
     calculate_all_totals,
-    calculate_totals,
     totals_check,
     calculate_state_counts,
     calculate_state_seroprevalence,
@@ -811,18 +810,6 @@ function _collect_totals_check_args(
     return Try.Ok((col, colname, denom_col, denom_total, digits))
 end
 
-function calculate_totals(
-        col::Vector{T},
-        colname::String,
-    ) where {T <: Union{<:Union{<:Missing, <:Integer}, <:Integer}}
-    totals_dict = OrderedDict{AbstractString, Real}()
-    return _calculate_totals!(
-        totals_dict,
-        col,
-        colname
-    )
-end
-
 function _calculate_totals!(
         totals_dict::OrderedDict,
         col::Vector{T},
@@ -831,29 +818,6 @@ function _calculate_totals!(
     calculated_total = sum(skip_missing_and_nan(col))
     totals_dict[colname] = calculated_total
     return nothing
-end
-
-function calculate_totals(
-        col::Vector{T},
-        colname::String,
-        denom_col::Vector{C},
-        denom_total,
-        atol = 0.1,
-        digits = 1
-    ) where {
-        T <: Union{<:Union{<:Missing, <:AbstractFloat}, <:AbstractFloat},
-        C <: Union{<:Union{<:Missing, <:Integer}, <:Integer},
-    }
-    totals_dict = OrderedDict{AbstractString, Real}()
-    return _calculate_totals!(
-        totals_dict,
-        col,
-        colname,
-        denom_col,
-        denom_total,
-        atol,
-        digits
-    )
 end
 
 function _calculate_totals!(
@@ -906,74 +870,6 @@ function totals_check(
 
     return Try.Ok(nothing)
 end
-
-"""
-    totals_check(
-        col::Vector{T},
-        provided_total,
-        colname::String,
-    ) where {T <: Union{<:Union{<:Missing, <:Integer}, <:Integer}}
-
-Check if the provided total counts equal the sum calculated using the provided state counts.
-"""
-function _totals_check!(
-        errors_dict::OrderedDict,
-        col::Vector{T},
-        provided_total,
-        colname::String,
-    ) where {T <: Union{<:Union{<:Missing, <:Integer}, <:Integer}}
-    calculated_total = sum(skipmissing(col))
-    if calculated_total != provided_total
-        errors_dict[colname] = (provided_total, calculated_total)
-    end
-    return nothing
-end
-
-"""
-    _totals_check(
-        col::Vector{T},
-        provided_total,
-        colname::String,
-        denom_col::Vector{C},
-        denom_total
-    ) where {
-        T <: Union{<:Union{<:Missing, <:AbstractFloat}, <:AbstractFloat},
-        C <: Union{<:Union{<:Missing, <:Integer}, <:Integer},
-    }
-        col::Vector{T},
-        provided_total,
-        colname::String,
-        denom_col::Vector{C},
-        denom_total
-    ) where {
-        T <: Union{<:Union{<:Missing, <:AbstractFloat}, <:AbstractFloat},
-        C <: Union{<:Union{<:Missing, <:Integer}, <:Integer},
-    }
-
-Check if the provided total for serotype seroprevalence values equal a weighted sum based on reported total counts.
-"""
-function _totals_check!(
-        errors_dict::OrderedDict,
-        col::Vector{T},
-        provided_total,
-        colname::String,
-        denom_col::Vector{C},
-        denom_total,
-        atol = 0.1,
-        digits = 1
-    ) where {
-        T <: Union{<:Union{<:Missing, <:AbstractFloat}, <:AbstractFloat},
-        C <: Union{<:Union{<:Missing, <:Integer}, <:Integer},
-    }
-    calculated_total = round(
-        sum(skip_missing_and_nan(col .* denom_col)) / denom_total; digits = digits
-    )
-    if !isapprox(calculated_total, provided_total; atol = atol)
-        errors_dict[colname] = (provided_total, calculated_total)
-    end
-    return nothing
-end
-
 
 """
     calculate_state_counts(df::DataFrame, allowed_serotypes = default_allowed_serotypes)
