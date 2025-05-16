@@ -1091,20 +1091,19 @@ function select_calculated_cols!(
     end
 
     # Columns that only have a calculated count column (and not a provided one) should be renamed to remove "_calculated"
-    count_reg = update_regex(
+    calc_reg = update_regex(
         reg,
-        r"(.*)\|pct(.*)\$",
-        s"(\1\2)_calculated",
+        r"(.*)\$",
+        s"(\1)_calculated",
     )
 
     rename!(
         n -> replace(
             n,
-            count_reg => s"\1"
+            calc_reg => s"\1"
         ),
         df,
     )
-
     return Try.Ok(nothing)
 end
 
