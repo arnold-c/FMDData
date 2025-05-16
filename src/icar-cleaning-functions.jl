@@ -123,6 +123,9 @@ function all_cleaning_steps(
         _log_try_error(select_calculated_totals!(calculated_state_seroprevs_data))
         _log_try_error(select_calculated_cols!(calculated_state_seroprevs_data))
 
+        _log_try_error(sort_columns!(calculated_state_seroprevs_data))
+        _log_try_error(sort_states!(calculated_state_seroprevs_data))
+
         _log_try_error(
             write_csv(output_filename, output_dir, calculated_state_seroprevs_data)
         )
