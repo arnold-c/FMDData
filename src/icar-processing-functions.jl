@@ -199,7 +199,11 @@ function infer_later_year_values(
         reg = count_pct_reg
     )
 
-    @? all_totals_check(later_df; reg = count_pct_reg)
+    @? sort_states!(later_df)
+    @? sort_columns!(later_df)
+
+
+    @? all_totals_check(later_df; reg = count_pct_reg, atol = atol, digits = digits)
 
     return Try.Ok(later_df)
 end
