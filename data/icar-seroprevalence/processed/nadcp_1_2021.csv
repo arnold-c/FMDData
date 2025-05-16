@@ -1,0 +1,12 @@
+states_ut,serotype_all_count_pre,serotype_all_count_post,serotype_o_count_pre,serotype_o_pct_pre,serotype_o_count_post,serotype_o_pct_post,serotype_a_count_pre,serotype_a_pct_pre,serotype_a_count_post,serotype_a_pct_post,serotype_asia1_count_pre,serotype_asia1_pct_pre,serotype_asia1_count_post,serotype_asia1_pct_post,sample_year,report_year,round_name,test_type,test_threshold
+Andaman,328,516,65,19.8,203,39.3,32,9.8,180,34.9,80,24.4,234,45.3,2021,2021,NADCP 1,SPCE,1.8 log10 @ 50% inhibition
+Himachal Pradesh,879,1273,25,2.8,120,9.4,30,3.4,93,7.3,9,1.0,48,3.8,2021,2021,NADCP 1,SPCE,1.8 log10 @ 50% inhibition
+Jammu & Kashmir,0,139,0,NaN,34,24.5,0,NaN,27,19.4,0,NaN,26,18.7,2021,2021,NADCP 1,SPCE,1.8 log10 @ 50% inhibition
+Kerala,1485,1349,800,53.9,959,71.1,674,45.4,788,58.4,761,51.2,898,66.6,2021,2021,NADCP 1,SPCE,1.8 log10 @ 50% inhibition
+Meghalaya,586,586,82,14.0,244,41.6,41,7.0,202,34.5,99,16.9,190,32.4,2021,2021,NADCP 1,SPCE,1.8 log10 @ 50% inhibition
+Nagaland,726,419,96,13.2,25,6.0,45,6.2,54,12.9,31,4.3,40,9.5,2021,2021,NADCP 1,SPCE,1.8 log10 @ 50% inhibition
+Pondichery,960,960,807,84.1,857,89.3,755,78.6,771,80.3,814,84.8,856,89.2,2021,2021,NADCP 1,SPCE,1.8 log10 @ 50% inhibition
+Punjab,53,886,9,17.0,201,22.7,7,13.2,148,16.7,8,15.1,209,23.6,2021,2021,NADCP 1,SPCE,1.8 log10 @ 50% inhibition
+Rajasthan,1188,1188,533,44.9,678,57.1,530,44.6,642,54.0,459,38.6,628,52.9,2021,2021,NADCP 1,SPCE,1.8 log10 @ 50% inhibition
+Sikkim,78,353,6,7.7,62,17.6,4,5.1,46,13.0,6,7.7,39,11.0,2021,2021,NADCP 1,SPCE,1.8 log10 @ 50% inhibition
+Total,6283,7669,2423,38.6,3383,44.1,2118,33.7,2951,38.5,2267,36.1,3168,41.3,2021,2021,NADCP 1,SPCE,1.8 log10 @ 50% inhibition

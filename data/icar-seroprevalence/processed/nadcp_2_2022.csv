@@ -1,28 +1,28 @@
-states_ut,serotype_all_count_pre,serotype_all_count_post,serotype_o_count_pre_calculated,serotype_o_count_post_calculated,serotype_a_count_pre_calculated,serotype_a_count_post_calculated,serotype_asia1_count_pre_calculated,serotype_asia1_count_post_calculated,serotype_o_pct_pre,serotype_o_pct_post,serotype_a_pct_pre,serotype_a_pct_post,serotype_asia1_pct_pre,serotype_asia1_pct_post,sample_year,report_year,round_name,test_type,test_threshold
-A&N Island,108,472,11,374,6,321,15,405,10.2,79.2,5.6,68.0,13.9,85.8,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
-Arunachal Pradesh,417,342,65,282,50,250,2,248,15.6,82.5,12.0,73.1,0.5,72.5,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
-Assam,1848,1848,456,1055,368,1002,368,1016,24.7,57.1,19.9,54.2,19.9,55.0,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
-Bihar,2246,2117,359,959,166,972,265,788,16.0,45.3,7.4,45.9,11.8,37.2,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
-Chhattisgarh,2209,,539,,367,,254,,24.4,,16.6,,11.5,,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
-Dadra and Nagar Haveli and Daman and Diu,200,191,112,133,55,129,64,112,56.0,69.6,27.5,67.5,32.0,58.6,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
-Goa,1289,1289,624,1003,452,1029,557,1093,48.4,77.8,35.1,79.8,43.2,84.8,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
-Gujarat,2184,2184,332,887,264,592,306,760,15.2,40.6,12.1,27.1,14.0,34.8,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
-Himachal Pradesh,619,1108,196,649,166,574,127,553,31.7,58.6,26.8,51.8,20.5,49.9,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
-Jammu & Kashmir,586,1048,12,705,12,610,26,602,2.0,67.3,2.0,58.2,4.4,57.4,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
-Jharkhand,83,,28,,13,,30,,33.7,,15.7,,36.1,,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
-Karnataka,2166,2173,1083,1858,979,1827,986,1808,50.0,85.5,45.2,84.1,45.5,83.2,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
-Kerala,2182,2182,779,1586,735,1510,807,1582,35.7,72.7,33.7,69.2,37.0,72.5,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
-Madhya Pradesh,1014,1014,356,639,385,675,211,526,35.1,63.0,38.0,66.6,20.8,51.9,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
-Maharashtra,3341,3809,1236,2957,1278,3106,1201,3040,37.0,77.6,38.3,81.5,35.9,79.8,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
-Meghalaya,198,154,69,140,120,142,16,102,34.8,90.9,60.6,92.2,8.1,66.2,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
-Nagaland,1056,,468,,297,,334,,44.3,,28.1,,31.6,,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
-Odisha,2262,2262,303,2034,283,1988,287,1968,13.4,89.9,12.5,87.9,12.7,87.0,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
-Pondichery,883,883,806,847,734,793,755,787,91.3,95.9,83.1,89.8,85.5,89.1,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
-Punjab,2196,2196,729,1452,648,1465,663,1495,33.2,66.1,29.5,66.7,30.2,68.1,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
-Sikkim,1138,1016,142,532,127,490,143,466,12.5,52.4,11.2,48.2,12.6,45.9,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
-Tamil Nadu,2327,2327,1196,1822,849,1594,945,1636,51.4,78.3,36.5,68.5,40.6,70.3,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
-Telangana,2275,2275,678,1456,514,1274,500,1301,29.8,64.0,22.6,56.0,22.0,57.2,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
-Uttar Pradesh,1554,2240,469,1223,376,1279,292,1015,30.2,54.6,24.2,57.1,18.8,45.3,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
-Uttarakhand,1358,1236,227,719,181,738,149,556,16.7,58.2,13.3,59.7,11.0,45.0,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
-West Bengal,803,814,247,613,138,513,157,518,30.8,75.3,17.2,63.0,19.6,63.6,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
-Total,36542,35180,11522,23925,9563,22873,9460,22377,31.5,68.0,26.2,65.0,25.9,63.6,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
+states_ut,serotype_all_count_pre,serotype_all_count_post,serotype_o_count_pre,serotype_o_pct_pre,serotype_o_count_post,serotype_o_pct_post,serotype_a_count_pre,serotype_a_pct_pre,serotype_a_count_post,serotype_a_pct_post,serotype_asia1_count_pre,serotype_asia1_pct_pre,serotype_asia1_count_post,serotype_asia1_pct_post,sample_year,report_year,round_name,test_type,test_threshold
+A&N Island,108,472,11,10.2,374,79.2,6,5.6,321,68.0,15,13.9,405,85.8,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
+Arunachal Pradesh,417,342,65,15.6,282,82.5,50,12.0,250,73.1,2,0.5,248,72.5,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
+Assam,1848,1848,456,24.7,1055,57.1,368,19.9,1002,54.2,368,19.9,1016,55.0,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
+Bihar,2246,2117,359,16.0,959,45.3,166,7.4,972,45.9,265,11.8,788,37.2,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
+Chhattisgarh,2209,0,539,24.4,0,NaN,367,16.6,0,NaN,254,11.5,0,NaN,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
+Dadra and Nagar Haveli and Daman and Diu,200,191,112,56.0,133,69.6,55,27.5,129,67.5,64,32.0,112,58.6,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
+Goa,1289,1289,624,48.4,1003,77.8,452,35.1,1029,79.8,557,43.2,1093,84.8,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
+Gujarat,2184,2184,332,15.2,887,40.6,264,12.1,592,27.1,306,14.0,760,34.8,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
+Himachal Pradesh,619,1108,196,31.7,649,58.6,166,26.8,574,51.8,127,20.5,553,49.9,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
+Jammu & Kashmir,586,1048,12,2.0,705,67.3,12,2.0,610,58.2,26,4.4,602,57.4,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
+Jharkhand,83,0,28,33.7,0,NaN,13,15.7,0,NaN,30,36.1,0,NaN,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
+Karnataka,2166,2173,1083,50.0,1858,85.5,979,45.2,1827,84.1,986,45.5,1808,83.2,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
+Kerala,2182,2182,779,35.7,1586,72.7,735,33.7,1510,69.2,807,37.0,1582,72.5,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
+Madhya Pradesh,1014,1014,356,35.1,639,63.0,385,38.0,675,66.6,211,20.8,526,51.9,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
+Maharashtra,3341,3809,1236,37.0,2957,77.6,1278,38.3,3106,81.5,1201,35.9,3040,79.8,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
+Meghalaya,198,154,69,34.8,140,90.9,120,60.6,142,92.2,16,8.1,102,66.2,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
+Nagaland,1056,0,468,44.3,0,NaN,297,28.1,0,NaN,334,31.6,0,NaN,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
+Odisha,2262,2262,303,13.4,2034,89.9,283,12.5,1988,87.9,287,12.7,1968,87.0,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
+Pondichery,883,883,806,91.3,847,95.9,734,83.1,793,89.8,755,85.5,787,89.1,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
+Punjab,2196,2196,729,33.2,1452,66.1,648,29.5,1465,66.7,663,30.2,1495,68.1,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
+Sikkim,1138,1016,142,12.5,532,52.4,127,11.2,490,48.2,143,12.6,466,45.9,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
+Tamil Nadu,2327,2327,1196,51.4,1822,78.3,849,36.5,1594,68.5,945,40.6,1636,70.3,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
+Telangana,2275,2275,678,29.8,1456,64.0,514,22.6,1274,56.0,500,22.0,1301,57.2,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
+Uttar Pradesh,1554,2240,469,30.2,1223,54.6,376,24.2,1279,57.1,292,18.8,1015,45.3,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
+Uttarakhand,1358,1236,227,16.7,719,58.2,181,13.3,738,59.7,149,11.0,556,45.0,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
+West Bengal,803,814,247,30.8,613,75.3,138,17.2,513,63.0,157,19.6,518,63.6,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition
+Total,36542,35180,11522,31.5,23925,68.0,9563,26.2,22873,65.0,9460,25.9,22377,63.6,2022,2022,NADCP 2,SPCE,1.65 log10 @ 35% inhibition

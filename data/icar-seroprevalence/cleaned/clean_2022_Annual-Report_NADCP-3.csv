@@ -1,4 +1,4 @@
-states_ut,serotype_all_count_pre,serotype_all_count_post,serotype_o_pct_pre,serotype_o_pct_post,serotype_a_pct_pre,serotype_a_pct_post,serotype_asia1_pct_pre,serotype_asia1_pct_post,serotype_o_count_pre_calculated,serotype_o_count_post_calculated,serotype_a_count_pre_calculated,serotype_a_count_post_calculated,serotype_asia1_count_pre_calculated,serotype_asia1_count_post_calculated
-Haryana,2145,2143,32.4,74.3,35.9,77.9,34.6,79.5,695,1592,770,1669,742,1704
-Karnataka,1612,,45.3,,42.3,,41.4,,730,,682,,667,
-Total,3757,2143,37.9,74.3,38.6,77.9,37.5,79.5,1424,1592,1450,1669,1409,1704
+states_ut,serotype_all_count_pre,serotype_all_count_post,serotype_o_count_pre,serotype_o_pct_pre,serotype_o_count_post,serotype_o_pct_post,serotype_a_count_pre,serotype_a_pct_pre,serotype_a_count_post,serotype_a_pct_post,serotype_asia1_count_pre,serotype_asia1_pct_pre,serotype_asia1_count_post,serotype_asia1_pct_post
+Haryana,2145,2143,695,32.4,1592,74.3,770,35.9,1669,77.9,742,34.6,1704,79.5
+Karnataka,1612,,730,45.3,,,682,42.3,,,667,41.4,,
+Total,3757,2143,1424,37.9,1592,74.3,1450,38.6,1669,77.9,1409,37.5,1704,79.5
