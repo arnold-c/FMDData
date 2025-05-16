@@ -657,7 +657,7 @@ function all_totals_check(
         totals_key = "total",
         allowed_serotypes = vcat("all", default_allowed_serotypes),
         reg::Regex = Regex("serotype_(?|$(join(allowed_serotypes, "|")))_(count|pct)_(pre|post)\$"),
-        atol = 0.1,
+        atol = 0.0,
         digits = 1
     )
 
@@ -667,7 +667,6 @@ function all_totals_check(
         totals_key = totals_key,
         allowed_serotypes = allowed_serotypes,
         reg = reg,
-        atol = atol,
         digits = digits
     )
 
@@ -677,7 +676,8 @@ function all_totals_check(
         column = column,
         totals_key = totals_key,
         allowed_serotypes = allowed_serotypes,
-        reg = reg
+        reg = reg,
+        atol = atol
     )
 end
 
@@ -687,7 +687,9 @@ function all_totals_check(
         column::Symbol = :states_ut,
         totals_key = "total",
         allowed_serotypes = vcat("all", default_allowed_serotypes),
-        reg::Regex = Regex("serotype_(?|$(join(allowed_serotypes, "|")))_(count|pct)_(pre|post)\$")
+        reg::Regex = Regex("serotype_(?|$(join(allowed_serotypes, "|")))_(count|pct)_(pre|post)\$"),
+        atol = 0.0,
+        digits = 1
     )
 
     totals_rn, selected_df = Try.@? _totals_row_selectors(
@@ -702,7 +704,8 @@ function all_totals_check(
     Try.@? totals_check(
         selected_df[totals_rn, :],
         totals_dict,
-        column
+        column;
+        atol = atol,
     )
 
     return Try.Ok(nothing)
@@ -715,7 +718,6 @@ function calculate_all_totals(
         totals_key = "total",
         allowed_serotypes = vcat("all", default_allowed_serotypes),
         reg::Regex = Regex("serotype_(?|$(join(allowed_serotypes, "|")))_(count|pct)_(pre|post)\$"),
-        atol = 0.1,
         digits = 1
     )
     totals_rn, selected_df = Try.@? _totals_row_selectors(
@@ -736,7 +738,7 @@ function calculate_all_totals(
             selected_df,
             totals_rn,
             allowed_serotypes,
-            atol,
+            digits
         )
         Try.iserr(totals_check_args) && return totals_check_args
         _calculate_totals!(totals_dict, Try.unwrap(totals_check_args)...)
@@ -791,7 +793,6 @@ function _collect_totals_check_args(
         df::DataFrame,
         totals_rn,
         allowed_serotypes = default_allowed_serotypes,
-        atol = 0.1,
         digits = 1,
     ) where {T <: Union{Union{<:Missing, <:AbstractFloat}, <:AbstractFloat}}
     # Forms the regex string: r"serotype_(?|o|a|asia1)_pct_(pre|post)$"
@@ -807,7 +808,7 @@ function _collect_totals_check_args(
     denom_col = df[Not(totals_rn), denom_colname]
     denom_total = sum(skipmissing(denom_col))
 
-    return Try.Ok((col, colname, denom_col, denom_total, atol, digits))
+    return Try.Ok((col, colname, denom_col, denom_total, digits))
 end
 
 function calculate_totals(
@@ -861,7 +862,6 @@ function _calculate_totals!(
         colname::String,
         denom_col::Vector{C},
         denom_total,
-        atol = 0.1,
         digits = 1
     ) where {
         T <: Union{<:Union{<:Missing, <:AbstractFloat}, <:AbstractFloat},
@@ -875,17 +875,27 @@ function _calculate_totals!(
     return nothing
 end
 
+"""
+    totals_check(
+        col::Vector{T},
+        provided_total,
+        colname::String,
+    ) where {T <: Union{<:Union{<:Missing, <:Integer}, <:Integer}}
+
+Check if the provided total counts equal the sum calculated using the provided state counts.
+"""
 function totals_check(
         totals::DataFrameRow,
         calculated_totals::OrderedDict,
-        column::Symbol = :states_ut
+        column::Symbol = :states_ut;
+        atol = 0.0
     )
     errors_dict = OrderedDict{AbstractString, NamedTuple{(:provided, :calculated)}}()
 
     for colname in names(totals)
         provided_total = totals[colname]
         calculated_total = calculated_totals[colname]
-        if provided_total != calculated_total
+        if !isapprox(provided_total, calculated_total; atol = atol)
             errors_dict[colname] = (provided_total, calculated_total)
         end
     end
