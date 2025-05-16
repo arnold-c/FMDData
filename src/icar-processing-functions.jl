@@ -112,6 +112,7 @@ function infer_later_year_values(
         reg::Regex = Regex(
             "serotype_(?:$(join(allowed_serotypes, "|")))_count_(pre|post).*"
         ),
+        atol = 0.0,
         digits = 1
 
     ) where {T <: AbstractDataFrame}
@@ -154,6 +155,8 @@ function infer_later_year_values(
         end
     end
 
+    _correct_serotype_counts!(later_df; reg = reg)
+
     # Only calculate for count columns
     totals_dict = @? calculate_all_totals(later_df; reg = reg)
     push!(
@@ -191,7 +194,6 @@ function infer_later_year_values(
         reg,
         r"(.*)count(.*)",
         s"\1(?:count|pct)\2",
-
     )
 
     _remove_states_without_data!(
@@ -212,7 +214,9 @@ function _remove_states_without_data!(
         df;
         column::Symbol = :states_ut,
         allowed_serotypes = vcat("all", default_allowed_serotypes),
-        reg::Regex = Regex("serotype_(?:$(join(default_allowed_serotypes, "|")))_(?:count|pct)_(?:pre|post).*")
+        reg::Regex = Regex(
+            "serotype_(?:$(join(allowed_serotypes, "|")))_(?:count|pct)_(?:pre|post).*"
+        )
     )
     states = String[]
     for row in eachrow(df)
@@ -227,6 +231,56 @@ function _remove_states_without_data!(
         column => ByRow(c -> !(c in states)),
     )
     return nothing
+end
+
+"""
+	_correct_serotype_counts!(
+        df::DataFrame;
+        statename_column = :states_ut,
+        allowed_serotypes = default_allowed_serotypes,
+        reg::Regex
+	)
+
+Correct any serotype counts that have been miscalculated during the inferral steps, arising from rounding errors in the provided seroprevalence numbers that are then translated into counts to difference between initial and later dataframes. If the pre or post counts for all serotypes are 0, then all serotype specific counts must be 0 as well, so correct.
+"""
+function _correct_serotype_counts!(
+        df::DataFrame;
+        statename_column = :states_ut,
+        allowed_serotypes = default_allowed_serotypes,
+        reg::Regex = Regex(
+            "serotype_(?:$(join(allowed_serotypes, "|")))_(count)_(?:pre|post)\$"
+        ),
+    )
+
+    all_count_reg = update_regex(
+        reg,
+        r"(serotype_)(?:.*)(_\(count\).*)",
+        s"\1all\2"
+    )
+
+
+    pre_all_column = df[!, all_count_reg]
+
+    for (nm, col) in pairs(eachcol(pre_all_column))
+        pre_post_type = match(r".*(pre|post)", String(nm))[1]
+        pre_post_serotype_count_reg = update_regex(
+            reg,
+            r"(.*)\(.*pre\|post\).*",
+            SubstitutionString("\\1(?:$(pre_post_type))")
+        )
+
+        pre_post_edit_idx = []
+        for (i, v) in pairs(col)
+            if ismissing(v) || v == 0
+                push!(pre_post_edit_idx, i)
+            end
+        end
+        if !isempty(pre_post_edit_idx)
+            df[pre_post_edit_idx, pre_post_serotype_count_reg] .= 0
+        end
+    end
+
+    return df
 end
 
 function combine_round_dfs(dfs::DataFrame...)
