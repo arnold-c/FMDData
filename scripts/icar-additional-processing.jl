@@ -71,7 +71,7 @@ with_logger(logger) do
     FMDData._log_try_error(
         add_all_metadata!(
             cumulative_nadcp_2_2022 => OrderedDict(
-                :sample_year => "Combined",
+                :sample_year => "2021/2022",
                 :report_year => 2022,
                 :round_name => "NADCP 2",
                 :test_type => "SPCE",
@@ -145,7 +145,7 @@ with_logger(logger) do
     FMDData._log_try_error(
         add_all_metadata!(
             cumulative_nadcp_1_2021 => OrderedDict(
-                :sample_year => "Combined",
+                :sample_year => "2020/2021",
                 :report_year => 2021,
                 :round_name => "NADCP 1",
                 :test_type => "SPCE",
