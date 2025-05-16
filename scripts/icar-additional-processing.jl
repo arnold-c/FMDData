@@ -47,9 +47,11 @@ logfile = joinpath(icar_processed_logdir, "nadcp_2.log")
 logger = FileLogger(logfile)
 
 with_logger(logger) do
-    cumulative_nadcp_2_2022 = @? load_csv(
-        "clean_2022_Annual-Report_NADCP-2.csv",
-        icar_cleaned_dir()
+    cumulative_nadcp_2_2022 = FMDData._log_try_error(
+        load_csv(
+            "clean_2022_Annual-Report_NADCP-2.csv",
+            icar_cleaned_dir()
+        )
     )
 
     nadcp_2_2021 = FMDData._log_try_error(
@@ -142,7 +144,7 @@ with_logger(logger) do
 
     FMDData._log_try_error(
         add_all_metadata!(
-            cumulative_nadcp_2_2021 => OrderedDict(
+            cumulative_nadcp_1_2021 => OrderedDict(
                 :sample_year => "Combined",
                 :report_year => 2021,
                 :round_name => "NADCP 1",
@@ -154,7 +156,7 @@ with_logger(logger) do
 
     FMDData._log_try_error(
         add_all_metadata!(
-            nadcp_2_2021 => OrderedDict(
+            nadcp_1_2021 => OrderedDict(
                 :sample_year => 2021,
                 :report_year => 2021,
                 :round_name => "NADCP 1",
@@ -166,7 +168,7 @@ with_logger(logger) do
 
     FMDData._log_try_error(
         add_all_metadata!(
-            nadcp_2_2020 => OrderedDict(
+            nadcp_1_2020 => OrderedDict(
                 :sample_year => 2020,
                 :report_year => 2020,
                 :round_name => "NADCP 1",
