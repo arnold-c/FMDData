@@ -137,32 +137,32 @@ function infer_later_year_values(
                 initial_df[!, statename_column]
             )
 
-            ismissing(later_df[later_state_idx, col_name]) &&
-                return Try.Err("State $state_name and column $col_name value is missing in the follow-up dataset.")
+            ismissing(later_df[later_state_idx, col_name]) && !ismissing(initial_df[initial_state_idx, col_name]) &&
+                return Try.Err("State $state_name and column $col_name value is missing in the follow-up dataset, but not in the initial dataset.")
 
             initial_value = if ismissing(initial_df[initial_state_idx, col_name])
                 convert(eltype(initial_df[!, col_name]), 0)
             else
                 initial_df[initial_state_idx, col_name]
             end
-
             later_df[later_state_idx, col_name] = later_df[later_state_idx, col_name] - initial_value
+
+            # if the initial value is smaller than the later value by 1 then it's due to a rounding issue in calculating the counts from a pct
+            if !ismissing(later_df[later_state_idx, col_name]) && later_df[later_state_idx, col_name] == -1
+                later_df[later_state_idx, col_name] = 0
+            end
         end
     end
 
     # Only calculate for count columns
     totals_dict = @? calculate_all_totals(later_df; reg = reg)
-    totals_check_state = all_totals_check(totals_dict, later_df; reg = reg)
-
-    if Try.iserr(totals_check_state)
-        push!(
-            later_df,
-            merge(Dict("states_ut" => "Total calculated"), totals_dict);
-            promote = true,
-            cols = :subset
-        )
-        select_calculated_totals!(later_df)
-    end
+    push!(
+        later_df,
+        merge(Dict("states_ut" => "Total calculated"), totals_dict);
+        promote = true,
+        cols = :subset
+    )
+    select_calculated_totals!(later_df)
 
 
     # Calculate state serotype pct values
@@ -185,13 +185,6 @@ function infer_later_year_values(
         renamecols = true
     )
 
-    rename!(
-        n -> replace(
-            n,
-            r"(.*_calculated)_calculated" => s"\1"
-        ),
-        later_df,
-    )
     select_calculated_cols!(later_df)
 
     count_pct_reg = update_regex(
