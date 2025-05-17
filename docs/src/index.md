@@ -1,7 +1,8 @@
 # FMDData
 
-*Documentation goes here.*
+This project contains the code and cleaned FMD data sets for India's FMD disease elimination project.
 
-```@docs
-{FMDData}.{FMDData}
+```@contents
+Pages = ["public.md", "internal.md"]
+Depth = 2
 ```

@@ -1,5 +1,6 @@
 using DataFrames
 using Try
+using OrderedCollections: OrderedDict
 
 @testset verbose = true "icar-cleaning-functions.jl" begin
 
@@ -13,7 +14,7 @@ using Try
             Try.Err("$not_a_dir is not a valid directory")
         )
 
-        dir = "./"
+        dir = test_dir()
 
 
         @test isequal(
@@ -23,7 +24,7 @@ using Try
 
         filename = "test-data.csv"
 
-        data = load_csv(
+        data = Try.@? load_csv(
             filename,
             dir,
             DataFrame
@@ -73,14 +74,14 @@ using Try
 
     end
 
-    dir = "./"
+    dir = test_dir()
     filename = "test-data.csv"
-    data = load_csv(
+    data = Try.@? load_csv(
         filename,
         dir,
         DataFrame
     )
-    cleaned_colname_data = clean_colnames(data)
+    cleaned_colname_data = Try.@? clean_colnames(data)
 
     @testset "Column name cleaning" begin
         @test isequal(
@@ -109,7 +110,7 @@ using Try
         )
     end
 
-    renamed_aggregated_counts_df = rename_aggregated_pre_post_counts(cleaned_colname_data)
+    renamed_aggregated_counts_df = Try.@? rename_aggregated_pre_post_counts(cleaned_colname_data)
     @testset "Rename aggregated Pre/Post counts" begin
         @test isequal(
             names(renamed_aggregated_counts_df),
@@ -127,7 +128,7 @@ using Try
         )
     end
 
-    cleaned_states_data = correct_all_state_names(
+    cleaned_states_data = Try.@? correct_all_state_names(
         renamed_aggregated_counts_df,
         :states_ut,
         FMDData.states_dict
@@ -139,11 +140,26 @@ using Try
         end
 
         @test isequal(
+            correct_all_state_names(
+                DataFrame(
+                    "states_ut" => ["ab", "b", "c", "d"]
+                ),
+                :states_ut,
+                Dict(
+                    "a" => "a_new",
+                    "b" => "b_new",
+                    "c" => "c_new"
+                )
+            ),
+            Try.Err("State name `ab` doesn't exist in current dictionary match. Confirm if this is a new state or uncharacterized misspelling. State name `d` doesn't exist in current dictionary match. Confirm if this is a new state or uncharacterized misspelling.")
+        )
+
+        @test isequal(
             FMDData.correct_state_name(
                 "New State",
                 FMDData.states_dict
             ),
-            Try.Err("State name `New State` doesn't exist in current dictionary match. Confirm if this is a new state or uncharacterized misspelling")
+            Try.Err("State name `New State` doesn't exist in current dictionary match. Confirm if this is a new state or uncharacterized misspelling.")
         )
     end
 
@@ -153,16 +169,16 @@ using Try
         similar_column_names_df = DataFrame(
             "states_ut" => String[],
             "states_ut" => String[],
-            "seroprevalance_all_count_pre" => Int64[],
-            "seroprevalance_all_count_post" => Int64[],
-            "seroprevalance_all_pct_pre" => Float64[],
-            "seroprevalance_all_count_pre" => Int64[],
+            "serotype_all_count_pre" => Int64[],
+            "serotype_all_count_post" => Int64[],
+            "serotype_all_pct_pre" => Float64[],
+            "serotype_all_count_pre" => Int64[],
             makeunique = true
         )
 
         @test isequal(
             FMDData._check_similar_column_names(similar_column_names_df),
-            Try.Err("Similar column names were found in the data: OrderedCollections.OrderedDict(\"states_ut\" => [\"states_ut_1\"], \"seroprevalance_all_count_pre\" => [\"seroprevalance_all_count_pre_1\"]).")
+            Try.Err("Similar column names were found in the data: OrderedDict(\"states_ut\" => [\"states_ut_1\"], \"serotype_all_count_pre\" => [\"serotype_all_count_pre_1\"]).")
         )
 
         similar_column_names_df_2 = DataFrame(
@@ -170,21 +186,21 @@ using Try
             "states_ut" => String[],
             "states_ut_1" => String[],
             "states_u" => String[],
-            "seroprevalance_all_count_pre" => Int64[],
-            "seroprevalance_all_count_post" => Int64[],
-            "seroprevalance_all_pct_pre" => Float64[],
-            "seroprevalance_all_count_pre_test" => Int64[],
+            "serotype_all_count_pre" => Int64[],
+            "serotype_all_count_post" => Int64[],
+            "serotype_all_pct_pre" => Float64[],
+            "serotype_all_count_pre_test" => Int64[],
         )
 
         @test isequal(
             FMDData._check_similar_column_names(similar_column_names_df_2),
-            Try.Err("Similar column names were found in the data: OrderedCollections.OrderedDict(\"states_u\" => [\"states_ut\", \"states_ut_1\", \"states_ut_1_2\"], \"seroprevalance_all_count_pre\" => [\"seroprevalance_all_count_pre_test\"]).")
+            Try.Err("Similar column names were found in the data: OrderedDict(\"states_u\" => [\"states_ut\", \"states_ut_1\", \"states_ut_1_2\"], \"serotype_all_count_pre\" => [\"serotype_all_count_pre_test\"]).")
         )
 
 
         @test isequal(
             check_duplicated_column_names(similar_column_names_df),
-            Try.Err("Similar column names were found in the data: OrderedCollections.OrderedDict(\"states_ut\" => [\"states_ut_1\"], \"seroprevalance_all_count_pre\" => [\"seroprevalance_all_count_pre_1\"]).")
+            Try.Err("Similar column names were found in the data: OrderedDict(\"states_ut\" => [\"states_ut_1\"], \"serotype_all_count_pre\" => [\"serotype_all_count_pre_1\"]).")
         )
 
         duplicate_column_vals_df = DataFrame(
@@ -315,7 +331,7 @@ using Try
 
         @test isequal(
             check_seroprevalence_as_pct(seroprevs_as_props_df),
-            Try.Err("All `pct` columns should be a %, not a proportion. The following columns are likely reported as proportions with associated mean values: OrderedCollections.OrderedDict{Symbol, AbstractFloat}(:serotype_a_pct_pre => 0.12, :serotype_a_pct_post => 0.62)")
+            Try.Err("All `pct` columns should be a %, not a proportion. The following columns are likely reported as proportions with associated mean values: OrderedDict{Symbol, AbstractFloat}(:serotype_a_pct_pre => 0.12, :serotype_a_pct_post => 0.62)")
         )
 
         @test Try.isok(check_seroprevalence_as_pct(seroprevs_with_missing_df))
@@ -342,7 +358,7 @@ using Try
 
         @test isequal(
             check_pre_post_exists(missing_pre_post_df),
-            Try.Err("All serotype results should have both 'Pre' and 'Post' results columns, only. Instead, the following serotype results have the associated data columns:\nOrderedCollections.OrderedDict{AbstractString, Vector{AbstractString}}(\"serotype_a_pct\" => AbstractString[\"pre\"], \"serotype_a_count\" => AbstractString[\"post\"])")
+            Try.Err("All serotype results should have both 'Pre' and 'Post' results columns, only. Instead, the following serotype results have the associated data columns:\nOrderedDict{AbstractString, Vector{AbstractString}}(\"serotype_a_pct\" => AbstractString[\"pre\"], \"serotype_a_count\" => AbstractString[\"post\"])")
         )
 
     end
@@ -386,13 +402,13 @@ using Try
         @test isequal(
             all_totals_check(incorrect_totals_row_df; atol = 0.1),
             Try.Err(
-                "There were discrepancies in the totals calculated and those provided in the data: OrderedCollections.OrderedDict{AbstractString, NamedTuple{(:provided, :calculated)}}(\"serotype_a_count_pre\" => (provided = 5, calculated = 4), \"serotype_a_count_post\" => (provided = 20, calculated = 19), \"serotype_a_pct_pre\" => (provided = 13.1, calculated = 13.3), \"serotype_a_pct_post\" => (provided = 63.0, calculated = 63.3))"
+                "There were discrepancies in the totals calculated and those provided in the data: OrderedDict{AbstractString, NamedTuple{(:provided, :calculated)}}(\"serotype_a_count_pre\" => (provided = 5, calculated = 4), \"serotype_a_count_post\" => (provided = 20, calculated = 19), \"serotype_a_pct_pre\" => (provided = 13.1, calculated = 13.3), \"serotype_a_pct_post\" => (provided = 63.0, calculated = 63.3))"
             )
         )
 
         @test Try.isok(all_totals_check(correct_totals_row_df))
 
-        incorrect_totals_calculated = Dict(
+        incorrect_totals_calculated = OrderedDict(
             "serotype_all_count_pre" => 30,
             "serotype_all_count_post" => 30,
             "serotype_a_count_pre" => 4,
@@ -407,7 +423,7 @@ using Try
                 incorrect_totals_row_df[end, Not(:states_ut)],
                 incorrect_totals_calculated
             ),
-            Try.Err("There were discrepancies in the totals calculated and those provided in the data: OrderedCollections.OrderedDict{AbstractString, NamedTuple{(:provided, :calculated)}}(\"serotype_a_count_pre\" => (provided = 5, calculated = 4), \"serotype_a_count_post\" => (provided = 20, calculated = 19), \"serotype_a_pct_pre\" => (provided = 13.1, calculated = 13.3), \"serotype_a_pct_post\" => (provided = 63.0, calculated = 63.3))")
+            Try.Err("There were discrepancies in the totals calculated and those provided in the data: OrderedDict{AbstractString, NamedTuple{(:provided, :calculated)}}(\"serotype_a_count_pre\" => (provided = 5, calculated = 4), \"serotype_a_count_post\" => (provided = 20, calculated = 19), \"serotype_a_pct_pre\" => (provided = 13.1, calculated = 13.3), \"serotype_a_pct_post\" => (provided = 63.0, calculated = 63.3))")
         )
 
     end
@@ -464,8 +480,305 @@ using Try
                     "serotype_a_pct_post_calculated" => [80.0, 60.0, 50.0, 63.3],
                 )
             ),
-            Try.Err("The following calculated columns have discrepancies relative to the provided columns: OrderedCollections.OrderedDict{AbstractString, AbstractString}(\"serotype_a_count_pre\" => \"The following indices (row numbers) differ: [2]. Original: [1]. Calculated: [0]\", \"serotype_a_pct_pre\" => \"The following indices (row numbers) differ: [2]. Original: [10.0]. Calculated: [12.0]\")")
+            Try.Err("The following calculated columns have discrepancies relative to the provided columns: OrderedDict{AbstractString, AbstractString}(\"serotype_a_count_pre\" => \"The following indices (row numbers) differ: [2]. Original: [1]. Calculated: [0]\", \"serotype_a_pct_pre\" => \"The following indices (row numbers) differ: [2]. Original: [10.0]. Calculated: [12.0]\")")
         )
     end
 
+    @testset "Select totals row" begin
+
+        both_totals_df = DataFrame(
+            "states_ut" => ["a", "Total", "Total calculated"],
+            "vals" => [1, 2, 3]
+        )
+
+        @test isequal(
+            select_calculated_totals!(both_totals_df),
+            Try.Ok(nothing)
+        )
+
+        @test isequal(
+            both_totals_df,
+            DataFrame(
+                "states_ut" => ["a", "Total"],
+                "vals" => [1, 3]
+            )
+        )
+
+        both_totals_unordered_df = DataFrame(
+            "states_ut" => ["a", "Total calculated", "Total"],
+            "vals" => [1, 3, 2]
+        )
+
+        @test isequal(
+            select_calculated_totals!(both_totals_unordered_df),
+            Try.Ok(nothing)
+        )
+
+        @test isequal(
+            both_totals_unordered_df,
+            DataFrame(
+                "states_ut" => ["a", "Total"],
+                "vals" => [1, 3]
+            )
+        )
+
+        @test isequal(
+            select_calculated_totals!(
+                DataFrame(
+                    "states_ut" => ["total", "total"],
+                    "vals" => [1, 2]
+                )
+            ),
+            Try.Err("Expected to only find one row titled \"total\", but instead found 2")
+        )
+
+        @test isequal(
+            select_calculated_totals!(
+                DataFrame(
+                    "states_ut" => ["total calculated", "total calculated"],
+                    "vals" => [1, 2]
+                )
+            ),
+            Try.Err("Expected to only find one row titled \"total calculated\", but instead found 2")
+        )
+
+        @test isequal(
+            select_calculated_totals!(
+                DataFrame(
+                    "states_ut" => ["a", "Total"],
+                    "vals" => [1, 2]
+                )
+            ),
+            Try.Ok("Only has provided totals. Continuing")
+        )
+
+        @test isequal(
+            select_calculated_totals!(
+                DataFrame(
+                    "states_ut" => ["a", "Total calculated"],
+                    "vals" => [1, 3]
+                )
+            ),
+            Try.Err("Data contains the calculated totals row, but not the provided one")
+        )
+
+        @test isequal(
+            select_calculated_totals!(
+                DataFrame(
+                    "states_ut" => ["a", "b"],
+                    "alterative_column" => ["total", "total calculated"],
+                    "vals" => [1, 2]
+                )
+            ),
+            Try.Err("Data contains neither calculated or provided totals rows with a key in the column :states_ut")
+        )
+
+
+    end
+
+    @testset "Select serotype columns" begin
+
+        df = DataFrame(
+            "states_ut" => ["a", "b", "c", "total"],
+            "serotype_all_count_pre" => [10, 10, 10, 30],
+            "serotype_all_count_post" => [10, 10, 10, 30],
+            "serotype_a_count_pre" => [2, 1, 1, 4],
+            "serotype_a_count_post" => [8, 6, 5, 19],
+            "serotype_a_pct_pre" => [20.0, 10.0, 10.0, 13.3],
+            "serotype_a_pct_post" => [80.0, 60.0, 50.0, 63.3],
+            "serotype_a_count_pre_calculated" => [2, 1, 1, 4],
+            "serotype_a_pct_pre_calculated" => [20.0, 10.0, 10.0, 13.3],
+        )
+
+        out = select_calculated_cols!(df)
+
+        @test isequal(
+            out,
+            Try.Ok(nothing)
+        )
+
+        @test isequal(
+            names(df),
+            [
+                "states_ut",
+                "serotype_all_count_pre",
+                "serotype_all_count_post",
+                "serotype_a_count_pre",
+                "serotype_a_count_post",
+                "serotype_a_pct_post",
+                "serotype_a_pct_pre",
+            ]
+        )
+
+        @test isequal(
+            select_calculated_cols!(
+                DataFrame(
+                    "states_ut" => ["a", "b", "c", "total"],
+                    "serotype_all_count_pre" => [10, 10, 10, 30],
+                    "serotype_all_count_post" => [10, 10, 10, 30],
+                    "serotype_a_count_pre" => [2, 1, 1, 4],
+                    "serotype_a_count_post" => [8, 6, 5, 19],
+                    "serotype_a_pct_pre" => [20.0, 10.0, 10.0, 13.3],
+                    "serotype_a_pct_post" => [80.0, 60.0, 50.0, 63.3],
+                    "serotype_a_count_pre_calculated" => [2, 1, 1, 4],
+                    "serotype_a_pct_pre_calculated" => [20.0, 10.0, 10.0, 13.3],
+                );
+                reg = Regex(
+                    "serotype_(?:$(join(["all", "a"], "|")))_(count|pct)_(testing)_(?:pre|post)\$"
+                )
+            ),
+            Try.Err("No columns were matched by the regex. Check it correctly identifies the appropriate serotype data columns")
+        )
+
+        @test isequal(
+            select_calculated_cols!(
+                DataFrame(
+                    "states_ut" => ["a", "b", "c", "total"],
+                    "serotype_all_count_pre" => [10, 10, 10, 30],
+                    "serotype_all_count_post" => [10, 10, 10, 30],
+                    "serotype_a_count_testing_pre" => [2, 1, 1, 4],
+                    "serotype_a_count_post" => [8, 6, 5, 19],
+                    "serotype_a_pct_pre" => [20.0, 10.0, 10.0, 13.3],
+                    "serotype_a_pct_post" => [80.0, 60.0, 50.0, 63.3],
+                    "serotype_a_count_pre_calculated" => [2, 1, 1, 4],
+                    "serotype_a_pct_pre_calculated" => [20.0, 10.0, 10.0, 13.3],
+                );
+                reg = Regex(
+                    "serotype_(?:$(join(["all", "a"], "|")))_(count|pct)_(testing)_(?:pre|post)\$"
+                )
+            ),
+            Try.Err(
+                "Only 1 capture group should exist for the column serotype_a_count_testing_pre. Found 2: Union{Nothing, SubString{String}}[\"count\", \"testing\"]."
+            )
+        )
+
+        @test isequal(
+            select_calculated_cols!(
+                DataFrame(
+                    "states_ut" => ["a", "b", "c", "total"],
+                    "serotype_all_count_pre" => [10, 10, 10, 30],
+                    "serotype_all_count_post" => [10, 10, 10, 30],
+                    "serotype_a_testing_pre" => [2, 1, 1, 4],
+                    "serotype_a_count_post" => [8, 6, 5, 19],
+                    "serotype_a_pct_pre" => [20.0, 10.0, 10.0, 13.3],
+                    "serotype_a_pct_post" => [80.0, 60.0, 50.0, 63.3],
+                    "serotype_a_count_pre_calculated" => [2, 1, 1, 4],
+                    "serotype_a_pct_pre_calculated" => [20.0, 10.0, 10.0, 13.3],
+                );
+                reg = Regex(
+                    "serotype_(?:$(join(["all", "a"], "|")))_(testing)_(?:pre|post)\$"
+                )
+            ),
+            Try.Err(
+                "The capture group is not expected. It should be one of [\"count\", \"pct\"], but instead it is testing"
+            )
+        )
+
+        missing_count_df = DataFrame(
+            "states_ut" => ["a", "b", "c", "total"],
+            "serotype_all_count_pre" => [10, 10, 10, 30],
+            "serotype_all_count_post" => [10, 10, 10, 30],
+            "serotype_a_count_post" => [8, 6, 5, 19],
+            "serotype_a_pct_pre" => [20.0, 10.0, 10.0, 13.3],
+            "serotype_a_pct_post" => [80.0, 60.0, 50.0, 63.3],
+            "serotype_a_count_pre_calculated" => [2, 1, 1, 4],
+            "serotype_a_pct_pre_calculated" => [20.0, 10.0, 10.0, 13.3],
+        )
+
+        select_calculated_cols!(missing_count_df)
+
+        @test isequal(
+            names(missing_count_df),
+            [
+                "states_ut",
+                "serotype_all_count_pre",
+                "serotype_all_count_post",
+                "serotype_a_count_post",
+                "serotype_a_pct_post",
+                "serotype_a_count_pre",
+                "serotype_a_pct_pre",
+            ]
+        )
+    end
+
+    @testset "Sort dataframe columns" begin
+
+        unsorted_df = DataFrame(
+            "states_ut" => String[],
+            "serotype_all_count_pre" => Int64[],
+            "serotype_all_count_post" => Int64[],
+            "serotype_o_pct_pre" => Float64[],
+            "serotype_o_count_pre" => Int64[],
+            "serotype_o_count_post" => Int64[],
+            "serotype_a_pct_pre" => Float64[],
+            "serotype_asia1_pct_pre" => Float64[],
+            "serotype_asia1_pct_post" => Float64[],
+            "serotype_a_count_pre" => Int64[],
+            "serotype_asia1_count_pre" => Int64[],
+        )
+
+        @test isequal(
+            sort_columns!(unsorted_df),
+            Try.Ok(nothing)
+        )
+
+        @test isequal(
+            names(unsorted_df),
+            [
+                "states_ut",
+                "serotype_all_count_pre",
+                "serotype_all_count_post",
+                "serotype_o_count_pre",
+                "serotype_o_pct_pre",
+                "serotype_o_count_post",
+                "serotype_a_count_pre",
+                "serotype_a_pct_pre",
+                "serotype_asia1_count_pre",
+                "serotype_asia1_pct_pre",
+                "serotype_asia1_pct_post",
+            ]
+        )
+
+    end
+
+    @testset "Sort dataframe rows by state" begin
+
+        unsorted_df = DataFrame(
+            "states_ut" => String["a", "d", "Total", "c", "b", "e"],
+            "original_idx" => [1, 2, 3, 4, 5, 6]
+        )
+
+        @test isequal(
+            sort_states!(unsorted_df),
+            Try.Ok(nothing)
+        )
+
+        @test isequal(
+            unsorted_df,
+            DataFrame(
+                "states_ut" => String["a", "b", "c", "d", "e", "Total"],
+                "original_idx" => [1, 5, 4, 2, 6, 3]
+            )
+        )
+
+        unsorted_duplicates_df = DataFrame(
+            "states_ut" => String["a", "d", "Total", "c", "a", "d", "b", "e", "total"],
+            "original_idx" => [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        )
+
+        @test isequal(
+            sort_states!(unsorted_duplicates_df),
+            Try.Ok(nothing)
+        )
+
+        @test isequal(
+            unsorted_duplicates_df,
+            DataFrame(
+                "states_ut" => String["a", "a", "b", "c", "d", "d", "e", "Total", "total"],
+                "original_idx" => [1, 5, 7, 4, 2, 6, 8, 3, 9]
+            )
+        )
+
+
+    end
 end

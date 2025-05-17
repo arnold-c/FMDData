@@ -7,6 +7,7 @@ using Try
 using TryExperimental
 using Logging
 using LoggingExtras
+using Preferences: @load_preference
 
 export all_cleaning_steps,
     load_csv,
@@ -24,81 +25,119 @@ export all_cleaning_steps,
     has_totals_row,
     all_totals_check,
     calculate_all_totals,
-    calculate_totals,
     totals_check,
     calculate_state_counts,
     calculate_state_seroprevalence,
-    check_calculated_values_match_existing
+    check_calculated_values_match_existing,
+    select_calculated_totals!,
+    select_calculated_cols!,
+    sort_columns!,
+    sort_states!,
+    write_csv
+
 
 public collect_all_present_serotypes,
     correct_state_name
 
 default_allowed_serotypes::Vector{String} = ["o", "a", "asia1"]
 
+show_warnings = @load_preference("show_warnings", true)
+
 function all_cleaning_steps(
         input_filename::T1,
-        input_dir::T1,
+        input_dir::T1;
         output_filename::T1 = "clean_$input_filename",
-        output_dir::T1 = datadir("icar-seroprevalence");
+        output_dir::T1 = icar_cleaned_dir(),
         load_format = DataFrame
     ) where {T1 <: AbstractString}
 
-    println("\n==========================================================================")
-    println("Cleaning $(joinpath(input_dir, input_filename))\n")
-
-    data = Try.@? load_csv(
-        input_filename,
-        input_dir,
-        load_format
-    )
-    cleaned_colnames_data = Try.@? clean_colnames(data)
-    renamed_aggregate_counts_data = Try.@? rename_aggregated_pre_post_counts(cleaned_colnames_data)
-    corrected_state_name_data = Try.@? correct_all_state_names(renamed_aggregate_counts_data)
-
-    Try.@? check_duplicated_column_names(corrected_state_name_data)
-    Try.@? check_missing_states(corrected_state_name_data)
-    Try.@? check_duplicated_states(corrected_state_name_data)
-    Try.@? check_allowed_serotypes(corrected_state_name_data)
-    Try.@? check_seroprevalence_as_pct(corrected_state_name_data)
-    Try.@? check_aggregated_pre_post_counts_exist(corrected_state_name_data)
-    Try.@? check_pre_post_exists(corrected_state_name_data)
-    Try.@? has_totals_row(corrected_state_name_data)
-
-
-    filebase = match(r"(.*)\.csv", input_filename).captures[1]
-    logger = FileLogger(joinpath(output_dir, "logfiles", "$filebase.log"))
-
-    function log_try_error(res)
-        if Try.iserr(res)
-            @error(Try.unwrap_err(res))
-        end
-        return nothing
+    if show_warnings
+        println("\n==========================================================================")
+        println("Cleaning $(joinpath(input_dir, input_filename))\n")
     end
 
+    if !isdir(output_dir)
+        mkpath(output_dir)
+    end
+    logpath = joinpath(output_dir, "logfiles")
+    if !isdir(logpath)
+        mkpath(logpath)
+    end
+
+    filebase = match(r"(.*)\.csv", input_filename).captures[1]
+    logfile = joinpath(output_dir, "logfiles", "$filebase.log")
+    logger = FileLogger(logfile)
+
     with_logger(logger) do
-        if Try.iserr(all_totals_check(corrected_state_name_data))
-            log_try_error(all_totals_check(corrected_state_name_data))
-            totals = Try.@? calculate_all_totals(corrected_state_name_data)
+        data = _log_try_error(
+            load_csv(
+                input_filename,
+                input_dir,
+                load_format
+            )
+        )
+        cleaned_colnames_data = _log_try_error(clean_colnames(data))
+        renamed_aggregate_counts_data = _log_try_error(
+            rename_aggregated_pre_post_counts(cleaned_colnames_data)
+        )
+        corrected_state_name_data = _log_try_error(
+            correct_all_state_names(renamed_aggregate_counts_data)
+        )
+
+        _log_try_error(check_duplicated_column_names(corrected_state_name_data))
+        _log_try_error(check_missing_states(corrected_state_name_data))
+        _log_try_error(check_duplicated_states(corrected_state_name_data))
+        _log_try_error(check_allowed_serotypes(corrected_state_name_data))
+        _log_try_error(check_seroprevalence_as_pct(corrected_state_name_data))
+        _log_try_error(check_aggregated_pre_post_counts_exist(corrected_state_name_data))
+        _log_try_error(check_pre_post_exists(corrected_state_name_data))
+
+        has_totals = has_totals_row(corrected_state_name_data)
+        totals_dict = _log_try_error(calculate_all_totals(corrected_state_name_data))
+        totals_check_state = all_totals_check(totals_dict, corrected_state_name_data)
+        if Try.iserr(has_totals)
+            _log_try_error(has_totals, :Warn)
             push!(
                 corrected_state_name_data,
-                merge(Dict("states_ut" => "Total calculated"), totals);
+                merge(Dict("states_ut" => "Total calculated"), Try.unwrap_err(totals_dict));
+                promote = true
+            )
+        elseif Try.iserr(totals_check_state)
+            _log_try_error(
+                totals_check_state,
+                :Warn
+            )
+            push!(
+                corrected_state_name_data,
+                merge(Dict("states_ut" => "Total calculated"), totals_dict);
                 promote = true
             )
         end
+        calculated_state_counts_data = calculate_state_counts(corrected_state_name_data)
+        calculated_state_seroprevs_data = calculate_state_seroprevalence(calculated_state_counts_data)
+
+        _log_try_error(
+            check_calculated_values_match_existing(calculated_state_seroprevs_data)
+        )
+
+        _log_try_error(select_calculated_totals!(calculated_state_seroprevs_data))
+        _log_try_error(select_calculated_cols!(calculated_state_seroprevs_data))
+
+        _log_try_error(sort_columns!(calculated_state_seroprevs_data))
+        _log_try_error(sort_states!(calculated_state_seroprevs_data))
+
+        _log_try_error(
+            write_csv(output_filename, output_dir, calculated_state_seroprevs_data)
+        )
     end
 
-    calculated_state_counts_data = calculate_state_counts(corrected_state_name_data)
-    calculated_state_seroprevs_data = calculate_state_seroprevalence(calculated_state_counts_data)
-    log_try_error(check_calculated_values_match_existing(calculated_state_seroprevs_data))
-
-    log_try_error(write_csv(output_filename, output_dir, calculated_state_seroprevs_data))
-
-    Try.@? check_calculated_values_match_existing(calculated_state_seroprevs_data)
-
-    Try.@? write_csv(output_filename, output_dir, calculated_state_seroprevs_data)
+    if filesize(logfile) == 0
+        rm(logfile)
+    end
 
     return Try.Ok("Cleaning of $input_filename successful. Written to $output_filename.")
 end
+
 
 """
     load_csv(
@@ -203,13 +242,19 @@ function correct_all_state_names(
         states_dict::Dict = FMDData.states_dict
     )
 
-    return Try.Ok(
-        transform(
-            df,
-            column => ByRow(s -> correct_state_name(s, states_dict));
-            renamecols = false
-        )
+    corrected_df = transform(
+        df,
+        column => ByRow(s -> Try.and_then(String, correct_state_name(s, states_dict)));
+        renamecols = false
     )
+
+    name_errors_idxs = isa.(corrected_df[!, column], Try.Err)
+    if sum(name_errors_idxs) > 0
+        name_errors = convert(Vector{Try.Err}, corrected_df[name_errors_idxs, column])
+        return Try.Err(_combine_error_messages(name_errors))
+    end
+
+    return Try.Ok(corrected_df)
 end
 
 """
@@ -227,14 +272,14 @@ function correct_state_name(
     possible_state_values = values(states_dict)
 
     if in(input_name, possible_state_values) || lowercase(input_name) == "total"
-        return input_name
+        return Try.Ok(input_name)
     end
 
     possible_state_keys = keys(states_dict)
     in(input_name, possible_state_keys) ||
-        return error("State name `$input_name` doesn't exist in current dictionary match. Confirm if this is a new state or uncharacterized misspelling")
+        return Try.Err("State name `$input_name` doesn't exist in current dictionary match. Confirm if this is a new state or uncharacterized misspelling.")
 
-    return states_dict[input_name]
+    return Try.Ok(states_dict[input_name])
 end
 
 """
@@ -547,8 +592,8 @@ function check_seroprevalence_as_pct(
     )
     prop_cols_dict = OrderedDict{Symbol, AbstractFloat}()
     for (name, vals) in pairs(eachcol(select(df, Cols(reg))))
-        if round(mean(skipmissing(vals)) / 100; digits = 1) < 0.1
-            prop_cols_dict[name] = round(mean(skipmissing(vals)); digits = 2)
+        if round(mean(skip_missing_and_nan(vals)) / 100; digits = 1) < 0.1
+            prop_cols_dict[name] = round(mean(skip_missing_and_nan(vals)); digits = 2)
         end
     end
     if !isempty(prop_cols_dict)
@@ -594,29 +639,59 @@ function has_totals_row(
     return Try.Ok(nothing)
 end
 
-"""
-    all_totals_check(df::DataFrame, totals_key = "total")
 
-Check if all provided values in the provided totals row are correct. If the column is a count, then calculate an unweighted sum. If the column is the seroprevalence, calculated the sum weighted by the relevant counts (pre- or post-vaccination counts).
 """
-function all_totals_check(
+    all_totals_check(
         df::DataFrame,
         column::Symbol = :states_ut,
         totals_key = "total",
         allowed_serotypes = vcat("all", default_allowed_serotypes),
-        reg = Regex("serotype_(?|$(join(allowed_serotypes, "|")))_(count|pct)_(pre|post)\$");
+        reg::Regex,
         atol = 0.1,
         digits = 1
     )
 
+Check if all provided values in the provided totals row are correct. If the column is a count, then calculate an unweighted sum. If the column is the seroprevalence, calculated the sum weighted by the relevant counts (pre- or post-vaccination counts).
+"""
+function all_totals_check(
+        df::DataFrame;
+        column::Symbol = :states_ut,
+        totals_key = "total",
+        allowed_serotypes = vcat("all", default_allowed_serotypes),
+        reg::Regex = Regex("serotype_(?|$(join(allowed_serotypes, "|")))_(count|pct)_(pre|post)\$"),
+        atol = 0.0,
+        digits = 1
+    )
+
     totals_dict = Try.@? calculate_all_totals(
-        df,
-        column,
-        totals_key,
-        allowed_serotypes,
-        reg;
-        atol = atol,
+        df;
+        column = column,
+        totals_key = totals_key,
+        allowed_serotypes = allowed_serotypes,
+        reg = reg,
         digits = digits
+    )
+
+    return all_totals_check(
+        totals_dict,
+        df;
+        column = column,
+        totals_key = totals_key,
+        allowed_serotypes = allowed_serotypes,
+        reg = reg,
+        atol = atol
+    )
+end
+
+function all_totals_check(
+        totals_dict::OrderedDict,
+        df::DataFrame;
+        column::Symbol = :states_ut,
+        totals_key = "total",
+        allowed_serotypes = vcat("all", default_allowed_serotypes),
+        reg::Regex = Regex("serotype_(?|$(join(allowed_serotypes, "|")))_(count|pct)_(pre|post)\$"),
+        atol = 0.0,
+        digits = 1
     )
 
     totals_rn, selected_df = Try.@? _totals_row_selectors(
@@ -631,19 +706,20 @@ function all_totals_check(
     Try.@? totals_check(
         selected_df[totals_rn, :],
         totals_dict,
-        column
+        column;
+        atol = atol,
     )
 
     return Try.Ok(nothing)
+
 end
 
 function calculate_all_totals(
-        df::DataFrame,
+        df::DataFrame;
         column::Symbol = :states_ut,
         totals_key = "total",
         allowed_serotypes = vcat("all", default_allowed_serotypes),
-        reg = Regex("serotype_(?|$(join(allowed_serotypes, "|")))_(count|pct)_(pre|post)\$");
-        atol = 0.1,
+        reg::Regex = Regex("serotype_(?|$(join(allowed_serotypes, "|")))_(count|pct)_(pre|post)\$"),
         digits = 1
     )
     totals_rn, selected_df = Try.@? _totals_row_selectors(
@@ -654,7 +730,7 @@ function calculate_all_totals(
     )
 
     col_names = names(df)
-    totals_dict = Dict{AbstractString, Real}()
+    totals_dict = OrderedDict{AbstractString, Real}()
 
     for col_ind in eachindex(names(selected_df))
         col_name = col_names[col_ind]
@@ -664,7 +740,7 @@ function calculate_all_totals(
             selected_df,
             totals_rn,
             allowed_serotypes,
-            atol,
+            digits
         )
         Try.iserr(totals_check_args) && return totals_check_args
         _calculate_totals!(totals_dict, Try.unwrap(totals_check_args)...)
@@ -719,7 +795,6 @@ function _collect_totals_check_args(
         df::DataFrame,
         totals_rn,
         allowed_serotypes = default_allowed_serotypes,
-        atol = 0.1,
         digits = 1,
     ) where {T <: Union{Union{<:Missing, <:AbstractFloat}, <:AbstractFloat}}
     # Forms the regex string: r"serotype_(?|o|a|asia1)_pct_(pre|post)$"
@@ -735,91 +810,36 @@ function _collect_totals_check_args(
     denom_col = df[Not(totals_rn), denom_colname]
     denom_total = sum(skipmissing(denom_col))
 
-    return Try.Ok((col, colname, denom_col, denom_total, atol, digits))
-end
-
-function calculate_totals(
-        col::Vector{T},
-        colname::String,
-    ) where {T <: Union{<:Union{<:Missing, <:Integer}, <:Integer}}
-    totals_dict = Dict{AbstractString, Real}()
-    return _calculate_totals!(
-        totals_dict,
-        col,
-        colname
-    )
+    return Try.Ok((col, colname, denom_col, denom_total, digits))
 end
 
 function _calculate_totals!(
-        totals_dict::Dict,
+        totals_dict::OrderedDict,
         col::Vector{T},
         colname::String,
     ) where {T <: Union{<:Union{<:Missing, <:Integer}, <:Integer}}
-    calculated_total = sum(skipmissing(col))
+    calculated_total = sum(skip_missing_and_nan(col))
     totals_dict[colname] = calculated_total
     return nothing
 end
 
-function calculate_totals(
+function _calculate_totals!(
+        totals_dict::OrderedDict,
         col::Vector{T},
         colname::String,
         denom_col::Vector{C},
         denom_total,
-        atol = 0.1,
         digits = 1
     ) where {
         T <: Union{<:Union{<:Missing, <:AbstractFloat}, <:AbstractFloat},
         C <: Union{<:Union{<:Missing, <:Integer}, <:Integer},
     }
-    totals_dict = Dict{AbstractString, Real}()
-    return _calculate_totals!(
-        totals_dict,
-        col,
-        colname,
-        denom_col,
-        denom_total,
-        atol,
-        digits
+    calculated_total = round(
+        sum(skip_missing_and_nan(col .* denom_col)) / denom_total;
+        digits = digits
     )
-end
-
-function _calculate_totals!(
-        totals_dict::Dict,
-        col::Vector{T},
-        colname::String,
-        denom_col::Vector{C},
-        denom_total,
-        atol = 0.1,
-        digits = 1
-    ) where {
-        T <: Union{<:Union{<:Missing, <:AbstractFloat}, <:AbstractFloat},
-        C <: Union{<:Union{<:Missing, <:Integer}, <:Integer},
-    }
-    calculated_total = round(sum(skipmissing(col .* denom_col)) / denom_total; digits = digits)
     totals_dict[colname] = calculated_total
     return nothing
-end
-
-function totals_check(
-        totals::DataFrameRow,
-        calculated_totals::Dict,
-        column::Symbol = :states_ut
-    )
-    errors_dict = OrderedDict{AbstractString, NamedTuple{(:provided, :calculated)}}()
-
-    for colname in names(totals)
-        provided_total = totals[colname]
-        calculated_total = calculated_totals[colname]
-        if provided_total != calculated_total
-            errors_dict[colname] = (provided_total, calculated_total)
-        end
-    end
-
-    if !isempty(errors_dict)
-        return Try.Err("There were discrepancies in the totals calculated and those provided in the data: $errors_dict")
-    end
-
-    return Try.Ok(nothing)
 end
 
 """
@@ -831,62 +851,28 @@ end
 
 Check if the provided total counts equal the sum calculated using the provided state counts.
 """
-function _totals_check!(
-        errors_dict::OrderedDict,
-        col::Vector{T},
-        provided_total,
-        colname::String,
-    ) where {T <: Union{<:Union{<:Missing, <:Integer}, <:Integer}}
-    calculated_total = sum(skipmissing(col))
-    if calculated_total != provided_total
-        errors_dict[colname] = (provided_total, calculated_total)
+function totals_check(
+        totals::DataFrameRow,
+        calculated_totals::OrderedDict,
+        column::Symbol = :states_ut;
+        atol = 0.0
+    )
+    errors_dict = OrderedDict{AbstractString, NamedTuple{(:provided, :calculated)}}()
+
+    for colname in names(totals)
+        provided_total = totals[colname]
+        calculated_total = calculated_totals[colname]
+        if !isapprox(provided_total, calculated_total; atol = atol)
+            errors_dict[colname] = (provided_total, calculated_total)
+        end
     end
-    return nothing
-end
 
-"""
-    _totals_check(
-        col::Vector{T},
-        provided_total,
-        colname::String,
-        denom_col::Vector{C},
-        denom_total
-    ) where {
-        T <: Union{<:Union{<:Missing, <:AbstractFloat}, <:AbstractFloat},
-        C <: Union{<:Union{<:Missing, <:Integer}, <:Integer},
-    }
-        col::Vector{T},
-        provided_total,
-        colname::String,
-        denom_col::Vector{C},
-        denom_total
-    ) where {
-        T <: Union{<:Union{<:Missing, <:AbstractFloat}, <:AbstractFloat},
-        C <: Union{<:Union{<:Missing, <:Integer}, <:Integer},
-    }
-
-Check if the provided total for serotype seroprevalence values equal a weighted sum based on reported total counts.
-"""
-function _totals_check!(
-        errors_dict::OrderedDict,
-        col::Vector{T},
-        provided_total,
-        colname::String,
-        denom_col::Vector{C},
-        denom_total,
-        atol = 0.1,
-        digits = 1
-    ) where {
-        T <: Union{<:Union{<:Missing, <:AbstractFloat}, <:AbstractFloat},
-        C <: Union{<:Union{<:Missing, <:Integer}, <:Integer},
-    }
-    calculated_total = round(sum(skipmissing(col .* denom_col)) / denom_total; digits = digits)
-    if !isapprox(calculated_total, provided_total; atol = atol)
-        errors_dict[colname] = (provided_total, calculated_total)
+    if !isempty(errors_dict)
+        return Try.Err("There were discrepancies in the totals calculated and those provided in the data: $errors_dict")
     end
-    return nothing
-end
 
+    return Try.Ok(nothing)
+end
 
 """
     calculate_state_counts(df::DataFrame, allowed_serotypes = default_allowed_serotypes)
@@ -935,14 +921,16 @@ A wrapper function around the internal `_calculate_state_seroprevalence()` funct
 function calculate_state_seroprevalence(
         df::DataFrame,
         allowed_serotypes::T = default_allowed_serotypes;
+        reg = Regex("serotype_(?:$(join(allowed_serotypes, "|")))_count_(pre|post)\$"),
         digits = 1
     ) where {T <: AbstractVector{<:AbstractString}}
-    reg = Regex("serotype_($(join(allowed_serotypes, "|")))_count_(pre|post)\$")
     return hcat(
         df,
         select(
             df,
-            AsTable(Cols(reg)) .=> (t -> _calculate_state_seroprevalence(t, df; digits = 1)) => AsTable;
+            AsTable(Cols(reg)) .=> (
+                t -> _calculate_state_seroprevalence(t, df; reg = reg, digits = digits)
+            ) => AsTable;
             renamecols = true
         )
     )
@@ -954,9 +942,14 @@ end
 An internal function to handle the calculation of the state/serotype counts based upon the provided state/serotype seroprevalence values and total state counts.
 Because DataFrames handles tables as named tuples, we can extract information about the columns being passed from the regex selection and then use substitution strings to collect a view of the correct column of total state counts.
 """
-function _calculate_state_seroprevalence(table, original_df; digits = 1)
+function _calculate_state_seroprevalence(
+        table,
+        original_df;
+        reg = Regex("serotype_(?:$(join(allowed_serotypes, "|")))_count_(pre|post)\$"),
+        digits = 1
+    )
     str_keys = String.(keys(table))
-    timing = replace.(str_keys, r"serotype_.*_count_(pre|post)$" => s"serotype_all_count_\1")
+    timing = replace.(str_keys, reg => s"serotype_all_count_\1")
     vals = map(
         ((serotype_count, agg_counts_col),) -> round.((serotype_count ./ @view(original_df[!, agg_counts_col])) .* 100; digits = digits),
         zip(table, timing)
@@ -1004,12 +997,207 @@ function check_calculated_values_match_existing(
     return Try.Ok(nothing)
 end
 
+"""
+    select_calculated_totals!(
+    	df::DataFrame,
+    	column::Symbol = :states_ut,
+    	totals_key = "total",
+    	calculated_totals_key = "total calculated"
+    )
+
+If the cleaned data contains both a provided and a calculated totals row then return strip the provided one and rename the calculated.
+"""
+function select_calculated_totals!(
+        df::DataFrame,
+        column::Symbol = :states_ut,
+        totals_key = "total",
+        calculated_totals_key = "total calculated"
+    )
+    provided_totals_rn = findall(lowercase.(df[!, column]) .== totals_key)
+    length(provided_totals_rn) <= 1 || return Try.Err("Expected to only find one row titled \"$totals_key\", but instead found $(length(provided_totals_rn))")
+
+    calculated_totals_rn = findall(lowercase.(df[!, column]) .== calculated_totals_key)
+    length(calculated_totals_rn) <= 1 || return Try.Err("Expected to only find one row titled \"$calculated_totals_key\", but instead found $(length(calculated_totals_rn))")
+
+    has_provided_totals = false
+    if length(provided_totals_rn) == 1
+        provided_totals_rn = provided_totals_rn[1]
+        has_provided_totals = true
+    end
+    has_calculated_totals = false
+    if length(calculated_totals_rn) == 1
+        calculated_totals_rn = calculated_totals_rn[1]
+        has_calculated_totals = true
+    end
+    if has_provided_totals && !has_calculated_totals
+        return Try.Ok("Only has provided totals. Continuing")
+    end
+    if has_calculated_totals && !has_provided_totals
+        return Try.Err("Data contains the calculated totals row, but not the provided one")
+    end
+    if !has_provided_totals && !has_calculated_totals
+        return Try.Err("Data contains neither calculated or provided totals rows with a key in the column :$column")
+    end
+
+    show_warnings && @warn "Using calculated totals"
+    df[calculated_totals_rn, column] = titlecase("Total")
+    popat!(df, provided_totals_rn)
+
+    return Try.Ok(nothing)
+end
+
+"""
+	select_calculated_cols!(
+        df::DataFrame,
+        allowed_serotypes = vcat("all", default_allowed_serotypes),
+        reg::Regex
+    )
+
+Checks if the data contains both provided and calculated columns that refer to the same variables. If the calculated column is a % seroprevalence, keep the calculated values. If the calculated column is a column of counts, keep the provided as they are deemed to be more accurate (counts require no calculation and should be a direct recording/reporting of the underlying data). The cleaning function `check_calculated_values_match_existing()` should have been run before to ensure there are no surprises during this processing step i.e., accidentally deleting columns that should be retained.
+"""
+function select_calculated_cols!(
+        df::DataFrame;
+        allowed_serotypes = vcat("all", default_allowed_serotypes),
+        reg::Regex = Regex(
+            "serotype_(?:$(join(allowed_serotypes, "|")))_(count|pct)_(?:pre|post)\$"
+        )
+    )
+    colnames = names(df)
+    all_matched_cols = filter(!isnothing, match.(reg, colnames))
+
+    length(all_matched_cols) > 0 || return Try.Err("No columns were matched by the regex. Check it correctly identifies the appropriate serotype data columns")
+
+    for col in all_matched_cols
+        colnm = col.match
+        colcap = col.captures
+
+        length(colcap) == 1 || return Try.Err("Only 1 capture group should exist for the column $colnm. Found $(length(colcap)): $colcap.")
+        colcap = colcap[1]
+        colcap in ["count", "pct"] || return Try.Err("The capture group is not expected. It should be one of [\"count\", \"pct\"], but instead it is $colcap")
+
+        calculated_col = colnm * "_calculated"
+        calculated_present = calculated_col in colnames
+
+        # If both count column type has both provided and calculated columns, only keep provided
+        if calculated_present && colcap == "count"
+            select!(df, Not(calculated_col))
+        end
+
+        if calculated_present && colcap == "pct"
+            show_warnings && @warn "Using calculated seroprevalence values for column $colnm"
+            select!(df, Not(colnm))
+            rename!(df, calculated_col => colnm)
+        end
+    end
+
+    # Columns that only have a calculated count column (and not a provided one) should be renamed to remove "_calculated"
+    calc_reg = update_regex(
+        reg,
+        r"(.*)\$",
+        s"(\1)_calculated",
+    )
+
+    rename!(
+        n -> replace(
+            n,
+            calc_reg => s"\1"
+        ),
+        df,
+    )
+    return Try.Ok(nothing)
+end
+
+"""
+	sort_columns!(
+        df::DataFrame;
+        statename_column = :states_ut,
+        allowed_serotypes = vcat("all", default_allowed_serotypes)
+        prefix = "serotype_",
+        suffix_order = [
+            "_count_pre",
+            "_pct_pre",
+            "_count_post",
+            "_pct_post",
+        ]
+    )
+
+Sort the columns of the cleaned dataframe to have a consistent order. Follows the pattern:
+
+- state column name
+- serotype all counts (pre then post)
+- serotype specific columns in the order "O", "A", "Asia1"
+
+The serotype specific columns have their data presented in the following order.
+- serotype X pre count
+- serotype X pre pct
+- serotype X post count
+- serotype X post pct
+"""
+function sort_columns!(
+        df::DataFrame;
+        statename_column = :states_ut,
+        allowed_serotypes = vcat("all", default_allowed_serotypes),
+        prefix = "serotype_",
+        suffix_order = [
+            "_count_pre",
+            "_pct_pre",
+            "_count_post",
+            "_pct_post",
+        ]
+    )
+
+    colnames = names(df)
+
+    ordered_names = [String(statename_column)]
+
+    for serotype in allowed_serotypes
+        for suffix in suffix_order
+            colname = prefix * serotype * suffix
+            push!(ordered_names, colname)
+        end
+    end
+
+    missed_colnames = setdiff(colnames, ordered_names)
+
+    if !isempty(missed_colnames)
+        ordered_names = vcat(ordered_names, missed_colnames)
+    end
+
+    ordered_names = intersect(ordered_names, colnames)
+
+    select!(df, ordered_names)
+
+    return Try.Ok(nothing)
+end
+
+"""
+	sort_states!(
+        df::DataFrame;
+        statename_column = :states_ut,
+        totals_key = "total"
+    )
+
+Sort the dataframe by alphabetical order of the states and list the totals row at the bottom. Preserves the original order of rows if there are duplicates.
+"""
+function sort_states!(
+        df::DataFrame;
+        statename_column = :states_ut,
+        totals_key = "total"
+    )
+    sort!(
+        df,
+        statename_column,
+        by = n -> (lowercase(n) == totals_key, n)
+    )
+    return Try.Ok(nothing)
+end
+
 function write_csv(
         filename::T1,
         dir::T1,
         data::DataFrame
     ) where {T1 <: AbstractString}
-    isdir(dir) || return Err("$dir is not a valid directory")
+    isdir(dir) || mkpath(dir)
     contains(filename, r".*\.csv$") || return Err("$filename is not a csv file")
 
     write(

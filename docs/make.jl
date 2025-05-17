@@ -7,10 +7,15 @@ makedocs(
     format = Documenter.HTML(; prettyurls = get(ENV, "CI", nothing) == "true"),
     authors = "arnold-c",
     sitename = "FMDData.jl",
-    pages = Any["index.md"],
+    pages = Any[
+        "index.md",
+        "public.md",
+        "internal.md",
+    ],
     # strict = true,
     # clean = true,
     # checkdocs = :exports,
+    remotes = nothing
 )
 
 # Some setup is needed for documentation deployment, see “Hosting Documentation” and
