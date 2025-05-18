@@ -49,6 +49,6 @@ shell> tree
 ```
 
 - `extracted-seroprevalence-tables/` contains seroprevalence tables from the annual reports, extracted and saved in separate CSV files.
-    - `metadata.md` contains additional information about the extracted tables, e.g., report page number, table/figure numbers in the original report, summaries about the states included, information about the diagnostic test used, general information about the program and sampling plans etc.
+    - `README.md` contains additional information about the extracted tables, e.g., report page number, table/figure numbers in the original report, summaries about the states included, information about the diagnostic test used, general information about the program and sampling plans etc.
     - It is important to not that not every state appears in each year's report.
 - `pdfs/` contains the underlying ICAR Annual Reports in PDF format used to extract pertinent tables from.
