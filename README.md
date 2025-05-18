@@ -59,3 +59,27 @@
 - `test/` contains unit and integration tests for the cleaning and processing functions and steps
 
 Each `README.md` contains additional details relating to their respective directories.
+
+## Downloading the processed files
+
+You can either:
+
+1) navigate to the processed files in GitHub and download the raw files, or;
+2) you can click on the "Raw" button to open the file in your browser, and then copy the URL (it should look something like "https://raw.githubusercontent.com/arnold-c/FMDData/refs/heads/main/data/icar-seroprevalence/processed/nadcp_1.csv"), which you can then use in a script to download the file programmatically.
+3) you can clone the repository, which includes the cleaned and processed data files
+
+The advantage of method 2) is that if the data files change then the script should capture this, though you will want to ensure you have some sort check to notify you when this happens.
+
+## Running the cleaning files
+
+If you download raw files as above, you shouldn't need to run the steps yourself.
+But if you would like to do so, you can follow the steps below.
+
+- Install Julia (>= v1.11)
+    - Recommended using [juliaup](https://github.com/JuliaLang/juliaup)
+- Clone this repository
+- Open the julia REPL in the repository directory and activate the project (`julia --project=.`)
+- Instantiate the project to download the required packages (`using Pkg; Pkg.instantiate()`)
+- Run the cleaning file (`include("./scripts/icar-cleaning.jl")`)
+    - This currently terminates early as a couple of the raw files have irredeemable errors that should not be skipped over. To work around this, you can send each individual line of code to a running julia session (either copy and pasting by hand, or using some built-in functionality of your editor of choice).
+- Run the processing file (`include("./scripts/icar-additional-processing.jl")`)
