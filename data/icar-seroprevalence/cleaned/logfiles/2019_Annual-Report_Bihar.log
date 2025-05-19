@@ -1,0 +1,4 @@
+┌ Warning: Found 3 allowed serotypes (["o", "a", "asia1"]). Required 4: ["all", "o", "a", "asia1"].
+└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/utils.jl:30
+┌ Error: All `pct` columns should be a %, not a proportion. The following columns are likely reported as proportions with associated mean values: OrderedCollections.OrderedDict{Symbol, AbstractFloat}(:serotype_o_pct_pre => 1.8, :serotype_a_pct_pre => 1.2, :serotype_asia1_pct_pre => 1.1, :serotype_asia1_pct_post => 4.37)
+└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/utils.jl:27

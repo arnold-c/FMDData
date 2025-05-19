@@ -1,4 +1,4 @@
 ┌ Warning: There were discrepancies in the totals calculated and those provided in the data: OrderedCollections.OrderedDict{AbstractString, NamedTuple{(:provided, :calculated)}}("serotype_a_pct_pre" => (provided = 38.7, calculated = 38.6))
 └ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/utils.jl:30
 ┌ Warning: Using calculated totals
-└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/icar-cleaning-functions.jl:1042
+└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/icar-cleaning-functions.jl:1039
