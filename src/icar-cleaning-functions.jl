@@ -809,7 +809,6 @@ function all_totals_check(
         allowed_serotypes = vcat("all", default_allowed_serotypes),
         reg::Regex = Regex("serotype_(?|$(join(allowed_serotypes, "|")))_(count|pct)_(pre|post)\$"),
         atol = 0.0,
-        digits = 1
     )
 
     totals_rn, selected_df = Try.@? _totals_row_selectors(
@@ -847,11 +846,9 @@ function calculate_all_totals(
         reg = reg
     )
 
-    col_names = names(df)
     totals_dict = OrderedDict{AbstractString, Real}()
 
     for col_ind in eachindex(names(selected_df))
-        col_name = col_names[col_ind]
         totals_check_args = _collect_totals_check_args(
             selected_df[Not(totals_rn), col_ind],
             names(selected_df)[col_ind],
