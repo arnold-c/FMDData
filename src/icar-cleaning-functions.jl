@@ -595,8 +595,8 @@ end
 """
     check_allowed_serotypes(
         df::DataFrame,
-        allowed_serotypes::Vector{String} = default_allowed_serotypes,
-        reg::Regex
+        allowed_serotypes::Vector{String} = vcat("all", default_allowed_serotypes),
+        reg::Regex = r"serotype_(.*)_(?|count|pct)_(pre|post)"
     )
 
 Function to confirm that all required and no disallowed serotypes are provided in the data.
