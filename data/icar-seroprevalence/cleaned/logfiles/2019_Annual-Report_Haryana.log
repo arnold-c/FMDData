@@ -1,4 +1,0 @@
-┌ Warning: Expected 1 row of totals. Found 0. Check the spelling in the states column :states_ut matches the provided `totals_key` "total"
-└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/utils.jl:30
-┌ Warning: Totals row not found in the data using the possible row keys ["total", "totals"] in the column :states_ut
-└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/utils.jl:30

@@ -201,28 +201,9 @@ function all_2019_cleaning_steps(
         _log_try_error(check_pre_post_exists(corrected_state_name_data))
 
         has_totals = has_totals_row(corrected_state_name_data)
-        totals_dict = calculate_all_totals(corrected_state_name_data)
-        _log_try_error(totals_dict, :Warn)
-        if Try.iserr(has_totals)
-            _log_try_error(has_totals, :Warn)
+        if Try.isok(has_totals)
+            _log_try_error(Try.Err("Found a totals row when one shouldn't exist"))
         end
-
-        if Try.isok(totals_dict)
-            totals_check_state = all_totals_check(Try.unwrap(totals_dict), corrected_state_name_data)
-
-            if Try.iserr(totals_check_state)
-                _log_try_error(
-                    totals_check_state,
-                    :Warn
-                )
-                push!(
-                    corrected_state_name_data,
-                    merge(Dict("states_ut" => "Total calculated"), totals_dict);
-                    promote = true
-                )
-            end
-        end
-
 
         out_df = corrected_state_name_data
         if Try.isok(aggregated_counts_exist)
@@ -234,9 +215,6 @@ function all_2019_cleaning_steps(
             check_calculated_values_match_existing(out_df)
         )
 
-        if Try.isok(totals_dict)
-            _log_try_error(select_calculated_totals!(out_df))
-        end
         if Try.isok(aggregated_counts_exist)
             _log_try_error(select_calculated_cols!(out_df))
         end
