@@ -710,7 +710,7 @@ function check_seroprevalence_as_pct(
     )
     prop_cols_dict = OrderedDict{Symbol, AbstractFloat}()
     for (name, vals) in pairs(eachcol(select(df, Cols(reg))))
-        if round(mean(skip_missing_and_nan(vals)) / 100; digits = 1) < 0.1
+        if round(mean(skip_missing_and_nan(vals)); digits = 2) < 1.0
             prop_cols_dict[name] = round(mean(skip_missing_and_nan(vals)); digits = 2)
         end
     end
