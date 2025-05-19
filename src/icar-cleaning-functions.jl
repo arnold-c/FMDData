@@ -36,13 +36,25 @@ export all_cleaning_steps,
     write_csv
 
 
-public collect_all_present_serotypes,
-    correct_state_name
+# public collect_all_present_serotypes,
+#     correct_state_name
 
-default_allowed_serotypes::Vector{String} = ["o", "a", "asia1"]
 
 show_warnings = @load_preference("show_warnings", true)
 
+"""
+    all_cleaning_steps(
+        input_filename::T1,
+        input_dir::T1;
+		output_filename::T1 = "clean_\$(input_filename)",
+        output_dir::T1 = icar_cleaned_dir(),
+        load_format = DataFrame
+    ) where {T1 <: AbstractString}
+
+A wrapper function that runs all the cleaning steps for seroprevalence tables that share the common format of states in each row and columns relating to serotype counts/seroprevalence. For tables that contain multiple rows for each state e.g., 2019 report tables which cover multiple years for a single state, use the relevant alternative wrapper functions.
+
+See [all_2019_cleaning_steps](@ref)
+"""
 function all_cleaning_steps(
         input_filename::T1,
         input_dir::T1;

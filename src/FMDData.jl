@@ -4,6 +4,7 @@ Placeholder for a short summary about FMDData.
 module FMDData
 
 include("./utils.jl")
+include("./consts.jl")
 include("./state-keys.jl")
 include("./icar-cleaning-functions.jl")
 include("./icar-processing-functions.jl")
