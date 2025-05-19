@@ -581,7 +581,7 @@ function check_duplicated_states(
         df::DataFrame,
         column::Symbol = :states_ut,
     )
-    states = filter(!ismissing, df[!, column])
+    states = String.(filter(!ismissing, df[!, column]))
     nstates = length(states)
     unique_states = unique(states)
     state_counts = _calculate_string_occurences(states, unique_states)
