@@ -1,4 +1,3 @@
-using DrWatson: datadir, scriptsdir
 using CSV: read, write
 using DataFrames: DataFrame, DataFrameRow, select, subset, filter, rename, transform, transform!, ByRow, Not, Cols, nrow, AsTable, ncol
 using OrderedCollections: OrderedDict
@@ -9,8 +8,7 @@ using Logging
 using LoggingExtras
 using Preferences: @load_preference
 
-    load_csv,
-    clean_colnames,
+export clean_colnames,
     rename_aggregated_pre_post_counts,
     correct_all_state_names,
     check_duplicated_column_names,
@@ -31,8 +29,7 @@ using Preferences: @load_preference
     select_calculated_totals!,
     select_calculated_cols!,
     sort_columns!,
-    sort_states!,
-    write_csv
+    sort_states!
 
 
 # public collect_all_present_serotypes,
@@ -1059,21 +1056,6 @@ function sort_states!(
         df,
         statename_column,
         by = n -> (lowercase(n) == totals_key, n)
-    )
-    return Try.Ok(nothing)
-end
-
-function write_csv(
-        filename::T1,
-        dir::T1,
-        data::DataFrame
-    ) where {T1 <: AbstractString}
-    isdir(dir) || mkpath(dir)
-    contains(filename, r".*\.csv$") || return Err("$filename is not a csv file")
-
-    write(
-        joinpath(dir, filename),
-        data
     )
     return Try.Ok(nothing)
 end

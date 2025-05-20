@@ -6,6 +6,7 @@ module FMDData
 include("./utils.jl")
 include("./consts.jl")
 include("./icar-cleaning/state-keys.jl")
+include("./icar-cleaning/file-management.jl")
 include("./icar-cleaning/icar-cleaning-functions.jl")
 include("./icar-cleaning/wrapper-functions.jl")
 include("./icar-processing/icar-processing-functions.jl")
