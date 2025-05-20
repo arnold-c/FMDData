@@ -25,7 +25,7 @@ set_preferences!(FMDData, "show_warnings" => false)
     include("./error-handlers.jl")
     @testset verbose = true "ICAR Cleaning" begin
         include("./icar-cleaning/calculate-state-counts.jl")
-        # include("./icar-cleaning/calculate-state-seroprevalence.jl")
+        include("./icar-cleaning/calculate-state-seroprevalence.jl")
         # include("./icar-cleaning/check-calculated-values.jl")
         # include("./icar-cleaning/check-seroprevalence-values.jl")
         # include("./icar-cleaning/clean-column-names.jl")
