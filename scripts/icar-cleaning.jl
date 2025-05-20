@@ -37,51 +37,26 @@ using FMDData
 # "2022_Annual-Report_Organized-farms.csv"
 
 #%%
-all_cleaning_steps(
-    "2022_Annual-Report_Organized-farms.csv",
-    icar_inputs_dir(),
-)
+for file in [
 
-#%%
-all_cleaning_steps(
-    "2022_Annual-Report_NADCP-3.csv",
-    icar_inputs_dir(),
-)
-
-#%%
-all_cleaning_steps(
-    "2022_Annual-Report_NADCP-2.csv",
-    icar_inputs_dir(),
-)
-
-#%%
-all_cleaning_steps(
-    "2021_Annual-Report_Organized-farms.csv",
-    icar_inputs_dir(),
-)
-
-#%%
-all_cleaning_steps(
-    "2021_Annual-Report_NADCP-2.csv",
-    icar_inputs_dir(),
-)
-
-#%%
-all_cleaning_steps(
-    "2021_Annual-Report_NADCP-1.csv",
-    icar_inputs_dir(),
-)
+        "2022_Annual-Report_Organized-farms.csv",
+        "2022_Annual-Report_NADCP-3.csv",
+        "2022_Annual-Report_NADCP-2.csv",
+        "2021_Annual-Report_Organized-farms.csv",
+        "2021_Annual-Report_NADCP-2.csv",
+        "2021_Annual-Report_NADCP-1.csv",
+        "2020_Annual-Report_NADCP-1.csv",
+    ]
+    all_cleaning_steps(
+        file,
+        icar_inputs_dir(),
+    )
+end
 
 #%%
 # errors as provides farm-level data with duplicated states
 all_cleaning_steps(
     "2020_Annual-Report_Organized-farms.csv",
-    icar_inputs_dir(),
-)
-
-#%%
-all_cleaning_steps(
-    "2020_Annual-Report_NADCP-1.csv",
     icar_inputs_dir(),
 )
 
