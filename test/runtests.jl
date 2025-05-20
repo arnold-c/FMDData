@@ -21,7 +21,7 @@ set_preferences!(FMDData, "show_warnings" => false)
     #     Aqua.test_all(FMDData)
     # end
 
-    # include("./utils.jl")
+    include("./utils.jl")
     include("./error-handlers.jl")
     # include("./icar-cleaning/aggregate-count-checks.jl")
     # include("./icar-cleaning/calculate-state-counts.jl")

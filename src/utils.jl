@@ -18,7 +18,23 @@ icar_outputs_dir(args...) = DrWatson.datadir("icar-seroprevalence", args...)
 icar_cleaned_dir(args...) = icar_outputs_dir("cleaned", args...)
 icar_processed_dir(args...) = icar_outputs_dir("processed", args...)
 
+"""
+	skip_missing_and_nan
+
+Convenience function to skip missing and/or NaN values in a iterator.
+
+Returns another iterator.
+"""
 skip_missing_and_nan = Skipper.skip(x -> ismissing(x) || isnan(x))
+
+
+"""
+	skip_nothing
+
+Convenience function to skip nothing values in an iterator
+
+Returns another iterator.
+"""
 skip_nothing = Skipper.skip(x -> isnothing(x))
 
 """
