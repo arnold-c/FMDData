@@ -55,10 +55,10 @@ end
 
 #%%
 # errors as provides farm-level data with duplicated states
-all_cleaning_steps(
-    "2020_Annual-Report_Organized-farms.csv",
-    icar_inputs_dir(),
-)
+# all_cleaning_steps(
+#     "2020_Annual-Report_Organized-farms.csv",
+#     icar_inputs_dir(),
+# )
 
 #%%
 for file in [
