@@ -5,9 +5,10 @@ module FMDData
 
 include("./utils.jl")
 include("./consts.jl")
-include("./state-keys.jl")
-include("./icar-cleaning-functions.jl")
-include("./icar-processing-functions.jl")
+include("./icar-cleaning/state-keys.jl")
+include("./icar-cleaning/icar-cleaning-functions.jl")
+include("./icar-cleaning/wrapper-functions.jl")
+include("./icar-processing/icar-processing-functions.jl")
 
 using PrecompileTools: @setup_workload, @compile_workload
 using DrWatson: srcdir
