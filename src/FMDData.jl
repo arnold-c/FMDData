@@ -6,7 +6,6 @@ module FMDData
 include("./consts.jl")
 include("./utils.jl")
 include("./error-handlers.jl")
-include("./icar-cleaning/aggregate-count-checks.jl")
 include("./icar-cleaning/calculate-state-counts.jl")
 include("./icar-cleaning/calculate-state-seroprevalence.jl")
 include("./icar-cleaning/check-calculated-values.jl")
