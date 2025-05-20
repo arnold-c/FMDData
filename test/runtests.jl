@@ -23,6 +23,7 @@ set_preferences!(FMDData, "show_warnings" => false)
 
     include("./icar-cleaning-functions.jl")
     # include("./icar-processing-functions.jl")
+    include("./error-handlers.jl")
 end
 #
 # Reset preferences to show warnings during package use

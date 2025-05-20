@@ -35,7 +35,13 @@ end
 
 Internal function that accepts a vector of `Try` results e.g., `Ok()` and `Err()`, and concatenates them to be passed up the call stack.
 """
-function _combine_error_messages(arr_of_errs::AbstractVector{T}) where {T <: Try.InternalPrelude.AbstractResult}
+function _combine_error_messages(
+        arr_of_errs::AbstractVector{T};
+        filter_ok = false
+    ) where {T <: Try.InternalPrelude.AbstractResult}
+    if filter_ok
+        filter!(!Try.isok, arr_of_errs)
+    end
     return String(
         strip(
             mapreduce(
