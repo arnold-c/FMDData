@@ -1,4 +1,4 @@
-using CSV: read
+using CSV: read, write
 using DataFrames: DataFrame
 using Try: Try
 
