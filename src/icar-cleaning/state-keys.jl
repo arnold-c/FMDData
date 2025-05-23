@@ -1,14 +1,14 @@
-public states_dict
+# public states_dict
 
 """
 A Dictionary of States/UTs that can appear in the data set. The keys will be returned in the cleaning steps, and the values can be matched in the underlying datasets.
 """
 states_dict = Dict(
     [
-        ["A&N Island"; "Andaman and Nicobar Islands"] .=> "A&N Island";
+        ["A&N Island"; "A&N Islands"; "Andaman and Nicobar Islands"] .=> "A&N Island";
         ["Andaman"] .=> "Andaman";
-        ["Andhra Pradesh"] .=> "Andhra Pradesh";
-        ["Arunachal Pradesh"] .=> "Arunachal Pradesh";
+        ["Andhra Pradesh"; "AP"] .=> "Andhra Pradesh";
+        ["Arunachal Pradesh"; "AR"] .=> "Arunachal Pradesh";
         ["Assam"] .=> "Assam";
         ["Bihar"] .=> "Bihar";
         ["Chandigarh"] .=> "Chandigarh";
@@ -31,7 +31,7 @@ states_dict = Dict(
         ["Mizoram"] .=> "Mizoram";
         ["Nagaland"] .=> "Nagaland";
         ["Odisha"] .=> "Odisha";
-        ["Pondichery"; "Pudhucherry"] .=> "Pondichery";
+        ["Pondicherry"; "Pondichery"; "Pudhucherry"] .=> "Pondichery";
         ["Punjab"] .=> "Punjab";
         ["Rajasthan"] .=> "Rajasthan";
         ["Sikkim"] .=> "Sikkim";

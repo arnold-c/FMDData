@@ -1,4 +1,4 @@
-# Public Functions
+# Exported Functions
 
 ```@autodocs
 Modules = [FMDData]

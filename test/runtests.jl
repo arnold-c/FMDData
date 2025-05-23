@@ -21,8 +21,28 @@ set_preferences!(FMDData, "show_warnings" => false)
     #     Aqua.test_all(FMDData)
     # end
 
-    include("./icar-cleaning-functions.jl")
-    # include("./icar-processing-functions.jl")
+    include("./utils.jl")
+    include("./error-handlers.jl")
+    @testset verbose = true "ICAR Cleaning" begin
+        include("./icar-cleaning/calculate-state-counts.jl")
+        include("./icar-cleaning/calculate-state-seroprevalence.jl")
+        include("./icar-cleaning/check-calculated-values.jl")
+        include("./icar-cleaning/check-seroprevalence-values.jl")
+        # include("./icar-cleaning/clean-column-names.jl")
+        # include("./icar-cleaning/column-name-checks.jl")
+        # include("./icar-cleaning/file-management.jl")
+        # include("./icar-cleaning/pre-post-checks.jl")
+        # include("./icar-cleaning/select-calculated-columns.jl")
+        # include("./icar-cleaning/serotype-checks.jl")
+        # include("./icar-cleaning/sort-data.jl")
+        # include("./icar-cleaning/state-checks.jl")
+        # include("./icar-cleaning/state-keys.jl")
+        # include("./icar-cleaning/total-row-functions.jl")
+        # include("./icar-cleaning/wrapper-functions.jl")
+        include("./icar-cleaning/integration-test.jl")
+    end
+
+    # include("./icar-processing/icar-processing-functions.jl")
 end
 #
 # Reset preferences to show warnings during package use

@@ -18,32 +18,34 @@ icar_outputs_dir(args...) = DrWatson.datadir("icar-seroprevalence", args...)
 icar_cleaned_dir(args...) = icar_outputs_dir("cleaned", args...)
 icar_processed_dir(args...) = icar_outputs_dir("processed", args...)
 
-show_warnings = @load_preference("show_warnings", true)
+"""
+	skip_missing_and_nan
 
-function _log_try_error(res, type::Symbol = :Error; unwrap_ok = true)
-    @assert type in [:Error, :Warn, :Info]
-    if Try.iserr(res)
-        if type == :Error
-            show_warnings && @error Try.unwrap_err(res)
-            Try.unwrap_err(res)
-        elseif type == :Warn
-            show_warnings && @warn Try.unwrap_err(res)
-            return Try.unwrap_err(res)
-        elseif type == :Info
-            show_warnings && @info Try.unwrap_err(res)
-            return Try.unwrap_err(res)
-        end
-    end
+Convenience function to skip missing and/or NaN values in a iterator.
 
-    if unwrap_ok
-        return Try.unwrap(res)
-    end
-    return res
-end
-
+Returns another iterator.
+"""
 skip_missing_and_nan = Skipper.skip(x -> ismissing(x) || isnan(x))
+
+
+"""
+	skip_nothing
+
+Convenience function to skip nothing values in an iterator
+
+Returns another iterator.
+"""
 skip_nothing = Skipper.skip(x -> isnothing(x))
 
+"""
+    update_regex(
+        original_reg::Regex,
+        find_reg::Regex,
+        subsitution_str::SubstitutionString
+    )
+
+Update a Regex string using regex and a substitution string.
+"""
 function update_regex(
         original_reg::Regex,
         find_reg::Regex,
@@ -56,4 +58,24 @@ function update_regex(
         )
     )
     return new_reg
+end
+
+"""
+    _calculate_string_occurences(
+        vals::Vector{S},
+        unique_vals::Vector{S} = unique(vals)
+    ) where {S <: AbstractString}
+
+Internal function to calculate how many times each unique string value occurs in a vector of strings
+"""
+function _calculate_string_occurences(
+        vals::Vector{S},
+        unique_vals::Vector{S} = unique(vals)
+    ) where {S <: AbstractString}
+    return NamedTuple{tuple(Symbol.(unique_vals)...)}(
+        map(
+            i -> sum(i .== vals),
+            unique_vals,
+        )
+    )
 end
