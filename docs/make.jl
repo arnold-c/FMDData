@@ -4,11 +4,22 @@ using Documenter
 using DocumenterVitepress
 using FMDData
 
+gh_user = "arnold-c"
+gh_repo_name = "FMDData"
+repo = "github.com/$gh_user/$gh_repo_name.git"
+devbranch = "main"
+docsbranch = "docs"
+devurl = "dev"
+deploy_url = "fmddata.callumarnold.com"
+
 Documenter.makedocs(
     modules = [FMDData],
-    repo = Remotes.GitHub("arnold-c", "FMDData"),
+    repo = Remotes.GitHub(gh_user, gh_repo_name),
     format = MarkdownVitepress(;
-        repo = "github.com/arnold-c/FMDData.git",
+        repo = repo,
+        devbranch = devbranch,
+        devurl = devurl,
+        deploy_url = deploy_url,
     ),
     authors = "arnold-c",
     sitename = "FMDData",
@@ -26,9 +37,9 @@ Documenter.makedocs(
 # Some setup is needed for documentation deployment, see “Hosting Documentation” and
 # deploydocs() in the Documenter manual for more information.
 DocumenterVitepress.deploydocs(
-    repo = "github.com/arnold-c/FMDData.git",
+    repo = repo,
     target = "build", # this is where Vitepress stores its output
-    devbranch = "main",
-    branch = "docs",
+    devbranch = devbranch,
+    branch = docsbranch,
     push_preview = true
 )
