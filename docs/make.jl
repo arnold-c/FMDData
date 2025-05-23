@@ -1,20 +1,24 @@
 # see documentation at https://juliadocs.github.io/Documenter.jl/stable/
 
-using Documenter, FMDData
+using Documenter
+using DocumenterVitepress
+using FMDData
 
 makedocs(
     modules = [FMDData],
-    format = Documenter.HTML(; prettyurls = get(ENV, "CI", nothing) == "true"),
+    repo = Remotes.GitHub("arnold-c", "FMDData.jl"),
+    format = MarkdownVitepress(;
+        repo = "github.com/arnold-c/FMDData.jl.git",
+    ),
     authors = "arnold-c",
     sitename = "FMDData.jl",
     pages = Any[
         "index.md",
-        "public.md",
+        "exported.md",
         "internal.md",
     ],
-    # strict = true,
-    # clean = true,
-    # checkdocs = :exports,
+    clean = true,
+    checkdocs = :exports,
     remotes = nothing
 )
 
@@ -22,5 +26,8 @@ makedocs(
 # deploydocs() in the Documenter manual for more information.
 deploydocs(
     repo = "github.com/arnold-c/FMDData.jl.git",
+    target = "build", # this is where Vitepress stores its output
+    devbranch = "main",
+    branch = "gh-pages",
     push_preview = true
 )
