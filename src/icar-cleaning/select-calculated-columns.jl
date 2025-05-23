@@ -10,7 +10,7 @@ export select_calculated_cols!
         reg::Regex
     )
 
-Checks if the data contains both provided and calculated columns that refer to the same variables. If the calculated column is a % seroprevalence, keep the calculated values. If the calculated column is a column of counts, keep the provided as they are deemed to be more accurate (counts require no calculation and should be a direct recording/reporting of the underlying data). The cleaning function `check_calculated_values_match_existing()` should have been run before to ensure there are no surprises during this processing step i.e., accidentally deleting columns that should be retained.
+Checks if the data contains both provided and calculated columns that refer to the same variables. If the calculated column is a % seroprevalence, keep the calculated values. If the calculated column is a column of counts, keep the provided as they are deemed to be more accurate (counts require no calculation and should be a direct recording/reporting of the underlying data). The cleaning function [`check_calculated_values_match_existing()`](@ref) should have been run before to ensure there are no surprises during this processing step i.e., accidentally deleting columns that should be retained.
 """
 function select_calculated_cols!(
         df::DataFrame;

@@ -13,7 +13,7 @@ export check_duplicated_column_names,
         min_score = 0.79
     ) where {T <: Union{<:Metric, <:SemiMetric}}
 
-Wrapper function around the two internal functions `_check_identical_column_names()` and `_check_similar_column_names()`. If a DataFrame is created then all identical column names should result in an error before it is created, but potentially they may be coerced to be made unique so a similarity check should be performed.
+Wrapper function around the two internal functions [`_check_identical_column_names()`](@ref) and [`_check_similar_column_names()`](@ref). If a DataFrame is created then all identical column names should result in an error before it is created, but potentially they may be coerced to be made unique so a similarity check should be performed.
 """
 function check_duplicated_column_names(df::DataFrame)
     identical_check = _check_identical_column_names(df)
@@ -29,7 +29,7 @@ end
 
 Check if the provided data has any duplicate column names.
 
-Should be run BEFORE `_check_similar_column_names()` as `push!()` call in `_check_similar_column_names` will overwrite previous Dict entry key (of similar column names) if there are exact matches.
+Should be run BEFORE [`_check_similar_column_names()`](@ref) as `push!()` call in [`_check_similar_column_names`](@ref) will overwrite previous Dict entry key (of similar column names) if there are exact matches.
 """
 function _check_identical_column_names(df::DataFrame)
     df_ncol = ncol(df)
@@ -50,7 +50,7 @@ end
 
 Check if any columns have similar names. Calculates if any column names are substrings of other columns names.
 
-Should be run AFTER `_check_identical_column_names()` as `push!()` call will overwrite previous Dict entry key if there are exact matches.
+Should be run AFTER [`_check_identical_column_names()`](@ref) as `push!()` call will overwrite previous Dict entry key if there are exact matches.
 """
 function _check_similar_column_names(df::DataFrame)
     colnames = sort(String.(names(df)); by = length)

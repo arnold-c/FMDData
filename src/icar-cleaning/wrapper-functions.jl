@@ -17,9 +17,7 @@ show_warnings = @load_preference("show_warnings", true)
         load_format = DataFrame
     ) where {T1 <: AbstractString}
 
-A wrapper function that runs all the cleaning steps for seroprevalence tables that share the common format of states in each row and columns relating to serotype counts/seroprevalence. For tables that contain multiple rows for each state e.g., 2019 report tables which cover multiple years for a single state, use the relevant alternative wrapper functions.
-
-See `all_2019_cleaning_steps`
+A wrapper function that runs all the cleaning steps for seroprevalence tables that share the common format of states in each row and columns relating to serotype counts/seroprevalence. For tables that contain multiple rows for each state e.g., 2019 report tables which cover multiple years for a single state, use the relevant alternative wrapper functions [`all_2019_cleaning_steps()`](@ref).
 """
 function all_cleaning_steps(
         input_filename::T1,
@@ -116,6 +114,18 @@ function all_cleaning_steps(
     return Try.Ok("Cleaning of $input_filename successful. Written to $output_filename.")
 end
 
+"""
+    all_2019_cleaning_steps(
+        input_filename::T1,
+        input_dir::T1;
+		output_filename::T1 = "clean_\$(input_filename)",
+        output_dir::T1 = icar_cleaned_dir(),
+        load_format = DataFrame
+    ) where {T1 <: AbstractString}
+
+
+A wrapper function that runs all the cleaning steps for seroprevalence tables from the 2019 annual report that share the common format of states in each row and columns relating to serotype seroprevalence. For tables from later reports, use [`all_cleaning_steps()`](@ref)
+"""
 function all_2019_cleaning_steps(
         input_filename::T1,
         input_dir::T1;

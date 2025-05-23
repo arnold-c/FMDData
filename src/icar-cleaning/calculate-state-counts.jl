@@ -5,7 +5,7 @@ export calculate_state_counts
 """
     calculate_state_counts(df::DataFrame, allowed_serotypes = default_allowed_serotypes)
 
-A wrapper function around the internal `_calculate_state_counts()` function to calculate the state/serotype specific counts based upon the state/serotype seroprevalence values and total state counts. See the documentation of `_calculate_state_counts()` for more details on the implementation.
+A wrapper function around the internal [`_calculate_state_counts()`](@ref) function to calculate the state/serotype specific counts based upon the state/serotype seroprevalence values and total state counts. See the documentation of [`_calculate_state_counts()`](@ref) for more details on the implementation.
 """
 function calculate_state_counts(
         df::DataFrame,
@@ -27,6 +27,8 @@ end
 
 An internal function to handle the calculation of the state/serotype counts based upon the provided state/serotype seroprevalence values and total state counts.
 Because DataFrames handles tables as named tuples, we can extract information about the columns being passed from the regex selection and then use substitution strings to collect a view of the correct column of total state counts.
+
+You probably want to use the user-facing function [`calculate_state_counts()`](@ref) instead.
 """
 function _calculate_state_counts(table, original_df)
     str_keys = String.(keys(table))
