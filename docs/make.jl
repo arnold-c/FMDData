@@ -8,9 +8,9 @@ gh_user = "arnold-c"
 gh_repo_name = "FMDData"
 repo = "github.com/$gh_user/$gh_repo_name.git"
 devbranch = "main"
-docsbranch = "docs"
 devurl = "dev"
-deploy_url = "fmddata.callumarnold.com"
+docsbranch = "docs"
+deploy_url = "https://fmddata.callumarnold.com"
 
 Documenter.makedocs(
     modules = [FMDData],
@@ -40,6 +40,7 @@ DocumenterVitepress.deploydocs(
     repo = repo,
     target = "build", # this is where Vitepress stores its output
     devbranch = devbranch,
+    devurl = devurl,
     branch = docsbranch,
     push_preview = true
 )
