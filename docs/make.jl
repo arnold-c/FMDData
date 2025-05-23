@@ -13,8 +13,12 @@ Documenter.makedocs(
     authors = "arnold-c",
     sitename = "FMDData",
     pages = Any[
-        "index.md",
-        "exported.md",
+        "Home" => "index.md",
+        "External Functions & Objects" => [
+            "common.md",
+            "icar-cleaning.md",
+            "icar-processing.md",
+        ],
         "internal.md",
     ],
 )
