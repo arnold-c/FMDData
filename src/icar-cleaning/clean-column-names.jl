@@ -10,7 +10,7 @@ Replace spaces and / with underscores, and (n) and (%) with "count" and "pct" re
 """
 function clean_colnames(
         df::DataFrame,
-        allowed_chars_reg::Regex = r"[^\w]"
+        allowed_chars_reg::Regex = r"[^\w]",
     )
     clean_df = rename(
         t -> replace(
@@ -54,7 +54,7 @@ Rename the aggregated pre/post counts to use the same format as the serotype-spe
 function rename_aggregated_pre_post_counts(
         df::DataFrame,
         original_regex::Regex = r"^(pre|post)_count",
-        substitution_string::SubstitutionString = s"serotype_all_count_\1"
+        substitution_string::SubstitutionString = s"serotype_all_count_\1",
     )
     return Try.Ok(
         rename(

@@ -17,7 +17,7 @@ export has_totals_row,
 
 Check if the table has a totals row.
 
-`df` should have, at the very least, cleaned column names using the `clean_colnames()` function.
+`df` should have, at the very least, cleaned column names using the [`clean_colnames()`](@ref) function.
 """
 function has_totals_row(
         df::DataFrame,
@@ -103,6 +103,18 @@ function all_totals_check(
 
 end
 
+"""
+    calculate_all_totals(
+        df::DataFrame;
+        column::Symbol = :states_ut,
+        totals_key = "total",
+        allowed_serotypes = vcat("all", default_allowed_serotypes),
+        reg::Regex,
+        digits = 1
+    )
+
+Calculate all totals using the appropriate method instance of the internal function [`_calculate_totals!()`](@ref), dependent on whether the column is a Float (seroprevalence) or Integer (count). Uses the internal function [`_collect_totals_check_args()`](@ref) to identify what arguments need to be passed to [`_calculate_totals!()`](@ref) function. Uses the internal function [`_totals_row_selectors()`](@ref) to extract the totals row from the dataframe, for use when calculating the serotype weight total seroprevalence.
+"""
 function calculate_all_totals(
         df::DataFrame;
         column::Symbol = :states_ut,
@@ -136,12 +148,24 @@ function calculate_all_totals(
     return Try.Ok(totals_dict)
 end
 
+"""
+    _totals_row_selectors(
+        df::DataFrame,
+        column::Symbol = :states_ut,
+        totals_key = "total";
+        allowed_serotypes = vcat("all", default_allowed_serotypes),
+        reg::Regex
+
+    )
+
+Internal function to extract the totals row and the subset of dataframe rows that match the regex.
+"""
 function _totals_row_selectors(
         df::DataFrame,
         column::Symbol = :states_ut,
         totals_key = "total";
         allowed_serotypes = vcat("all", default_allowed_serotypes),
-        reg = Regex("serotype_(?|$(join(allowed_serotypes, "|")))_(count|pct)_(pre|post)\$")
+        reg::Regex = Regex("serotype_(?|$(join(allowed_serotypes, "|")))_(count|pct)_(pre|post)\$")
 
     )
     totals_rn = findall(lowercase.(df[!, column]) .== totals_key)
@@ -164,9 +188,9 @@ end
         _...
     ) where {T <: Union{<:Union{<:Missing, <:Integer}, <:Integer}}
 
-Collect the necessary arguments to provide to the `totals_check()` functions. When checking the totals on counts, use `_...` varargs to denote additional arguments can be passed (necessary for total checks on seroprevalence values) but will not be assigned an used within the function body.
+Collect the necessary arguments to provide to the [`totals_check()`](@ref) functions. When checking the totals on counts, use `_...` varargs to denote additional arguments can be passed (necessary for total checks on seroprevalence values) but will not be assigned an used within the function body.
 
-Returns a tuple of variables to be unpacked and passed to `totals_check()`
+Returns a tuple of variables to be unpacked and passed to [`totals_check()`](@ref)
 """
 function _collect_totals_check_args(
         col::Vector{T},
@@ -200,6 +224,15 @@ function _collect_totals_check_args(
     return Try.Ok((col, colname, denom_col, denom_total, digits))
 end
 
+"""
+    _calculate_totals!(
+        totals_dict::OrderedDict,
+        col::Vector{T},
+        colname::String,
+    ) where {T <: Union{<:Union{<:Missing, <:Integer}, <:Integer}}
+
+Internal function to calculate the serotype total.
+"""
 function _calculate_totals!(
         totals_dict::OrderedDict,
         col::Vector{T},
