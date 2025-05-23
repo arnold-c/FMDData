@@ -4,30 +4,27 @@ using Documenter
 using DocumenterVitepress
 using FMDData
 
-makedocs(
+Documenter.makedocs(
     modules = [FMDData],
-    repo = Remotes.GitHub("arnold-c", "FMDData.jl"),
+    repo = Remotes.GitHub("arnold-c", "FMDData"),
     format = MarkdownVitepress(;
-        repo = "github.com/arnold-c/FMDData.jl.git",
+        repo = "github.com/arnold-c/FMDData.git",
     ),
     authors = "arnold-c",
-    sitename = "FMDData.jl",
+    sitename = "FMDData",
     pages = Any[
         "index.md",
         "exported.md",
         "internal.md",
     ],
-    clean = true,
-    checkdocs = :exports,
-    remotes = nothing
 )
 
 # Some setup is needed for documentation deployment, see “Hosting Documentation” and
 # deploydocs() in the Documenter manual for more information.
-deploydocs(
-    repo = "github.com/arnold-c/FMDData.jl.git",
+DocumenterVitepress.deploydocs(
+    repo = "github.com/arnold-c/FMDData.git",
     target = "build", # this is where Vitepress stores its output
     devbranch = "main",
-    branch = "gh-pages",
+    branch = "docs",
     push_preview = true
 )
