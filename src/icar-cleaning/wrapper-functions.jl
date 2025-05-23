@@ -19,7 +19,7 @@ show_warnings = @load_preference("show_warnings", true)
 
 A wrapper function that runs all the cleaning steps for seroprevalence tables that share the common format of states in each row and columns relating to serotype counts/seroprevalence. For tables that contain multiple rows for each state e.g., 2019 report tables which cover multiple years for a single state, use the relevant alternative wrapper functions.
 
-See [all_2019_cleaning_steps](@ref)
+See `all_2019_cleaning_steps`
 """
 function all_cleaning_steps(
         input_filename::T1,
