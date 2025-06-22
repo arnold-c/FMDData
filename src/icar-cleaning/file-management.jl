@@ -49,7 +49,7 @@ function write_csv(
         data::DataFrame
     ) where {T1 <: AbstractString}
     isdir(dir) || mkpath(dir)
-    contains(filename, r".*\.csv$") || return Err("$filename is not a csv file")
+    contains(filename, r".*\.csv$") || return Try.Err("$filename is not a csv file")
 
     write(
         joinpath(dir, filename),
