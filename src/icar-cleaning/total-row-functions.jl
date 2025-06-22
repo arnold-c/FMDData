@@ -32,12 +32,12 @@ end
 
 """
     all_totals_check(
-        df::DataFrame,
+        df::DataFrame;
         column::Symbol = :states_ut,
         totals_key = "total",
         allowed_serotypes = vcat("all", default_allowed_serotypes),
         reg::Regex,
-        atol = 0.1,
+        atol = 0.0,
         digits = 1
     )
 
