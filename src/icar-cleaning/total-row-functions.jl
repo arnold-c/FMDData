@@ -169,7 +169,8 @@ function _totals_row_selectors(
 
     )
     totals_rn = findall(lowercase.(df[!, column]) .== totals_key)
-    length(totals_rn) == 1 || return Try.Err("Expected 1 row of totals. Found $(length(totals_rn)). Check the spelling in the states column :$column matches the provided `totals_key` \"$totals_key\"")
+    length(totals_rn) == 1 ||
+        return Try.Err("Expected 1 row of totals. Found $(length(totals_rn)). Check the spelling in the states column :$column matches the provided `totals_key` \"$totals_key\"")
     totals_rn = totals_rn[1]
     selected_df = select(df, Cols(reg))
     return Try.Ok((totals_rn, selected_df))
