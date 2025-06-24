@@ -46,7 +46,7 @@ end
 
 
 """
-    _check_similar_column_names(df::DataFrame) where {T <: Union{<:Metric, <:SemiMetric}}
+    _check_similar_column_names(df::DataFrame)
 
 Check if any columns have similar names. Calculates if any column names are substrings of other columns names.
 

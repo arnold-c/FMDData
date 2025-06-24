@@ -1,6 +1,5 @@
 using FMDData
 using DataFrames
-using OrderedCollections: OrderedDict
 using Try: Try
 
 @testset "column-name-checks.jl" begin
@@ -28,10 +27,11 @@ using Try: Try
 
         @test Try.isok(FMDData._check_identical_column_names(different_column_names_df))
 
-        @test isequal(
-            FMDData._check_similar_column_names(similar_column_names_df),
-            Try.Err("Similar column names were found in the data: OrderedCollections.OrderedDict(\"states_ut\" => [\"states_ut_1\"], \"serotype_all_count_pre\" => [\"serotype_all_count_pre_1\"]).")
+        @test occursin(
+            r"(OrderedCollections\.)?OrderedDict.*\"states_ut\" => \[\"states_ut_1\"\].*\"serotype_all_count_pre\" => \[\"serotype_all_count_pre_1\"\]",
+            Try.unwrap_err(FMDData._check_similar_column_names(similar_column_names_df))
         )
+
 
         similar_column_names_df_2 = DataFrame(
             "states_ut_1_2" => String[],
@@ -44,15 +44,15 @@ using Try: Try
             "serotype_all_count_pre_test" => Int64[],
         )
 
-        @test isequal(
-            FMDData._check_similar_column_names(similar_column_names_df_2),
-            Try.Err("Similar column names were found in the data: OrderedCollections.OrderedDict(\"states_u\" => [\"states_ut\", \"states_ut_1\", \"states_ut_1_2\"], \"serotype_all_count_pre\" => [\"serotype_all_count_pre_test\"]).")
+        @test occursin(
+            r"(OrderedCollections\.)?OrderedDict.*\"states_u\" => \[\"states_ut\", \"states_ut_1\", \"states_ut_1_2\"\].*\"serotype_all_count_pre\" => \[\"serotype_all_count_pre_test\"\]",
+            Try.unwrap_err(FMDData._check_similar_column_names(similar_column_names_df_2))
         )
 
 
-        @test isequal(
-            check_duplicated_column_names(similar_column_names_df),
-            Try.Err("Similar column names were found in the data: OrderedCollections.OrderedDict(\"states_ut\" => [\"states_ut_1\"], \"serotype_all_count_pre\" => [\"serotype_all_count_pre_1\"]).")
+        @test occursin(
+            r"(OrderedCollections\.)?OrderedDict.*\"states_ut\" => \[\"states_ut_1\"\].*\"serotype_all_count_pre\" => \[\"serotype_all_count_pre_1\"\]",
+            Try.unwrap_err(check_duplicated_column_names(similar_column_names_df))
         )
 
         duplicate_column_vals_df = DataFrame(

@@ -1,6 +1,5 @@
 using DataFrames
 using Try
-using OrderedCollections: OrderedDict
 using DrWatson: findproject
 
 @testset verbose = true "icar-cleaning-functions.jl" begin

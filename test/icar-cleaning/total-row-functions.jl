@@ -54,11 +54,9 @@ using OrderedCollections: OrderedCollections
             Try.Err("Expected 1 row of totals. Found 0. Check the spelling in the states column :states_ut matches the provided `totals_key` \"total\"")
         )
 
-        @test isequal(
-            all_totals_check(incorrect_totals_row_df; atol = 0.1),
-            Try.Err(
-                "There were discrepancies in the totals calculated and those provided in the data: OrderedCollections.OrderedDict{AbstractString, NamedTuple{(:provided, :calculated)}}(\"serotype_a_count_pre\" => (provided = 5, calculated = 4), \"serotype_a_count_post\" => (provided = 20, calculated = 19), \"serotype_a_pct_pre\" => (provided = 13.1, calculated = 13.3), \"serotype_a_pct_post\" => (provided = 63.0, calculated = 63.3))"
-            )
+        @test occursin(
+            r"There were discrepancies in the totals calculated and those provided in the data: (OrderedCollections\.)?OrderedDict\{AbstractString, NamedTuple\{\(:provided, :calculated\)\}\}\(\"serotype_a_count_pre\" => \(provided = 5, calculated = 4\), \"serotype_a_count_post\" => \(provided = 20, calculated = 19\), \"serotype_a_pct_pre\" => \(provided = 13.1, calculated = 13.3\), \"serotype_a_pct_post\" => \(provided = 63.0, calculated = 63.3\)\)",
+            Try.unwrap_err(all_totals_check(incorrect_totals_row_df; atol=0.1))
         )
 
         @test Try.isok(all_totals_check(correct_totals_row_df))
@@ -72,14 +70,23 @@ using OrderedCollections: OrderedCollections
             "serotype_a_pct_post" => 63.3,
         )
 
-
-        @test isequal(
-            totals_check(
-                incorrect_totals_row_df[end, Not(:states_ut)],
-                incorrect_totals_calculated
+        @test occursin(
+            r"There were discrepancies in the totals calculated and those provided in the data: (OrderedCollections\.)?OrderedDict\{AbstractString, NamedTuple\{\(:provided, :calculated\)\}\}\(\"serotype_a_count_pre\" => \(provided = 5, calculated = 4\).*\"serotype_a_count_post\" => \(provided = 20, calculated = 19\).*\"serotype_a_pct_pre\" => \(provided = 13\.1, calculated = 13\.3\).*\"serotype_a_pct_post\" => \(provided = 63\.0, calculated = 63\.3\)",
+            Try.unwrap_err(
+                totals_check(
+                    incorrect_totals_row_df[end, Not(:states_ut)],
+                    incorrect_totals_calculated
+                )
             ),
-            Try.Err("There were discrepancies in the totals calculated and those provided in the data: OrderedCollections.OrderedDict{AbstractString, NamedTuple{(:provided, :calculated)}}(\"serotype_a_count_pre\" => (provided = 5, calculated = 4), \"serotype_a_count_post\" => (provided = 20, calculated = 19), \"serotype_a_pct_pre\" => (provided = 13.1, calculated = 13.3), \"serotype_a_pct_post\" => (provided = 63.0, calculated = 63.3))")
         )
+
+        # @test isequal(
+        #     totals_check(
+        #         incorrect_totals_row_df[end, Not(:states_ut)],
+        #         incorrect_totals_calculated
+        #     ),
+        #     Try.Err("There were discrepancies in the totals calculated and those provided in the data: OrderedDict{AbstractString, NamedTuple{(:provided, :calculated)}}(\"serotype_a_count_pre\" => (provided = 5, calculated = 4), \"serotype_a_count_post\" => (provided = 20, calculated = 19), \"serotype_a_pct_pre\" => (provided = 13.1, calculated = 13.3), \"serotype_a_pct_post\" => (provided = 63.0, calculated = 63.3))")
+        # )
     end
 
     @testset verbose = true "Calculate totals" begin
@@ -102,14 +109,14 @@ using OrderedCollections: OrderedCollections
         )
 
         @test isequal(
-            calculate_all_totals(cleaned_states_data[begin:(end - 1), :]),
+            calculate_all_totals(cleaned_states_data[begin:(end-1), :]),
             Try.Err("Expected 1 row of totals. Found 0. Check the spelling in the states column :states_ut matches the provided `totals_key` \"total\"")
         )
 
         count_total_dict = OrderedCollections.OrderedDict()
         FMDData._calculate_totals!(
             count_total_dict,
-            cleaned_states_data[begin:(end - 1), "serotype_a_count_pre"],
+            cleaned_states_data[begin:(end-1), "serotype_a_count_pre"],
             "serotype_a_count_pre"
         )
         @test isequal(
@@ -121,9 +128,9 @@ using OrderedCollections: OrderedCollections
         seroprev_total_dict = OrderedCollections.OrderedDict()
         FMDData._calculate_totals!(
             seroprev_total_dict,
-            cleaned_states_data[begin:(end - 1), "serotype_a_pct_pre"],
+            cleaned_states_data[begin:(end-1), "serotype_a_pct_pre"],
             "serotype_a_pct_pre",
-            cleaned_states_data[begin:(end - 1), "serotype_all_count_pre"],
+            cleaned_states_data[begin:(end-1), "serotype_all_count_pre"],
             20,
             1
         )
@@ -143,7 +150,7 @@ using OrderedCollections: OrderedCollections
         )
 
         @test isequal(
-            calculate_all_totals(cleaned_states_data[begin:(end - 1), :]),
+            calculate_all_totals(cleaned_states_data[begin:(end-1), :]),
             Try.Err("Expected 1 row of totals. Found 0. Check the spelling in the states column :states_ut matches the provided `totals_key` \"total\"")
         )
 
