@@ -6,7 +6,6 @@ using FMDData
 
 #%%
 for file in [
-
         "2022_Annual-Report_Organized-farms.csv",
         "2022_Annual-Report_NADCP-3.csv",
         "2022_Annual-Report_NADCP-2.csv",
