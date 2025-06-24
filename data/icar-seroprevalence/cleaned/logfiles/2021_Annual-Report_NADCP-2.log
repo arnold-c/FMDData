@@ -1,4 +1,4 @@
 ┌ Warning: There were discrepancies in the totals calculated and those provided in the data: OrderedCollections.OrderedDict{AbstractString, NamedTuple{(:provided, :calculated)}}("serotype_o_pct_pre" => (provided = 30.9, calculated = 32.5), "serotype_o_pct_post" => (provided = 57.5, calculated = 62.9), "serotype_a_pct_pre" => (provided = 26.7, calculated = 28.8), "serotype_a_pct_post" => (provided = 58.4, calculated = 63.9), "serotype_asia1_pct_pre" => (provided = 31.5, calculated = 33.4), "serotype_asia1_pct_post" => (provided = 61.4, calculated = 66.6))
-└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/utils.jl:30
+└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/error-handlers.jl:18
 ┌ Warning: Using calculated totals
-└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/icar-cleaning-functions.jl:1038
+└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/icar-cleaning/total-row-functions.jl:340

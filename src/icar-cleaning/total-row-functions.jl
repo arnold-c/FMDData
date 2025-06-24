@@ -32,12 +32,12 @@ end
 
 """
     all_totals_check(
-        df::DataFrame,
+        df::DataFrame;
         column::Symbol = :states_ut,
         totals_key = "total",
         allowed_serotypes = vcat("all", default_allowed_serotypes),
         reg::Regex,
-        atol = 0.1,
+        atol = 0.0,
         digits = 1
     )
 
@@ -169,7 +169,8 @@ function _totals_row_selectors(
 
     )
     totals_rn = findall(lowercase.(df[!, column]) .== totals_key)
-    length(totals_rn) == 1 || return Try.Err("Expected 1 row of totals. Found $(length(totals_rn)). Check the spelling in the states column :$column matches the provided `totals_key` \"$totals_key\"")
+    length(totals_rn) == 1 ||
+        return Try.Err("Expected 1 row of totals. Found $(length(totals_rn)). Check the spelling in the states column :$column matches the provided `totals_key` \"$totals_key\"")
     totals_rn = totals_rn[1]
     selected_df = select(df, Cols(reg))
     return Try.Ok((totals_rn, selected_df))

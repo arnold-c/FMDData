@@ -1,4 +1,4 @@
 ┌ Warning: Found 3 allowed serotypes (["o", "a", "asia1"]). Required 4: ["all", "o", "a", "asia1"].
-└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/utils.jl:30
+└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/error-handlers.jl:18
 ┌ Warning: The aggregated count columns ["serotype_all_count_pre", "serotype_all_count_post"] do not exist in the data
-└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/utils.jl:30
+└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/error-handlers.jl:18
