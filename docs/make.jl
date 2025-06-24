@@ -28,6 +28,7 @@ Documenter.makedocs(
     pages = Any[
         "Data Descriptions & Tutorials" => [
             "extracted-seroprev-tables.md",
+            "cleaning-process.md",
         ],
         "External Functions & Objects" => [
             "common.md",
