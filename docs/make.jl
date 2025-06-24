@@ -26,7 +26,9 @@ Documenter.makedocs(
     authors = "arnold-c",
     sitename = "FMDData",
     pages = Any[
-        "Home" => "index.md",
+        "Data Descriptions & Tutorials" => [
+            "extracted-seroprev-tables.md",
+        ],
         "External Functions & Objects" => [
             "common.md",
             "icar-cleaning.md",
