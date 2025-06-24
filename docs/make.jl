@@ -20,6 +20,8 @@ Documenter.makedocs(
         devbranch = devbranch,
         devurl = devurl,
         deploy_url = deploy_url,
+        md_output_path = ".",
+        build_vitepress = false,
     ),
     authors = "arnold-c",
     sitename = "FMDData",
@@ -31,6 +33,7 @@ Documenter.makedocs(
             "icar-processing.md",
         ],
         "internal.md",
+        "doc-instructions.md",
     ],
 )
 
@@ -38,7 +41,7 @@ Documenter.makedocs(
 # deploydocs() in the Documenter manual for more information.
 DocumenterVitepress.deploydocs(
     repo = repo,
-    target = "build", # this is where Vitepress stores its output
+    target = joinpath(@__DIR__, "build"), # this is where Vitepress stores its output
     devbranch = devbranch,
     devurl = devurl,
     branch = docsbranch,
