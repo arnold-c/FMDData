@@ -34,8 +34,10 @@ Documenter.makedocs(
             "icar-cleaning.md",
             "icar-processing.md",
         ],
-        "internal.md",
-        "doc-instructions.md",
+        "Developer Documentation" => [
+            "internal.md",
+            "doc-instructions.md",
+        ],
     ],
 )
 
