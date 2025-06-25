@@ -36,12 +36,21 @@ end
         column::Symbol = :states_ut,
         totals_key = "total",
         allowed_serotypes = vcat("all", default_allowed_serotypes),
-        reg::Regex,
+        reg::Regex, # Note: This is a positional argument in the function signature.
         atol = 0.0,
         digits = 1
     )
 
 Check if all provided values in the provided totals row are correct. If the column is a count, then calculate an unweighted sum. If the column is the seroprevalence, calculated the sum weighted by the relevant counts (pre- or post-vaccination counts).
+
+# Arguments
+- `df::DataFrame`: The input DataFrame.
+- `column::Symbol`: Symbol of the column containing state/UT names (default: `:states_ut`).
+- `totals_key::String`: String key used to identify the totals row (default: `"total"`).
+- `allowed_serotypes::Vector{String}`: Vector of allowed serotype strings.
+- `reg::Regex`: A positional Regex argument to select columns for totals checking.
+- `atol::Float64`: Absolute tolerance for comparing floating point numbers (default: `0.0`).
+- `digits::Int`: Number of digits for rounding (default: `1`).
 """
 function all_totals_check(
         df::DataFrame;
@@ -109,11 +118,19 @@ end
         column::Symbol = :states_ut,
         totals_key = "total",
         allowed_serotypes = vcat("all", default_allowed_serotypes),
-        reg::Regex,
+        reg::Regex, # Note: This is a positional argument in the function signature.
         digits = 1
     )
 
 Calculate all totals using the appropriate method instance of the internal function [`_calculate_totals!()`](@ref), dependent on whether the column is a Float (seroprevalence) or Integer (count). Uses the internal function [`_collect_totals_check_args()`](@ref) to identify what arguments need to be passed to [`_calculate_totals!()`](@ref) function. Uses the internal function [`_totals_row_selectors()`](@ref) to extract the totals row from the dataframe, for use when calculating the serotype weight total seroprevalence.
+
+# Arguments
+- `df::DataFrame`: The input DataFrame.
+- `column::Symbol`: Symbol of the column containing state/UT names (default: `:states_ut`).
+- `totals_key::String`: String key used to identify the totals row (default: `"total"`).
+- `allowed_serotypes::Vector{String}`: Vector of allowed serotype strings.
+- `reg::Regex`: A positional Regex argument to select columns for totals calculation.
+- `digits::Int`: Number of digits for rounding (default: `1`).
 """
 function calculate_all_totals(
         df::DataFrame;
@@ -179,19 +196,19 @@ end
 """
     _collect_totals_check_args(
         col::Vector{T},
-        totals::DataFrame,
         colname::String,
         _...
     ) where {T <: Union{Union{<:Missing, <:Integer}, <:Integer}}
-        col::Vector{T},
-        totals::DataFrame,
-        colname::String,
-        _...
-    ) where {T <: Union{<:Union{<:Missing, <:Integer}, <:Integer}}
 
-Collect the necessary arguments to provide to the [`totals_check()`](@ref) functions. When checking the totals on counts, use `_...` varargs to denote additional arguments can be passed (necessary for total checks on seroprevalence values) but will not be assigned an used within the function body.
+Collect the necessary arguments to provide to the [`_calculate_totals!()`](@ref) function for count-based columns.
+Uses `_...` varargs to denote that additional arguments (relevant for seroprevalence calculations in other methods of this function) might be passed but are not used in this specific method for integer/count columns.
 
-Returns a tuple of variables to be unpacked and passed to [`totals_check()`](@ref)
+# Arguments
+- `col::Vector{T}`: The column vector of counts.
+- `colname::String`: The name of the column.
+- `_...`: Varargs for unused parameters in this method.
+
+Returns a `Try.Ok` containing a tuple `(col, colname)` to be unpacked and passed to `_calculate_totals!`.
 """
 function _collect_totals_check_args(
         col::Vector{T},
@@ -265,12 +282,21 @@ end
 
 """
     totals_check(
-        col::Vector{T},
-        provided_total,
-        colname::String,
-    ) where {T <: Union{<:Union{<:Missing, <:Integer}, <:Integer}}
+        totals::DataFrameRow,
+        calculated_totals::OrderedDict,
+        column::Symbol = :states_ut;
+        atol = 0.0
+    )
 
-Check if the provided total counts equal the sum calculated using the provided state counts.
+Check if the totals provided in a DataFrameRow match the calculated totals.
+
+# Arguments
+- `totals::DataFrameRow`: A row from a DataFrame, typically the 'total' row.
+- `calculated_totals::OrderedDict`: An OrderedDict where keys are column names and values are the calculated totals for these columns.
+- `column::Symbol`: The symbol for the column containing state/UT names, used for error messaging if totals don't match (default: `:states_ut`).
+- `atol::Float64`: Absolute tolerance used for comparing floating-point numbers (default: `0.0`).
+
+Returns `Try.Ok(nothing)` if all totals match, or `Try.Err` with a descriptive message if discrepancies are found.
 """
 function totals_check(
         totals::DataFrameRow,

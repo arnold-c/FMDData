@@ -41,7 +41,7 @@ skip_nothing = Skipper.skip(x -> isnothing(x))
     update_regex(
         original_reg::Regex,
         find_reg::Regex,
-        subsitution_str::SubstitutionString
+        substitution_str::SubstitutionString
     )
 
 Update a Regex string using regex and a substitution string.
@@ -49,12 +49,12 @@ Update a Regex string using regex and a substitution string.
 function update_regex(
         original_reg::Regex,
         find_reg::Regex,
-        subsitution_str::SubstitutionString
+        substitution_str::SubstitutionString
     )
     new_reg = Regex(
         replace(
             original_reg.pattern,
-            find_reg => subsitution_str,
+            find_reg => substitution_str,
         )
     )
     return new_reg

@@ -7,13 +7,10 @@ export check_duplicated_column_names,
 
 
 """
-    check_duplicated_column_names(
-        df::DataFrame,
-        metric::T = Levenshtein();
-        min_score = 0.79
-    ) where {T <: Union{<:Metric, <:SemiMetric}}
+    check_duplicated_column_names(df::DataFrame)
 
-Wrapper function around the two internal functions [`_check_identical_column_names()`](@ref) and [`_check_similar_column_names()`](@ref). If a DataFrame is created then all identical column names should result in an error before it is created, but potentially they may be coerced to be made unique so a similarity check should be performed.
+Wrapper function around the two internal functions [`_check_identical_column_names()`](@ref) and [`_check_similar_column_names()`](@ref).
+Checks for both identical and very similar column names in the DataFrame.
 """
 function check_duplicated_column_names(df::DataFrame)
     identical_check = _check_identical_column_names(df)

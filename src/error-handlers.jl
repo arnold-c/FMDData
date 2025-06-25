@@ -7,6 +7,11 @@ show_warnings = @load_preference("show_warnings", true)
     _log_try_error(res, type::Symbol = :Error; unwrap_ok = true)
 
 Internal function that checks if the value received is a Try.Err() object, and if so, logs the error with the level provided by the `type` argument. Useful to choose when to stop for an error, and when to log and continue.
+
+# Arguments
+- `res`: The result object, typically from a `Try` operation.
+- `type::Symbol`: The logging level (`:Error`, `:Warn`, `:Info`). Default is `:Error`.
+- `unwrap_ok::Bool`: If true and `res` is `Try.Ok`, the unwrapped value is returned. Otherwise, the `Try.Ok` object itself is returned. Default is `true`.
 """
 function _log_try_error(res, type::Symbol = :Error; unwrap_ok = true)
     @assert type in [:Error, :Warn, :Info]
@@ -31,9 +36,13 @@ end
 
 
 """
-    _combine_error_messages(arr_of_errs::AbstractVector{T}) where {T <: Try.InternalPrelude.AbstractResult}
+    _combine_error_messages(arr_of_errs::AbstractVector{T}; filter_ok = false) where {T <: Try.InternalPrelude.AbstractResult}
 
-Internal function that accepts a vector of `Try` results e.g., `Ok()` and `Err()`, and concatenates them to be passed up the call stack.
+Internal function that accepts a vector of `Try` results e.g., `Ok()` and `Err()`, and concatenates their error messages (if any) to be passed up the call stack.
+
+# Arguments
+- `arr_of_errs::AbstractVector{T}`: A vector of `Try.Ok` or `Try.Err` objects.
+- `filter_ok::Bool`: If `true`, `Try.Ok` results are filtered out before processing. Default is `false`.
 """
 function _combine_error_messages(
         arr_of_errs::AbstractVector{T};
