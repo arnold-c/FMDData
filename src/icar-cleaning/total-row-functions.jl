@@ -41,16 +41,22 @@ end
         digits = 1
     )
 
-Check if all provided values in the provided totals row are correct. If the column is a count, then calculate an unweighted sum. If the column is the seroprevalence, calculated the sum weighted by the relevant counts (pre- or post-vaccination counts).
+Checks if the totals row in a DataFrame is accurate.
+
+This function has two main methods:
+1.  **`all_totals_check(df::DataFrame; ...)`**: This is the main method, which calculates the totals and then compares them to the existing totals row in the DataFrame.
+2.  **`all_totals_check(totals_dict::OrderedDict, df::DataFrame; ...)`**: This method is used when the totals have already been calculated and are passed in as a dictionary.
+
+The function calculates the totals for both counts and seroprevalence. For counts, it calculates a simple sum. For seroprevalence, it calculates a weighted sum based on the relevant counts (pre- or post-vaccination).
 
 # Arguments
-- `df::DataFrame`: The input DataFrame.
-- `column::Symbol`: Symbol of the column containing state/UT names (default: `:states_ut`).
-- `totals_key::String`: String key used to identify the totals row (default: `"total"`).
-- `allowed_serotypes::Vector{String}`: Vector of allowed serotype strings.
-- `reg::Regex`: A positional Regex argument to select columns for totals checking.
-- `atol::Float64`: Absolute tolerance for comparing floating point numbers (default: `0.0`).
-- `digits::Int`: Number of digits for rounding (default: `1`).
+- `df`: The DataFrame to check.
+- `column`: The column containing the state/UT names. Defaults to `:states_ut`.
+- `totals_key`: The key used to identify the totals row. Defaults to `"total"`.
+- `allowed_serotypes`: A vector of allowed serotypes.
+- `reg`: A regular expression used to select the columns to check.
+- `atol`: The absolute tolerance to use when comparing floating-point numbers. Defaults to `0.0`.
+- `digits`: The number of digits to round to. Defaults to `1`.
 """
 function all_totals_check(
         df::DataFrame;
@@ -227,7 +233,7 @@ function _collect_totals_check_args(
         digits = 1,
     ) where {T <: Union{Union{<:Missing, <:AbstractFloat}, <:AbstractFloat}}
     # Forms the regex string: r"serotype_(?|o|a|asia1)_pct_(pre|post)$"
-    # (?|...) indicates a non-capture group i.e. must match any of the words separated by '|' characters, but does not return a match as a capture group
+    # (?|...) indicates a non-capture group i.e. must match any of the words separated by \'|\' characters, but does not return a match as a capture group
     # (pre|post) is the only capture group, providing the timing used to collect the correct state column for weighting the seroprevalence sums
     reg = Regex("serotype_(?|$(join(allowed_serotypes, "|")))_pct_(pre|post)\$")
     denom_type_matches = match(reg, colname)
@@ -291,9 +297,9 @@ end
 Check if the totals provided in a DataFrameRow match the calculated totals.
 
 # Arguments
-- `totals::DataFrameRow`: A row from a DataFrame, typically the 'total' row.
+- `totals::DataFrameRow`: A row from a DataFrame, typically the \'total\' row.
 - `calculated_totals::OrderedDict`: An OrderedDict where keys are column names and values are the calculated totals for these columns.
-- `column::Symbol`: The symbol for the column containing state/UT names, used for error messaging if totals don't match (default: `:states_ut`).
+- `column::Symbol`: The symbol for the column containing state/UT names, used for error messaging if totals don\'t match (default: `:states_ut`).
 - `atol::Float64`: Absolute tolerance used for comparing floating-point numbers (default: `0.0`).
 
 Returns `Try.Ok(nothing)` if all totals match, or `Try.Err` with a descriptive message if discrepancies are found.
@@ -369,3 +375,4 @@ function select_calculated_totals!(
 
     return Try.Ok(nothing)
 end
+

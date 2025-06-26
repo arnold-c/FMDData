@@ -12,11 +12,41 @@ export input_dir,
     skip_nothing,
     update_regex
 
+"""
+    input_dir(args...)
+
+Returns the absolute path to the `inputs` directory of the project.
+"""
 input_dir(args...) = DrWatson.projectdir("inputs", args...)
+
+"""
+    icar_inputs_dir(args...)
+
+Returns the absolute path to the `extracted-seroprevalence-tables` directory, which contains the raw ICAR report data.
+"""
 icar_inputs_dir(args...) = input_dir("ICAR-Reports", "extracted-seroprevalence-tables", args...)
+
+"""
+    icar_outputs_dir(args...)
+
+Returns the absolute path to the `icar-seroprevalence` directory, which contains the cleaned and processed data.
+"""
 icar_outputs_dir(args...) = DrWatson.datadir("icar-seroprevalence", args...)
+
+"""
+    icar_cleaned_dir(args...)
+
+Returns the absolute path to the `cleaned` directory, which contains the cleaned ICAR report data.
+"""
 icar_cleaned_dir(args...) = icar_outputs_dir("cleaned", args...)
+
+"""
+    icar_processed_dir(args...)
+
+Returns the absolute path to the `processed` directory, which contains the processed ICAR report data.
+"""
 icar_processed_dir(args...) = icar_outputs_dir("processed", args...)
+
 
 """
 	skip_missing_and_nan

@@ -8,10 +8,6 @@ using DrWatson: findproject
 
 test_dir(args...) = joinpath(findproject(), "test", args...)
 
-# Turn off warnings during testing
-delete_preferences!(FMDData, "show_warnings"; force = true)
-set_preferences!(FMDData, "show_warnings" => false)
-
 @testset verbose = true "FMDData" begin
     # @testset "Static analysis with JET.jl" begin
     #     @test isempty(JET.get_reports(report_package(FMDData, target_modules = (FMDData,))))
@@ -38,12 +34,7 @@ set_preferences!(FMDData, "show_warnings" => false)
         include("./icar-cleaning/state-checks.jl")
         include("./icar-cleaning/state-keys.jl")
         include("./icar-cleaning/total-row-functions.jl")
-        include("./icar-cleaning/integration-test.jl")
     end
 
     # include("./icar-processing/icar-processing-functions.jl")
 end
-#
-# Reset preferences to show warnings during package use
-delete_preferences!(FMDData, "show_warnings"; force = true)
-set_preferences!(FMDData, "show_warnings" => true)

@@ -1,5 +1,7 @@
 """
-Placeholder for a short summary about FMDData.
+    FMDData
+
+A Julia package for cleaning and processing Foot-and-Mouth Disease (FMD) seroprevalence data from Indian Council of Agricultural Research (ICAR) annual reports.
 """
 module FMDData
 
