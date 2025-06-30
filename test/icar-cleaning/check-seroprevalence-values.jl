@@ -1,6 +1,5 @@
 using FMDData
 using DataFrames
-using OrderedCollections: OrderedDict
 using Try: Try
 
 @testset "check-seroprevalence-values.jl" begin

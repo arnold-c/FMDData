@@ -14,6 +14,17 @@ export add_all_metadata!,
     infer_later_year_values,
     combine_round_dfs
 
+
+"""
+    add_all_metadata!(
+        df_pair::Pair{T, D}
+    ) where {T <: DataFrame, D <: OrderedDict{<:Symbol, <:Any}}
+
+Adds multiple metadata columns to a DataFrame based on a dictionary of metadata.
+
+# Arguments
+- `df_pair`: A `Pair` where the key is the DataFrame to modify and the value is an `OrderedDict` of metadata. The keys of the dictionary should be the names of the metadata columns to add, and the values should be the values to populate those columns with.
+"""
 function add_all_metadata!(
         df_pair::Pair{T, D}
     ) where {T <: DataFrame, D <: OrderedDict{<:Symbol, <:Any}}
@@ -44,6 +55,15 @@ function add_all_metadata!(
     return Try.Ok(nothing)
 end
 
+
+"""
+    add_test_threshold!(
+        df_round_pairs::Pair{T, S}...;
+        threshold_column = :test_threshold
+    ) where {T <: AbstractDataFrame, S <: AbstractString}
+
+Adds a test threshold column to one or more DataFrames.
+"""
 function add_test_threshold!(
         df_round_pairs::Pair{T, S}...;
         threshold_column = :test_threshold
@@ -51,6 +71,15 @@ function add_test_threshold!(
     return add_metadata_col!(threshold_column, df_round_pairs...)
 end
 
+
+"""
+    add_test_type!(
+        df_round_pairs::Pair{T, S}...;
+        test_column = :test_type
+    ) where {T <: AbstractDataFrame, S <: AbstractString}
+
+Adds a test type column to one or more DataFrames.
+"""
 function add_test_type!(
         df_round_pairs::Pair{T, S}...;
         test_column = :test_type
@@ -58,6 +87,15 @@ function add_test_type!(
     return add_metadata_col!(test_column, df_round_pairs...)
 end
 
+
+"""
+    add_round_name!(
+        df_round_pairs::Pair{T, S}...;
+        round_column = :round
+    ) where {T <: AbstractDataFrame, S <: AbstractString}
+
+Adds a round name column to one or more DataFrames.
+"""
 function add_round_name!(
         df_round_pairs::Pair{T, S}...;
         round_column = :round
@@ -65,6 +103,15 @@ function add_round_name!(
     return add_metadata_col!(round_column, df_round_pairs...)
 end
 
+
+"""
+    add_report_year!(
+        df_year_pairs::Pair{T, I}...;
+        year_column = :report_year
+    ) where {T <: AbstractDataFrame, I <: Integer}
+
+Adds a report year column to one or more DataFrames.
+"""
 function add_report_year!(
         df_year_pairs::Pair{T, I}...;
         year_column = :report_year
@@ -73,6 +120,14 @@ function add_report_year!(
 end
 
 
+"""
+    add_sample_year!(
+        df_year_pairs...;
+        year_column = :sample_year
+    )
+
+Adds a sample year column to one or more DataFrames.
+"""
 function add_sample_year!(
         df_year_pairs...;
         year_column = :sample_year
@@ -80,6 +135,11 @@ function add_sample_year!(
     return add_metadata_col!(year_column, df_year_pairs...)
 end
 
+"""
+    add_metadata_col!(metadata_column, df_metadata_pairs...)
+
+Adds a metadata column to one or more DataFrames. This is a generic function that can be used to add any metadata column.
+"""
 function add_metadata_col!(metadata_column, df_metadata_pairs...)
     metadata_errs = OrderedDict()
     for pair in df_metadata_pairs
@@ -94,6 +154,14 @@ function add_metadata_col!(metadata_column, df_metadata_pairs...)
     return Try.Ok(nothing)
 end
 
+"""
+    add_metadata_col!(
+        metadata_column::Symbol,
+        df_metadata_pair::Pair{T, I},
+    ) where {T <: AbstractDataFrame, I <: Union{<:Integer, <:AbstractFloat, <:AbstractString}}
+
+Adds a metadata column to a single DataFrame.
+"""
 function add_metadata_col!(
         metadata_column::Symbol,
         df_metadata_pair::Pair{T, I},
@@ -103,6 +171,22 @@ function add_metadata_col!(
     return Try.Ok(nothing)
 end
 
+
+"""
+    infer_later_year_values(
+        cumulative_later_df::T,
+        initial_df::T;
+        year_column = :sample_year,
+        statename_column = :states_ut,
+        allowed_serotypes = vcat("all", default_allowed_serotypes),
+        reg::Regex,
+        atol = 0.0,
+        digits = 1
+
+    ) where {T <: AbstractDataFrame}
+
+Infers the values for a later year by subtracting the values from an initial year from a cumulative dataset. This is useful when a report provides cumulative data, and you need to extract the data for a single year.
+"""
 function infer_later_year_values(
         cumulative_later_df::T,
         initial_df::T;
@@ -283,6 +367,14 @@ function _correct_serotype_counts!(
     return df
 end
 
-function combine_round_dfs(dfs::DataFrame...)
+
+"""
+    combine_round_dfs(dfs::DataFrame...)
+
+Combines multiple DataFrames into a single DataFrame.
+"""
+function combine_round_dfs(
+        dfs::DataFrame...
+    )
     return Try.Ok(vcat(dfs...))
 end
