@@ -29,6 +29,7 @@ Documenter.makedocs(
         "Data Descriptions & Tutorials" => [
             "extracted-seroprev-tables.md",
             "cleaning-process.md",
+            "additional-processing.md",
         ],
         "External Functions & Objects" => [
             "common.md",
