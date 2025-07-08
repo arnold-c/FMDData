@@ -1,0 +1,12 @@
+states_ut,serotype_all_count_pre,serotype_all_count_post,serotype_o_count_pre,serotype_o_pct_pre,serotype_o_count_post,serotype_o_pct_post,serotype_a_count_pre,serotype_a_pct_pre,serotype_a_count_post,serotype_a_pct_post,serotype_asia1_count_pre,serotype_asia1_pct_pre,serotype_asia1_count_post,serotype_asia1_pct_post
+A&N Island,364,,61,16.8,,,26,7.1,,,64,17.6,,
+Andhra Pradesh,2722,2716,536,19.7,1127,41.5,531,19.5,1263,46.5,623,22.9,1336,49.2
+Chandigarh,200,200,71,35.5,151,75.5,64,32.0,136,68.0,80,40.0,158,79.0
+Delhi,234,230,171,73.1,204,88.7,152,65.0,198,86.1,152,65.0,206,89.6
+Haryana,2289,2285,833,36.4,1572,68.8,794,34.7,1552,67.9,989,43.2,1666,72.9
+Himachal Pradesh,,324,,,232,71.6,,,212,65.4,,,236,72.8
+Jammu & Kashmir,487,,187,38.4,,,127,26.1,,,85,17.5,,
+Kamataka,1196,1213,721,60.3,1069,88.1,670,56.0,1069,88.1,663,55.4,1047,86.3
+Maharashtra,1079,611,152,14.1,415,67.9,203,18.8,417,68.2,178,16.5,399,65.3
+Uttar Pradesh,879,,334,38.0,,,159,18.1,,,321,36.5,,
+Total,9450,7579,3071,32.5,4767,62.9,2722,28.8,4843,63.9,3156,33.4,5048,66.6
