@@ -36,5 +36,9 @@ test_dir(args...) = joinpath(findproject(), "test", args...)
         include("./icar-cleaning/total-row-functions.jl")
     end
 
-    # include("./icar-processing/icar-processing-functions.jl")
+    @testset verbose = true "ICAR Processing" begin
+        include("./icar-processing/metadata-operations.jl")
+        include("./icar-processing/data-inference.jl")
+        include("./icar-processing/dataframe-operations.jl")
+    end
 end

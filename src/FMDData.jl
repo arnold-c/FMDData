@@ -23,7 +23,9 @@ include("./icar-cleaning/state-checks.jl")
 include("./icar-cleaning/state-keys.jl")
 include("./icar-cleaning/total-row-functions.jl")
 include("./icar-cleaning/wrapper-functions.jl")
-include("./icar-processing/icar-processing-functions.jl")
+include("./icar-processing/metadata-operations.jl")
+include("./icar-processing/data-inference.jl")
+include("./icar-processing/dataframe-operations.jl")
 
 
 using PrecompileTools: @setup_workload, @compile_workload
