@@ -41,7 +41,7 @@ function add_all_metadata!(
 
     unaccepted_metadata = OrderedDict()
     for k in keys(dict)
-        !(k in acceptable_metadata) && push!(unaccepted_metadata, k)
+        !(k in acceptable_metadata) && push!(unaccepted_metadata, k => dict[k])
     end
     isempty(unaccepted_metadata) ||
         return Try.Err("Metadata provided that is not accepted: $unaccepted_metadata")
