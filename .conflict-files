@@ -1,3 +1,0 @@
-ancestorEntries = ["src/icar-processing/icar-processing-functions.jl"]
-ourEntries = ["src/icar-processing/data-inference.jl", "test/icar-processing/data-inference.jl"]
-theirEntries = ["src/icar-processing/data-inference.jl", "test/icar-processing/data-inference.jl"]
