@@ -76,24 +76,15 @@ function infer_later_year_values(
 
     _correct_serotype_counts!(later_df; reg = reg)
 
-    # Remove any existing totals rows before calculating new totals
-    later_df = later_df[lowercase.(later_df[!, statename_column]) .!= "total", :]
-
-    # Calculate totals manually for count columns (only)
-    count_columns = filter(s -> contains(s, reg), names(later_df))
-    totals_dict = Dict{String, Any}("states_ut" => "total")
-
-    for col in count_columns
-        # Only calculate for count columns (not pct columns)
-        if contains(col, r"_count_")
-            col_sum = sum(skipmissing(later_df[!, col]))
-            totals_dict[col] = col_sum
-        end
-    end
-
-    push!(later_df, totals_dict; promote = true, cols = :subset)
+    # Only calculate for count columns
+    totals_dict = @? calculate_all_totals(later_df; reg = reg)
+    push!(
+        later_df,
+        merge(Dict("states_ut" => "Total calculated"), totals_dict);
+        promote = true,
+        cols = :subset
+    )
     select_calculated_totals!(later_df)
-
 
     # Calculate state serotype pct values
     pct_reg = update_regex(
@@ -132,11 +123,26 @@ function infer_later_year_values(
     @? sort_columns!(later_df)
 
 
-    @? all_totals_check(later_df; reg = count_pct_reg, atol = atol, digits = digits)
+    @? all_totals_check(
+        later_df;
+        reg = count_pct_reg,
+        atol = atol,
+        digits = digits
+    )
 
     return Try.Ok(later_df)
 end
 
+"""
+    _remove_states_without_data!(
+        df;
+        column::Symbol = :states_ut,
+        allowed_serotypes = vcat("all", default_allowed_serotypes),
+        reg::Regex
+	)
+
+Internal function that removes states that do not contain any data.
+"""
 function _remove_states_without_data!(
         df;
         column::Symbol = :states_ut,

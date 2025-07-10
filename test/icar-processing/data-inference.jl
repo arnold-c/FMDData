@@ -44,7 +44,7 @@ using Try
         @test inferred_df[2, :serotype_a_count_post] == 10 # 34 - 24
 
         # Test that total rows are recalculated correctly
-        total_row = inferred_df[inferred_df.states_ut .== "total", :]
+        total_row = inferred_df[inferred_df.states_ut .== "Total", :]
         @test nrow(total_row) == 1
         @test total_row[1, :serotype_o_count_pre] == 100  # Sum of Gujarat + Maharashtra
         @test total_row[1, :serotype_o_count_post] == 30
@@ -52,15 +52,19 @@ using Try
 
     @testset "infer_later_year_values - missing value handling" begin
         initial_df = DataFrame(
-            states_ut = ["State1", "State2"],
-            serotype_o_count_pre = [100, missing],
-            serotype_o_count_post = [20, 30]
+            states_ut = ["State1", "State2", "Total"],
+            serotype_all_count_pre = [180, 270, 180 + 270],
+            serotype_all_count_post = [36, 54, 36 + 54],
+            serotype_o_count_pre = [100, missing, 100],
+            serotype_o_count_post = [20, 30, 50]
         )
 
         cumulative_df = DataFrame(
-            states_ut = ["State1", "State2"],
-            serotype_o_count_pre = [150, 50],  # State2: 50 - 0 (missing treated as 0)
-            serotype_o_count_post = [35, 45]
+            states_ut = ["State1", "State2", "Total"],
+            serotype_all_count_pre = [230, 320, 230 + 320],
+            serotype_all_count_post = [51, 69, 51 + 69],
+            serotype_o_count_pre = [150, 50, 200],  # State2: 50 - 0 (missing treated as 0)
+            serotype_o_count_post = [35, 45, 80]
         )
 
         result = infer_later_year_values(cumulative_df, initial_df)
@@ -93,32 +97,32 @@ using Try
     @testset "infer_later_year_values - rounding correction" begin
         # Test the -1 rounding correction feature
         initial_df = DataFrame(
-            states_ut = ["State1"],
-            serotype_o_count_pre = [101]  # This will cause -1 after subtraction
+            states_ut = ["State1", "State2", "Total"],
+            serotype_all_count_pre = [101, 100, 101]  # This will cause -1 after subtraction
         )
 
         cumulative_df = DataFrame(
-            states_ut = ["State1"],
-            serotype_o_count_pre = [100]  # 100 - 101 = -1, should be corrected to 0
+            states_ut = ["State1", "State2", "Total"],
+            serotype_all_count_pre = [100, 150, 100]  # 100 - 101 = -1, should be corrected to 0
         )
 
         result = infer_later_year_values(cumulative_df, initial_df)
         @test Try.isok(result)
 
         inferred_df = Try.unwrap(result)
-        @test inferred_df[1, :serotype_o_count_pre] == 0  # -1 corrected to 0
+        @test inferred_df.states_ut == ["State2", "Total"]  # Because State1 observed no additional samples, remove them from the inferred table
     end
 
     @testset "infer_later_year_values - state matching" begin
         # Test with different states between dataframes
         initial_df = DataFrame(
-            states_ut = ["State1", "State2", "State3"],
-            serotype_o_count_pre = [100, 200, 300]
+            states_ut = ["State1", "State2", "State3", "Total"],
+            serotype_all_count_pre = [100, 200, 300, 600]
         )
 
         cumulative_df = DataFrame(
-            states_ut = ["State1", "State3"],  # State2 missing
-            serotype_o_count_pre = [150, 350]
+            states_ut = ["State1", "State3", "Total"],  # State2 missing
+            serotype_all_count_pre = [150, 350, 500]
         )
 
         result = infer_later_year_values(cumulative_df, initial_df)
@@ -128,7 +132,7 @@ using Try
         # Only State1 and State3 should be processed (common states)
         @test "State1" in inferred_df.states_ut
         @test "State3" in inferred_df.states_ut
-        @test inferred_df[inferred_df.states_ut .== "State1", :serotype_o_count_pre][1] == 50  # 150 - 100
-        @test inferred_df[inferred_df.states_ut .== "State3", :serotype_o_count_pre][1] == 50  # 350 - 300
+        @test inferred_df[inferred_df.states_ut .== "State1", :serotype_all_count_pre][1] == 50  # 150 - 100
+        @test inferred_df[inferred_df.states_ut .== "State3", :serotype_all_count_pre][1] == 50  # 350 - 300
     end
 end
