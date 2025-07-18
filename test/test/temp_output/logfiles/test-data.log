@@ -1,2 +1,0 @@
-┌ Error: test-data.csv is not within the directory /Users/cfa5228/Documents/Repos/FMDData/test/test
-└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/error-handlers.jl:22

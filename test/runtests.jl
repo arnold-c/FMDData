@@ -6,8 +6,6 @@ using PrecompileTools
 using Preferences
 using DrWatson: findproject
 
-test_dir(args...) = joinpath(findproject(), "test", args...)
-
 @testset verbose = true "FMDData" begin
     # @testset "Static analysis with JET.jl" begin
     #     @test isempty(JET.get_reports(report_package(FMDData, target_modules = (FMDData,))))
