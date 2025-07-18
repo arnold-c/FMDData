@@ -1,5 +1,5 @@
 using CSV: read, write
-using DataFrames: DataFrame
+using DataFrames: DataFrames
 using Try: Try
 
 export load_csv,
@@ -19,11 +19,11 @@ function load_csv(
         dir::T1,
         output_format = DataFrame
     ) where {T1 <: AbstractString}
-    isdir(dir) || return Err("$dir is not a valid directory")
-    contains(filename, r".*\.csv$") || return Err("$filename is not a csv file")
+    isdir(dir) || return Try.Err("$dir is not a valid directory")
+    contains(filename, r".*\.csv$") || return Try.Err("$filename is not a csv file")
 
     dir_files = filter(t -> contains(t, r".*\.csv$"), readdir(dir))
-    in(filename, dir_files) || return Err("$filename is not within the directory $dir")
+    in(filename, dir_files) || return Try.Err("$filename is not within the directory $dir")
 
     return Try.Ok(
         read(
