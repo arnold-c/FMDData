@@ -20,7 +20,7 @@ function _log_try_error(res, type::Symbol = :Error; unwrap_ok = true)
     if Try.iserr(res)
         if type == :Error
             show_warnings && @error Try.unwrap_err(res)
-            Try.unwrap_err(res)
+            return Try.unwrap_err(res)
         elseif type == :Warn
             show_warnings && @warn Try.unwrap_err(res)
             return Try.unwrap_err(res)

@@ -5,8 +5,7 @@ using Try
     @testset "Logging errors" begin
         @test isequal(
             FMDData._log_try_error(Try.Err("This is a warning"), :Error),
-            Try.Err("This is a warning")
-
+            "This is a warning"
         )
 
         @test isequal(
