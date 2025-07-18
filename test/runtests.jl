@@ -42,6 +42,5 @@ test_dir(args...) = joinpath(findproject(), "test", args...)
         include("./icar-processing/dataframe-operations.jl")
     end
 
-    include("./edge-case-tests.jl")
     include("./integration-pipeline-test.jl")
 end

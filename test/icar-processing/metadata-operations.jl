@@ -121,4 +121,79 @@ using Try
         @test Try.isok(add_sample_year!(df3 => 2020; year_column = :year))
         @test df3.year == [2020]
     end
+
+    @testset "Edge Cases - DataFrame handling" begin
+        @testset "Empty DataFrame handling" begin
+            # Test with completely empty DataFrame
+            empty_df = DataFrame()
+            
+            # Test functions that should handle empty DataFrames gracefully
+            @test nrow(empty_df) == 0
+            @test ncol(empty_df) == 0
+            
+            # Test with DataFrame with columns but no rows
+            empty_with_cols = DataFrame(
+                states_ut = String[],
+                serotype_o_count_pre = Int[],
+                serotype_o_count_post = Int[]
+            )
+            
+            @test nrow(empty_with_cols) == 0
+            @test ncol(empty_with_cols) == 3
+            
+            # Test metadata addition to empty DataFrame
+            metadata_result = add_metadata_col!(:test_year, empty_with_cols => 2021)
+            @test Try.isok(metadata_result)
+            @test :test_year in names(empty_with_cols)
+            @test isempty(empty_with_cols.test_year)
+        end
+        
+        @testset "Single-row DataFrame handling" begin
+            # Test with single-row DataFrame
+            single_row_df = DataFrame(
+                states_ut = ["Test State"],
+                serotype_o_count_pre = [100],
+                serotype_o_count_post = [20]
+            )
+            
+            # Test metadata addition
+            metadata_result = add_metadata_col!(:sample_year, single_row_df => 2021)
+            @test Try.isok(metadata_result)
+            @test single_row_df.sample_year == [2021]
+            
+            # Test with single row containing missing values
+            single_row_missing = DataFrame(
+                states_ut = ["Test State"],
+                serotype_o_count_pre = [missing],
+                serotype_o_count_post = [20]
+            )
+            
+            # Test metadata addition still works
+            metadata_result2 = add_metadata_col!(:test_type, single_row_missing => "SPCE")
+            @test Try.isok(metadata_result2)
+            @test single_row_missing.test_type == ["SPCE"]
+        end
+        
+        @testset "Data type consistency with missing values" begin
+            # Test that missing values don't break data type consistency
+            mixed_types_df = DataFrame(
+                states_ut = ["State1", "State2", "State3"],
+                int_column = [1, missing, 3],
+                float_column = [1.5, missing, 3.5],
+                string_column = ["A", missing, "C"]
+            )
+            
+            # Test that column types are preserved
+            @test eltype(mixed_types_df.int_column) == Union{Missing, Int64}
+            @test eltype(mixed_types_df.float_column) == Union{Missing, Float64}
+            @test eltype(mixed_types_df.string_column) == Union{Missing, String}
+            
+            # Test metadata addition preserves existing types
+            metadata_result = add_metadata_col!(:year, mixed_types_df => 2021)
+            @test Try.isok(metadata_result)
+            @test eltype(mixed_types_df.int_column) == Union{Missing, Int64}
+            @test eltype(mixed_types_df.float_column) == Union{Missing, Float64}
+            @test eltype(mixed_types_df.string_column) == Union{Missing, String}
+        end
+    end
 end

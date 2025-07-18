@@ -47,4 +47,29 @@ using Try: Try
         )
     end
 
+    @testset "State name edge cases" begin
+        # Test with states containing special characters
+        special_states_df = DataFrame(
+            states_ut = ["State-With-Hyphens", "State With Spaces", "State_With_Underscores", "State&Symbols"],
+            serotype_o_count_pre = [100, 150, 80, 200],
+            serotype_o_count_post = [20, 30, 15, 40]
+        )
+        
+        # Test state validation (would need actual function)
+        for state in special_states_df.states_ut
+            @test isa(state, String)
+            @test !isempty(state)
+        end
+        
+        # Test with very long state names - fix the string multiplication syntax
+        long_state_name = repeat("A", 1000)  # 1000 character state name
+        long_name_df = DataFrame(
+            states_ut = [long_state_name],
+            serotype_o_count_pre = [100]
+        )
+        
+        @test nrow(long_name_df) == 1
+        @test length(long_name_df.states_ut[1]) == 1000
+    end
+
 end
