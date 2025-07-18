@@ -1,8 +1,8 @@
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.11.5"
+julia_version = "1.11.6"
 manifest_format = "2.0"
-project_hash = "d16dc6a6bb3384ce9bc5b1c8a98563cb891ae8f8"
+project_hash = "1fa8f1f537278c58bce38b5bb3f5c30652423144"
 
 [[deps.Aqua]]
 deps = ["Compat", "Pkg", "Test"]

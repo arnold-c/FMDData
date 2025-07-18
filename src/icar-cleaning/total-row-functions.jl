@@ -375,4 +375,3 @@ function select_calculated_totals!(
 
     return Try.Ok(nothing)
 end
-
