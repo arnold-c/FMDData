@@ -55,7 +55,7 @@ using Try
             states_ut = ["State1", "State2", "Total"],
             serotype_all_count_pre = [180, 270, 180 + 270],
             serotype_all_count_post = [36, 54, 36 + 54],
-            serotype_o_count_pre = [100, missing, 100],
+            serotype_o_count_pre = Union{Missing, Int}[100, missing, 100],
             serotype_o_count_post = [20, 30, 50]
         )
 
@@ -86,7 +86,7 @@ using Try
         # Test error when cumulative has missing value but initial doesn't
         cumulative_df_missing = DataFrame(
             states_ut = ["State1"],
-            serotype_o_count_pre = [missing]
+            serotype_o_count_pre = Union{Missing, Int}[missing]
         )
 
         result = infer_later_year_values(cumulative_df_missing, initial_df)
@@ -139,38 +139,46 @@ using Try
     @testset "infer_later_year_values - extreme missing value scenarios" begin
         # Test with initial DataFrame having all missing values
         all_missing_initial = DataFrame(
-            states_ut = ["State1", "State2"],
-            serotype_o_count_pre = [missing, missing],
-            serotype_o_count_post = [missing, missing]
+            states_ut = ["State1", "State2", "Total"],
+            serotype_all_count_pre = Union{Missing, Int}[missing, missing, missing],
+            serotype_all_count_post = Union{Missing, Int}[missing, missing, missing],
+            serotype_o_count_pre = Union{Missing, Int}[missing, missing, missing],
+            serotype_o_count_post = Union{Missing, Int}[missing, missing, missing]
         )
-        
+
         normal_cumulative = DataFrame(
-            states_ut = ["State1", "State2"],
-            serotype_o_count_pre = [100, 150],
-            serotype_o_count_post = [20, 30]
+            states_ut = ["State1", "State2", "Total"],
+            serotype_all_count_pre = [180, 270, 450],
+            serotype_all_count_post = [36, 54, 90],
+            serotype_o_count_pre = [100, 150, 250],
+            serotype_o_count_post = [20, 30, 50]
         )
-        
+
         result = infer_later_year_values(normal_cumulative, all_missing_initial)
         @test Try.isok(result)
-        
+
         inferred_df = Try.unwrap(result)
         # Missing values in initial should be treated as 0
         @test inferred_df[1, :serotype_o_count_pre] == 100
         @test inferred_df[2, :serotype_o_count_pre] == 150
-        
+
         # Test with cumulative DataFrame having mixed missing values
         mixed_missing_cumulative = DataFrame(
-            states_ut = ["State1", "State2"],
-            serotype_o_count_pre = [100, missing],
-            serotype_o_count_post = [20, 30]
+            states_ut = ["State1", "State2", "Total"],
+            serotype_all_count_pre = [180, 270, 450],
+            serotype_all_count_post = [36, 54, 90],
+            serotype_o_count_pre = Union{Missing, Int}[100, missing, 100],
+            serotype_o_count_post = [20, 30, 50]
         )
-        
+
         normal_initial = DataFrame(
-            states_ut = ["State1", "State2"],
-            serotype_o_count_pre = [50, 75],
-            serotype_o_count_post = [10, 15]
+            states_ut = ["State1", "State2", "Total"],
+            serotype_all_count_pre = [90, 135, 225],
+            serotype_all_count_post = [18, 27, 45],
+            serotype_o_count_pre = [50, 75, 125],
+            serotype_o_count_post = [10, 15, 25]
         )
-        
+
         result_mixed = infer_later_year_values(mixed_missing_cumulative, normal_initial)
         @test Try.iserr(result_mixed)  # Should error when cumulative missing but initial not
     end
