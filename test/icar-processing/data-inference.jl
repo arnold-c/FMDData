@@ -162,6 +162,19 @@ using Try
         @test inferred_df[1, :serotype_o_count_pre] == 100
         @test inferred_df[2, :serotype_o_count_pre] == 150
 
+        # Create expected DataFrame with the percentage columns that get added
+        # Note: Column order must match the actual output from infer_later_year_values
+        expected_df = DataFrame(
+            states_ut = ["State1", "State2", "Total"],
+            serotype_all_count_pre = [180, 270, 450],
+            serotype_all_count_post = [36, 54, 90],
+            serotype_o_count_pre = [100, 150, 250],
+            serotype_o_pct_pre = [55.6, 55.6, 55.6],
+            serotype_o_count_post = [20, 30, 50],
+            serotype_o_pct_post = [55.6, 55.6, 55.6]
+        )
+        @test inferred_df == expected_df
+
         # Test with cumulative DataFrame having mixed missing values
         mixed_missing_cumulative = DataFrame(
             states_ut = ["State1", "State2", "Total"],
