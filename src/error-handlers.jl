@@ -20,13 +20,12 @@ function _log_try_error(res, type::Symbol = :Error; unwrap_ok = true)
     if Try.iserr(res)
         if type == :Error
             show_warnings && @error Try.unwrap_err(res)
-            return Try.unwrap_err(res)
         elseif type == :Warn
             show_warnings && @warn Try.unwrap_err(res)
-            return Try.unwrap_err(res)
+            return unwrap_ok ? Try.unwrap_err(res) : res
         elseif type == :Info
             show_warnings && @info Try.unwrap_err(res)
-            return Try.unwrap_err(res)
+            return unwrap_ok ? Try.unwrap_err(res) : res
         end
     end
 

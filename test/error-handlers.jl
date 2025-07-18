@@ -3,9 +3,27 @@ using Try
 
 @testset "error-handlers.jl" begin
     @testset "Logging errors" begin
+        @test Try.iserr(FMDData._log_try_error(Try.Err("This is a warning"), :Error))
         @test isequal(
-            FMDData._log_try_error(Try.Err("This is a warning"), :Error),
+            Try.unwrap_err(FMDData._log_try_error(Try.Err("This is a warning"), :Error)),
             "This is a warning"
+        )
+
+        @test isequal(
+            FMDData._log_try_error(Try.Err(10), :Warn),
+            10
+        )
+
+        @test Try.iserr(FMDData._log_try_error(Try.Err("Warning message"), :Warn; unwrap_ok = false))
+        @test isequal(
+            Try.unwrap_err(FMDData._log_try_error(Try.Err("Warning message"), :Warn; unwrap_ok = false)),
+            "Warning message"
+        )
+
+        @test Try.iserr(FMDData._log_try_error(Try.Err("Info message"), :Info; unwrap_ok = false))
+        @test isequal(
+            Try.unwrap_err(FMDData._log_try_error(Try.Err("Info message"), :Info; unwrap_ok = false)),
+            "Info message"
         )
 
         @test isequal(
