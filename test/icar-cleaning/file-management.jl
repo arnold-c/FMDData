@@ -4,7 +4,7 @@ using DrWatson: findproject
 using DataFrames
 
 @testset verbose = true "file-management.jl" begin
-    test_dir(args...) = joinpath(findproject(), args...)
+    test_data_dir(args...) = joinpath(findproject(), "test-data", args...)
 
     @testset "Load CSV" begin
 
@@ -17,7 +17,7 @@ using DataFrames
             Try.Err("$not_a_dir is not a valid directory")
         )
 
-        dir = test_dir()
+        dir = test_data_dir()
 
         @test isequal(
             load_csv(filename, dir),
@@ -79,7 +79,7 @@ using DataFrames
         @test isequal(
             write_csv(
                 "test",
-                test_dir(),
+                test_data_dir(),
                 DataFrame("a" => String[])
             ),
             Try.Err("test is not a csv file")
