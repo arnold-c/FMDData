@@ -1,2 +1,0 @@
-┌ Error: Expected 1 row of totals. Found 0. Check the spelling in the states column :states_ut matches the provided `totals_key` "total"
-└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/error-handlers.jl:22

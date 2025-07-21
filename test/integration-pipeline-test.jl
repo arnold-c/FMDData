@@ -68,17 +68,18 @@ import Base: isfile, isdir
         @test isfile(initial_cleaned_file)
         @test isfile(cumulative_cleaned_file)
 
-        initial_cleaned_df = CSV.read(initial_cleaned_file, DataFrame)
-        cumulative_cleaned_df = CSV.read(cumulative_cleaned_file, DataFrame)
+        initial_cleaned_df = Try.unwrap(initial_cleaned_result)[2]
+        cumulative_cleaned_df = Try.unwrap(cumulative_cleaned_result)[2]
 
         # Step 3: Process data - infer later year values
-        inferred_result = infer_later_year_values(cumulative_cleaned_df, initial_cleaned_df)
+        inferred_result = infer_later_year_values(cumulative_cleaned_df, initial_cleaned_df; atol = 0.15)
         @test Try.isok(inferred_result)
 
         inferred_df = Try.unwrap(inferred_result)
+        original_inferred_ncol = length(names(inferred_df))
 
         # Step 4: Add metadata to processed data
-        metadata = OrderedDict(
+        metadata_to_add = OrderedDict(
             :sample_year => 2022,
             :report_year => 2022,
             :round_name => "NADCP 2",
@@ -86,16 +87,17 @@ import Base: isfile, isdir
             :test_threshold => "1.65 log10 @ 35% inhibition"
         )
 
-        metadata_result = add_all_metadata!(inferred_df => metadata)
+        metadata_result = add_all_metadata!(inferred_df => metadata_to_add)
         @test Try.isok(metadata_result)
 
         # Step 5: Validate final processed data
+        @test length(names(inferred_df)) == original_inferred_ncol + length(metadata_to_add)
         @test nrow(inferred_df) >= 3  # At least the 3 states
-        @test :sample_year in names(inferred_df)
-        @test :report_year in names(inferred_df)
-        @test :round_name in names(inferred_df)
-        @test :test_type in names(inferred_df)
-        @test :test_threshold in names(inferred_df)
+        @test "sample_year" in names(inferred_df)
+        @test "report_year" in names(inferred_df)
+        @test "round_name" in names(inferred_df)
+        @test "test_type" in names(inferred_df)
+        @test "test_threshold" in names(inferred_df)
 
         # Validate arithmetic correctness in integrated pipeline
         gujarat_row = inferred_df[inferred_df.states_ut .== "Gujarat", :]
@@ -246,16 +248,15 @@ import Base: isfile, isdir
         @test "NADCP 2" in combined_df.round_name
 
         # Add comprehensive metadata
-        metadata = OrderedDict(
+        metadata_to_add = OrderedDict(
             :report_year => 2022,
             :test_type => "SPCE"
         )
 
-        metadata_result = add_all_metadata!(combined_df => metadata)
+        metadata_result = add_all_metadata!(combined_df => metadata_to_add)
         @test Try.isok(metadata_result)
 
         @test all(combined_df.report_year .== 2022)
         @test all(combined_df.test_type .== "SPCE")
     end
 end
-

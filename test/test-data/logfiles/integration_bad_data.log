@@ -1,2 +1,0 @@
-┌ Error: State name `Invalid State Name` doesn't exist in current dictionary match. Confirm if this is a new state or uncharacterized misspelling. State name `Another Bad State` doesn't exist in current dictionary match. Confirm if this is a new state or uncharacterized misspelling.
-└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/error-handlers.jl:22
