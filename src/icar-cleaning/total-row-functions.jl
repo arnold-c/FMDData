@@ -98,12 +98,13 @@ function all_totals_check(
         atol = 0.0,
     )
 
-    totals_rn, selected_df = Try.@? _totals_row_selectors(
+    totals_rn = Try.@? _totals_row_selector(
         df,
         column,
-        totals_key;
-        reg = reg
+        totals_key
     )
+
+    selected_df = _select_serotype_columns(df; reg = reg)
 
     length(totals_dict) == ncol(selected_df) || return Try.Err("The number of totals calculated is $(length(totals_dict)), but there are $(ncol(selected_df)) columns selected to have totals calculated for")
 
@@ -128,7 +129,7 @@ end
         digits = 1
     )
 
-Calculate all totals using the appropriate method instance of the internal function [`_calculate_totals!()`](@ref), dependent on whether the column is a Float (seroprevalence) or Integer (count). Uses the internal function [`_collect_totals_check_args()`](@ref) to identify what arguments need to be passed to [`_calculate_totals!()`](@ref) function. Uses the internal function [`_totals_row_selectors()`](@ref) to extract the totals row from the dataframe, for use when calculating the serotype weight total seroprevalence.
+Calculate all totals using the appropriate method instance of the internal function [`_calculate_totals!()`](@ref), dependent on whether the column is a Float (seroprevalence) or Integer (count). Uses the internal function [`_collect_totals_check_args()`](@ref) to identify what arguments need to be passed to [`_calculate_totals!()`](@ref) function. Uses the internal function [`_totals_row_selector()`](@ref) to extract the totals row from the dataframe, for use when calculating the serotype weight total seroprevalence.
 
 # Arguments
 - `df::DataFrame`: The input DataFrame.
@@ -146,18 +147,27 @@ function calculate_all_totals(
         reg::Regex = Regex("serotype_(?|$(join(allowed_serotypes, "|")))_(count|pct)_(pre|post)\$"),
         digits = 1
     )
-    totals_rn, selected_df = Try.@? _totals_row_selectors(
+
+    totals_rn = _totals_row_selector(
         df,
         column,
-        totals_key;
-        reg = reg
+        totals_key
     )
+
+    selected_df = _select_serotype_columns(df; reg = reg)
+
+    no_totals_df = if Try.isok(totals_rn)
+        @view(selected_df[Not(Try.unwrap(totals_rn)), :])
+    else
+        @warn "No totals row present in the column `$column` under the expected key `$totals_key`. Proceeding to calculate totals."
+        selected_df
+    end
 
     totals_dict = OrderedDict{AbstractString, Real}()
 
-    for col_ind in eachindex(names(selected_df))
+    for col_ind in axes(selected_df, 2)
         totals_check_args = _collect_totals_check_args(
-            selected_df[Not(totals_rn), col_ind],
+            no_totals_df[:, col_ind],
             names(selected_df)[col_ind],
             selected_df,
             totals_rn,
@@ -172,7 +182,7 @@ function calculate_all_totals(
 end
 
 """
-    _totals_row_selectors(
+    _totals_row_selector(
         df::DataFrame,
         column::Symbol = :states_ut,
         totals_key = "total";
@@ -183,20 +193,24 @@ end
 
 Internal function to extract the totals row and the subset of dataframe rows that match the regex.
 """
-function _totals_row_selectors(
+function _totals_row_selector(
         df::DataFrame,
         column::Symbol = :states_ut,
-        totals_key = "total";
-        allowed_serotypes = vcat("all", default_allowed_serotypes),
-        reg::Regex = Regex("serotype_(?|$(join(allowed_serotypes, "|")))_(count|pct)_(pre|post)\$")
-
+        totals_key = "total"
     )
     totals_rn = findall(lowercase.(df[!, column]) .== totals_key)
     length(totals_rn) == 1 ||
         return Try.Err("Expected 1 row of totals. Found $(length(totals_rn)). Check the spelling in the states column :$column matches the provided `totals_key` \"$totals_key\"")
-    totals_rn = totals_rn[1]
+    return Try.Ok(totals_rn[1])
+end
+
+function _select_serotype_columns(
+        df::DataFrame;
+        allowed_serotypes = vcat("all", default_allowed_serotypes),
+        reg::Regex = Regex("serotype_(?|$(join(allowed_serotypes, "|")))_(count|pct)_(pre|post)\$")
+    )
     selected_df = select(df, Cols(reg))
-    return Try.Ok((totals_rn, selected_df))
+    return selected_df
 end
 
 """
@@ -237,12 +251,17 @@ function _collect_totals_check_args(
     # (pre|post) is the only capture group, providing the timing used to collect the correct state column for weighting the seroprevalence sums
     reg = Regex("serotype_(?|$(join(allowed_serotypes, "|")))_pct_(pre|post)\$")
     denom_type_matches = match(reg, colname)
-    length(denom_type_matches) == 1 || return Try.Err("For column $colname, $(length(denom_type_matches)) possible denominators found, but only expected 1: $(denom_type_matches.captures)")
+    length(denom_type_matches) == 1 ||
+        return Try.Err("For column $colname, $(length(denom_type_matches)) possible denominators found, but only expected 1: $(denom_type_matches.captures)")
     denom_type = denom_type_matches[1]
     denom_colname = "serotype_all_count_$denom_type"
 
     # Calculate own aggregate pre/post total in case provided values are incorrect
-    denom_col = df[Not(totals_rn), denom_colname]
+    denom_col = if Try.isok(totals_rn)
+        df[Not(Try.unwrap(totals_rn)), denom_colname]
+    else
+        df[:, denom_colname]
+    end
     denom_total = sum(skipmissing(denom_col))
 
     return Try.Ok((col, colname, denom_col, denom_total, digits))
