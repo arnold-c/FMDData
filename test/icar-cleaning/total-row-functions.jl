@@ -56,7 +56,7 @@ using OrderedCollections: OrderedCollections
 
         @test occursin(
             r"There were discrepancies in the totals calculated and those provided in the data: (OrderedCollections\.)?OrderedDict\{AbstractString, NamedTuple\{\(:provided, :calculated\)\}\}\(\"serotype_a_count_pre\" => \(provided = 5, calculated = 4\), \"serotype_a_count_post\" => \(provided = 20, calculated = 19\), \"serotype_a_pct_pre\" => \(provided = 13.1, calculated = 13.3\), \"serotype_a_pct_post\" => \(provided = 63.0, calculated = 63.3\)\)",
-            Try.unwrap_err(all_totals_check(incorrect_totals_row_df; atol=0.1))
+            Try.unwrap_err(all_totals_check(incorrect_totals_row_df; atol = 0.1))
         )
 
         @test Try.isok(all_totals_check(correct_totals_row_df))
@@ -109,14 +109,25 @@ using OrderedCollections: OrderedCollections
         )
 
         @test isequal(
-            calculate_all_totals(cleaned_states_data[begin:(end-1), :]),
-            Try.Err("Expected 1 row of totals. Found 0. Check the spelling in the states column :states_ut matches the provided `totals_key` \"total\"")
+            Try.unwrap(calculate_all_totals(cleaned_states_data[begin:(end - 1), :])),
+            OrderedCollections.OrderedDict(
+                "serotype_all_count_pre" => 20,
+                "serotype_all_count_post" => 20,
+                "serotype_a_pct_pre" => 37.5,
+                "serotype_a_count_pre" => 20,
+                "serotype_a_pct_post" => 37.5,
+                "serotype_a_count_post" => 20,
+                "serotype_o_pct_pre" => 37.5,
+                "serotype_o_pct_post" => 37.5,
+                "serotype_asia1_pct_pre" => 37.5,
+                "serotype_asia1_pct_post" => 37.5,
+            )
         )
 
         count_total_dict = OrderedCollections.OrderedDict()
         FMDData._calculate_totals!(
             count_total_dict,
-            cleaned_states_data[begin:(end-1), "serotype_a_count_pre"],
+            cleaned_states_data[begin:(end - 1), "serotype_a_count_pre"],
             "serotype_a_count_pre"
         )
         @test isequal(
@@ -128,12 +139,13 @@ using OrderedCollections: OrderedCollections
         seroprev_total_dict = OrderedCollections.OrderedDict()
         FMDData._calculate_totals!(
             seroprev_total_dict,
-            cleaned_states_data[begin:(end-1), "serotype_a_pct_pre"],
+            cleaned_states_data[begin:(end - 1), "serotype_a_pct_pre"],
             "serotype_a_pct_pre",
-            cleaned_states_data[begin:(end-1), "serotype_all_count_pre"],
+            cleaned_states_data[begin:(end - 1), "serotype_all_count_pre"],
             20,
             1
         )
+
         @test isequal(
             seroprev_total_dict,
             OrderedCollections.OrderedDict("serotype_a_pct_pre" => 37.5)
@@ -142,16 +154,33 @@ using OrderedCollections: OrderedCollections
     end
 
     @testset verbose = true "Argument selection to calculate totals" begin
-        @test Try.isok(FMDData._totals_row_selectors(cleaned_states_data))
+        @test Try.isok(FMDData._totals_row_selector(cleaned_states_data))
 
         @test isequal(
-            Try.unwrap(FMDData._totals_row_selectors(cleaned_states_data)),
-            (3, cleaned_states_data[:, 2:end])
+            Try.unwrap(FMDData._totals_row_selector(cleaned_states_data)),
+            3
         )
 
         @test isequal(
-            calculate_all_totals(cleaned_states_data[begin:(end-1), :]),
-            Try.Err("Expected 1 row of totals. Found 0. Check the spelling in the states column :states_ut matches the provided `totals_key` \"total\"")
+            FMDData._select_serotype_columns(cleaned_states_data),
+            cleaned_states_data[:, 2:end]
+
+        )
+
+        @test isequal(
+            Try.unwrap(calculate_all_totals(cleaned_states_data[begin:(end - 1), :])),
+            OrderedCollections.OrderedDict(
+                "serotype_all_count_pre" => 20,
+                "serotype_all_count_post" => 20,
+                "serotype_a_pct_pre" => 37.5,
+                "serotype_a_count_pre" => 20,
+                "serotype_a_pct_post" => 37.5,
+                "serotype_a_count_post" => 20,
+                "serotype_o_pct_pre" => 37.5,
+                "serotype_o_pct_post" => 37.5,
+                "serotype_asia1_pct_pre" => 37.5,
+                "serotype_asia1_pct_post" => 37.5,
+            )
         )
 
         # Test when targeting a count column
@@ -160,7 +189,7 @@ using OrderedCollections: OrderedCollections
                 cleaned_states_data[1:2, 5],
                 names(cleaned_states_data)[5],
                 cleaned_states_data,
-                3,
+                Try.Ok(3),
                 FMDData.default_allowed_serotypes,
                 2
             )
@@ -172,7 +201,7 @@ using OrderedCollections: OrderedCollections
                     cleaned_states_data[1:2, 5],
                     names(cleaned_states_data)[5],
                     cleaned_states_data,
-                    3,
+                    Try.Ok(3),
                     FMDData.default_allowed_serotypes,
                     2
                 )
@@ -185,7 +214,7 @@ using OrderedCollections: OrderedCollections
                 cleaned_states_data[1:2, 6],
                 names(cleaned_states_data)[6],
                 cleaned_states_data,
-                3,
+                Try.Ok(3),
                 FMDData.default_allowed_serotypes,
                 2
             )
@@ -198,7 +227,7 @@ using OrderedCollections: OrderedCollections
                     cleaned_states_data[1:2, 6],
                     names(cleaned_states_data)[6],
                     cleaned_states_data,
-                    3,
+                    Try.Ok(3),
                     FMDData.default_allowed_serotypes,
                     2
                 )
