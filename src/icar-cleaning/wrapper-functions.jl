@@ -124,6 +124,7 @@ function all_cleaning_steps(
             promote = true
         )
     end
+
     calculated_state_counts_data = calculate_state_counts(corrected_state_name_data)
     calculated_state_seroprevs_data = calculate_state_seroprevalence(calculated_state_counts_data)
 
@@ -162,8 +163,10 @@ function all_cleaning_steps(
     end
 
     return Try.Ok(
-        ("Cleaning of $input_filename successful. Written to $output_filename."),
-
+        (
+            "Cleaning of $input_filename successful. Written to $output_filename.",
+            cleaned_data,
+        )
     )
 end
 
