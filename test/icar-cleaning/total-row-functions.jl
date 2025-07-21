@@ -313,7 +313,7 @@ using OrderedCollections: OrderedCollections
                     "vals" => [1, 3]
                 )
             ),
-            Try.Err("Data contains the calculated totals row, but not the provided one")
+            Try.Ok(nothing)
         )
 
         @test isequal(

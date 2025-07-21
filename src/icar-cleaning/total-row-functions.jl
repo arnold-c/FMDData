@@ -382,7 +382,7 @@ function select_calculated_totals!(
         return Try.Ok("Only has provided totals. Continuing")
     end
     if has_calculated_totals && !has_provided_totals
-        return Try.Err("Data contains the calculated totals row, but not the provided one")
+        @warn "Data only contains the calculated totals row, but not the provided one."
     end
     if !has_provided_totals && !has_calculated_totals
         return Try.Err("Data contains neither calculated or provided totals rows with a key in the column :$column")
@@ -390,7 +390,9 @@ function select_calculated_totals!(
 
     show_warnings && @warn "Using calculated totals"
     df[calculated_totals_rn, column] = titlecase("Total")
-    popat!(df, provided_totals_rn)
+    if has_provided_totals
+        popat!(df, provided_totals_rn)
+    end
 
     return Try.Ok(nothing)
 end
