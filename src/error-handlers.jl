@@ -1,5 +1,7 @@
 using Try: Try
 using Preferences: @load_preference
+using Logging: with_logger
+using LoggingExtras: FileLogger
 
 show_warnings = @load_preference("show_warnings", true)
 
@@ -15,21 +17,31 @@ This function helps manage control flow by logging non-critical errors without h
 - `type::Symbol`: The logging level to use if `res` is an `Err`. Can be `:Error`, `:Warn`, or `:Info`. Defaults to `:Error`.
 - `unwrap_ok::Bool`: If `true`, returns the unwrapped value of an `Ok` result. If `false`, returns the `Try.Ok` object itself. Defaults to `true`.
 """
-function _log_try_error(res, type::Symbol = :Error)
+function _log_try_error(
+        res,
+        type::Symbol = :Error;
+        logger = nothing
+    )
     @assert type in [:Error, :Warn, :Info]
-    if Try.iserr(res)
-        if type == :Error
-            show_warnings && @error Try.unwrap_err(res)
-        elseif type == :Warn
-            show_warnings && @warn Try.unwrap_err(res)
-        elseif type == :Info
-            show_warnings && @info Try.unwrap_err(res)
-        end
+    if isnothing(logger)
+        @warn "Missing a logging file. Confirm this isn't a mistake"
         return res
     end
+    return with_logger(logger) do
+        if Try.iserr(res)
+            if type == :Error
+                show_warnings && @error Try.unwrap_err(res)
+            elseif type == :Warn
+                show_warnings && @warn Try.unwrap_err(res)
+            elseif type == :Info
+                show_warnings && @info Try.unwrap_err(res)
+            end
+            return res
+        end
 
-    if Try.isok(res)
-        return res
+        if Try.isok(res)
+            return res
+        end
     end
 end
 
