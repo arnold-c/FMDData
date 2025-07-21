@@ -11,28 +11,30 @@ using Try
 
         @test isequal(
             FMDData._log_try_error(Try.Err(10), :Warn),
-            10
+            Try.Err(10)
         )
 
-        @test Try.iserr(FMDData._log_try_error(Try.Err("Warning message"), :Warn; unwrap_ok = false))
+        @test Try.iserr(
+            FMDData._log_try_error(Try.Err("Warning message"), :Warn)
+        )
         @test isequal(
-            Try.unwrap_err(FMDData._log_try_error(Try.Err("Warning message"), :Warn; unwrap_ok = false)),
+            Try.unwrap_err(FMDData._log_try_error(Try.Err("Warning message"), :Warn)),
             "Warning message"
         )
 
-        @test Try.iserr(FMDData._log_try_error(Try.Err("Info message"), :Info; unwrap_ok = false))
+        @test Try.iserr(FMDData._log_try_error(Try.Err("Info message"), :Info))
         @test isequal(
-            Try.unwrap_err(FMDData._log_try_error(Try.Err("Info message"), :Info; unwrap_ok = false)),
+            Try.unwrap_err(FMDData._log_try_error(Try.Err("Info message"), :Info)),
             "Info message"
         )
 
         @test isequal(
-            FMDData._log_try_error(Try.Ok("This works")),
+            Try.unwrap(FMDData._log_try_error(Try.Ok("This works"))),
             "This works"
         )
 
         @test isequal(
-            FMDData._log_try_error(Try.Ok(10); unwrap_ok = false),
+            FMDData._log_try_error(Try.Ok(10)),
             Try.Ok(10)
         )
     end

@@ -15,24 +15,22 @@ This function helps manage control flow by logging non-critical errors without h
 - `type::Symbol`: The logging level to use if `res` is an `Err`. Can be `:Error`, `:Warn`, or `:Info`. Defaults to `:Error`.
 - `unwrap_ok::Bool`: If `true`, returns the unwrapped value of an `Ok` result. If `false`, returns the `Try.Ok` object itself. Defaults to `true`.
 """
-function _log_try_error(res, type::Symbol = :Error; unwrap_ok = true)
+function _log_try_error(res, type::Symbol = :Error)
     @assert type in [:Error, :Warn, :Info]
     if Try.iserr(res)
         if type == :Error
             show_warnings && @error Try.unwrap_err(res)
         elseif type == :Warn
             show_warnings && @warn Try.unwrap_err(res)
-            return unwrap_ok ? Try.unwrap_err(res) : res
         elseif type == :Info
             show_warnings && @info Try.unwrap_err(res)
-            return unwrap_ok ? Try.unwrap_err(res) : res
         end
+        return res
     end
 
-    if unwrap_ok && Try.isok(res)
-        return Try.unwrap(res)
+    if Try.isok(res)
+        return res
     end
-    return res
 end
 
 

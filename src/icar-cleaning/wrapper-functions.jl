@@ -45,28 +45,31 @@ function all_cleaning_steps(
     logger = FileLogger(logfile)
 
     with_logger(logger) do
-        data = _log_try_error(
+        data = Try.@? _log_try_error(
             load_csv(
                 input_filename,
                 input_dir,
                 load_format
             )
         )
-        cleaned_colnames_data = _log_try_error(clean_colnames(data))
-        renamed_aggregate_counts_data = _log_try_error(
+
+        cleaned_colnames_data = Try.@? _log_try_error(clean_colnames(data))
+
+        renamed_aggregate_counts_data = Try.@? _log_try_error(
             rename_aggregated_pre_post_counts(cleaned_colnames_data)
         )
-        corrected_state_name_data = _log_try_error(
+
+        corrected_state_name_data = Try.@? _log_try_error(
             correct_all_state_names(renamed_aggregate_counts_data)
         )
 
-        _log_try_error(check_duplicated_column_names(corrected_state_name_data))
-        _log_try_error(check_missing_states(corrected_state_name_data))
-        _log_try_error(check_duplicated_states(corrected_state_name_data))
-        _log_try_error(check_allowed_serotypes(corrected_state_name_data))
-        _log_try_error(check_seroprevalence_as_pct(corrected_state_name_data))
-        _log_try_error(check_aggregated_pre_post_counts_exist(corrected_state_name_data))
-        _log_try_error(check_pre_post_exists(corrected_state_name_data))
+        Try.@? _log_try_error(check_duplicated_column_names(corrected_state_name_data))
+        Try.@? _log_try_error(check_missing_states(corrected_state_name_data))
+        Try.@? _log_try_error(check_duplicated_states(corrected_state_name_data))
+        Try.@? _log_try_error(check_allowed_serotypes(corrected_state_name_data))
+        Try.@? _log_try_error(check_seroprevalence_as_pct(corrected_state_name_data))
+        Try.@? _log_try_error(check_aggregated_pre_post_counts_exist(corrected_state_name_data))
+        Try.@? _log_try_error(check_pre_post_exists(corrected_state_name_data))
 
         has_totals = has_totals_row(corrected_state_name_data)
         totals_dict = _log_try_error(calculate_all_totals(corrected_state_name_data))
@@ -92,17 +95,18 @@ function all_cleaning_steps(
         calculated_state_counts_data = calculate_state_counts(corrected_state_name_data)
         calculated_state_seroprevs_data = calculate_state_seroprevalence(calculated_state_counts_data)
 
-        _log_try_error(
-            check_calculated_values_match_existing(calculated_state_seroprevs_data)
+        Try.@? _log_try_error(
+            check_calculated_values_match_existing(calculated_state_seroprevs_data),
+            :Warn
         )
 
-        _log_try_error(select_calculated_totals!(calculated_state_seroprevs_data))
-        _log_try_error(select_calculated_cols!(calculated_state_seroprevs_data))
+        Try.@? _log_try_error(select_calculated_totals!(calculated_state_seroprevs_data), :Warn)
+        Try.@? _log_try_error(select_calculated_cols!(calculated_state_seroprevs_data), :Warn)
 
-        _log_try_error(sort_columns!(calculated_state_seroprevs_data))
-        _log_try_error(sort_states!(calculated_state_seroprevs_data))
+        Try.@? _log_try_error(sort_columns!(calculated_state_seroprevs_data), :Warn)
+        Try.@? _log_try_error(sort_states!(calculated_state_seroprevs_data), :Warn)
 
-        _log_try_error(
+        Try.@? _log_try_error(
             write_csv(output_filename, output_dir, calculated_state_seroprevs_data)
         )
     end
