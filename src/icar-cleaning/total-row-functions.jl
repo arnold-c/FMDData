@@ -256,6 +256,9 @@ function _collect_totals_check_args(
     denom_type = denom_type_matches[1]
     denom_colname = "serotype_all_count_$denom_type"
 
+    if !in(denom_colname, names(df))
+        return Try.Err("Column $denom_colname not found in $(names(df))")
+    end
     # Calculate own aggregate pre/post total in case provided values are incorrect
     denom_col = if Try.isok(totals_rn)
         df[Not(Try.unwrap(totals_rn)), denom_colname]
