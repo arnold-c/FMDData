@@ -53,8 +53,45 @@ for file in [
         "2019_Annual-Report_Uttarakhand.csv"
         "2019_Annual-Report_West-Bengal.csv"
     ]
-    all_2019_cleaning_steps(
+    all_cleaning_steps(
         file,
-        icar_inputs_dir(),
+        icar_inputs_dir();
+        skiptotals = true,
+        check_duplicated_states_ll = :Warn,
+        check_allowed_serotypes_ll = :Warn,
+        check_seroprevalence_as_pct_ll = :Error,
+        check_aggregated_pre_post_counts_exist_ll = :Warn,
+        check_pre_post_exists_ll = :Error,
+        has_totals_ll = :Warn,
+        calculate_all_totals_ll = :Warn,
+        totals_check_state_ll = :Error,
+        check_calculated_values_match_existing_ll = :Error,
+        select_calculated_totals_ll = :Error,
+        select_calculated_cols_ll = :Error,
+        sort_columns_ll = :Error,
+        sort_states_ll = :Error,
+        write_csv_ll = :Error,
     )
 end
+
+
+#%%
+all_cleaning_steps(
+    "2019_Annual-Report_Haryana.csv",
+    icar_inputs_dir();
+    skiptotals = true,
+    check_duplicated_states_ll = :Warn,
+    check_allowed_serotypes_ll = :Warn,
+    check_seroprevalence_as_pct_ll = :Error,
+    check_aggregated_pre_post_counts_exist_ll = :Warn,
+    check_pre_post_exists_ll = :Error,
+    has_totals_ll = :Warn,
+    calculate_all_totals_ll = :Warn,
+    totals_check_state_ll = :Error,
+    check_calculated_values_match_existing_ll = :Error,
+    select_calculated_totals_ll = :Error,
+    select_calculated_cols_ll = :Error,
+    sort_columns_ll = :Error,
+    sort_states_ll = :Error,
+    write_csv_ll = :Error,
+)

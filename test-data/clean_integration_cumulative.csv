@@ -1,0 +1,6 @@
+states_ut,serotype_all_count_pre,serotype_all_count_post,serotype_o_count_pre,serotype_o_pct_pre,serotype_o_count_post,serotype_o_pct_post,serotype_a_count_pre,serotype_a_pct_pre,serotype_a_count_post,serotype_a_pct_post,serotype_asia1_count_pre,serotype_asia1_pct_pre,serotype_asia1_count_post,serotype_asia1_pct_post
+Gujarat,410,81,180,43.9,35,43.2,140,34.1,28,34.6,90,22.0,18,22.2
+Maharashtra,565,112,230,40.7,45,40.2,200,35.4,40,35.7,135,23.9,27,24.1
+Punjab,310,61,130,41.9,25,41.0,110,35.5,22,36.1,70,22.6,14,23.0
+Total calculated,1285,254,540,42.0,105,41.3,450,35.0,90,35.4,295,23.0,59,23.2
+Total,1285,254,540,42.0,105,41.3,450,35.0,90,35.4,295,23.0,59,23.2
