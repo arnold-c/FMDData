@@ -23,7 +23,8 @@ function all_cleaning_steps(
         input_dir::T1;
         output_filename::T1 = "clean_$input_filename",
         output_dir::T1 = icar_cleaned_dir(),
-        load_format = DataFrame
+        load_format = DataFrame,
+        skiptotals = false,
     ) where {T1 <: AbstractString}
 
     if show_warnings
@@ -103,38 +104,99 @@ function all_cleaning_steps(
     )
     totals_check_state = all_totals_check(totals_dict, corrected_state_name_data)
     if Try.iserr(has_totals)
+    if skiptotals
         _log_try_error(
+        calculated_totals_dict = Try.Err(nothing)
             has_totals, :Warn;
+    else
+        calculated_totals_dict = calculate_all_totals(corrected_state_name_data)
+
+        Try.@? _log_try_error(
+            calculated_totals_dict,
+            calculate_all_totals_ll;
             logger = logger
         )
         push!(
+    end
             corrected_state_name_data,
             merge(Dict("states_ut" => "Total calculated"), totals_dict);
+    cleaned_data = corrected_state_name_data
             promote = true
+
         )
+    # If totals can be calculated, then calculate values that rely on the totals
     elseif Try.iserr(totals_check_state)
+    if Try.isok(calculated_totals_dict)
         _log_try_error(
+        calculated_totals_dict = Try.unwrap(calculated_totals_dict)
             totals_check_state,
+        # Check if calculated and provided totals match
             :Warn;
+        totals_check_state = all_totals_check(calculated_totals_dict, cleaned_data)
+
+        # If a totals row doesn't exist then use calculated totals values
+        if Try.iserr(has_totals)
+            Try.@? _log_try_error(
+                has_totals,
+                has_totals_ll;
+                logger = logger
+            )
+            push!(
+                cleaned_data,
+                merge(Dict("states_ut" => "Total calculated"), calculated_totals_dict);
+                promote = true
+            )
+            # If calculated and provided totals don't match then add calculated totals
+        elseif Try.iserr(totals_check_state)
+            Try.@? _log_try_error(
+                totals_check_state,
+                totals_check_state_ll;
+                logger = logger
+            )
+            push!(
+                cleaned_data,
+                merge(Dict("states_ut" => "Total calculated"), calculated_totals_dict);
+                promote = true
+            )
+        end
+
+        Try.@? _log_try_error(
+            select_calculated_totals!(cleaned_data),
+            select_calculated_totals_ll;
             logger = logger
         )
         push!(
-            corrected_state_name_data,
+            cleaned_data,
             merge(Dict("states_ut" => "Total calculated"), totals_dict);
             promote = true
         )
     end
 
     calculated_state_counts_data = calculate_state_counts(corrected_state_name_data)
+    if Try.isok(aggregate_pre_post_exist_result)
     calculated_state_seroprevs_data = calculate_state_seroprevalence(calculated_state_counts_data)
+        # Calculate missing state count and seroprevalence values that may be missing
+        cleaned_data = calculate_state_counts(cleaned_data)
+        cleaned_data = calculate_state_seroprevalence(cleaned_data)
 
     Try.@? _log_try_error(
+        Try.@? _log_try_error(
         check_calculated_values_match_existing(calculated_state_seroprevs_data),
+            check_calculated_values_match_existing(cleaned_data),
         :Warn;
+            check_calculated_values_match_existing_ll;
         logger = logger
+            logger = logger
     )
+        )
+        Try.@? _log_try_error(
+            select_calculated_cols!(cleaned_data),
+            select_calculated_cols_ll;
+            logger = logger
+        )
 
     Try.@? _log_try_error(
+    end
         select_calculated_totals!(calculated_state_seroprevs_data), :Warn;
         logger = logger
     )
