@@ -25,6 +25,26 @@ function all_cleaning_steps(
         output_dir::T1 = icar_cleaned_dir(),
         load_format = DataFrame,
         skiptotals = false,
+        load_csv_ll = :Error,
+        clean_colnames_ll = :Error,
+        rename_aggregated_pre_post_counts_ll = :Error,
+        correct_all_state_names_ll = :Error,
+        check_duplicated_column_names_ll = :Error,
+        check_missing_states_ll = :Error,
+        check_duplicated_states_ll = :Error,
+        check_allowed_serotypes_ll = :Error,
+        check_seroprevalence_as_pct_ll = :Error,
+        check_aggregated_pre_post_counts_exist_ll = :Error,
+        check_pre_post_exists_ll = :Error,
+        calculate_all_totals_ll = :Error,
+        has_totals_ll = :Error,
+        totals_check_state_ll = :Error,
+        check_calculated_values_match_existing_ll = :Warn,
+        select_calculated_totals_ll = :Warn,
+        select_calculated_cols_ll = :Warn,
+        sort_columns_ll = :Warn,
+        sort_states_ll = :Warn,
+        write_csv_ll = :Error,
     ) where {T1 <: AbstractString}
 
     if show_warnings
@@ -49,65 +69,75 @@ function all_cleaning_steps(
             input_filename,
             input_dir,
             load_format
-        );
+        ),
+        load_csv_ll;
         logger = logger
     )
 
     cleaned_colnames_data = Try.@? _log_try_error(
-        clean_colnames(data);
+        clean_colnames(data),
+        clean_colnames_ll;
         logger = logger
     )
 
     renamed_aggregate_counts_data = Try.@? _log_try_error(
-        rename_aggregated_pre_post_counts(cleaned_colnames_data);
+        rename_aggregated_pre_post_counts(cleaned_colnames_data),
+        rename_aggregated_pre_post_counts_ll;
         logger = logger
     )
 
     corrected_state_name_data = Try.@? _log_try_error(
-        correct_all_state_names(renamed_aggregate_counts_data);
+        correct_all_state_names(renamed_aggregate_counts_data),
+        correct_all_state_names_ll;
         logger = logger
     )
 
     Try.@? _log_try_error(
-        check_duplicated_column_names(corrected_state_name_data);
+        check_duplicated_column_names(corrected_state_name_data),
+        check_duplicated_column_names_ll;
         logger = logger
     )
     Try.@? _log_try_error(
-        check_missing_states(corrected_state_name_data);
+        check_missing_states(corrected_state_name_data),
+        check_missing_states_ll;
         logger = logger
     )
     Try.@? _log_try_error(
-        check_duplicated_states(corrected_state_name_data);
+        check_duplicated_states(corrected_state_name_data),
+        check_duplicated_states_ll;
         logger = logger
     )
     Try.@? _log_try_error(
-        check_allowed_serotypes(corrected_state_name_data);
+        check_allowed_serotypes(corrected_state_name_data),
+        check_allowed_serotypes_ll;
         logger = logger
     )
     Try.@? _log_try_error(
-        check_seroprevalence_as_pct(corrected_state_name_data);
+        check_seroprevalence_as_pct(corrected_state_name_data),
+        check_seroprevalence_as_pct_ll;
+        logger = logger
+    )
+
+    aggregate_pre_post_exist_result = check_aggregated_pre_post_counts_exist(corrected_state_name_data)
+    Try.@? _log_try_error(
+        aggregate_pre_post_exist_result,
+        check_aggregated_pre_post_counts_exist_ll;
         logger = logger
     )
     Try.@? _log_try_error(
-        check_aggregated_pre_post_counts_exist(corrected_state_name_data);
-        logger = logger
-    )
-    Try.@? _log_try_error(
-        check_pre_post_exists(corrected_state_name_data);
+        check_pre_post_exists(corrected_state_name_data),
+        check_pre_post_exists_ll;
         logger = logger
     )
 
     has_totals = has_totals_row(corrected_state_name_data)
-    totals_dict = Try.@? _log_try_error(
-        calculate_all_totals(corrected_state_name_data);
-        logger = logger
+
+    Try.@? _log_try_error(
+        has_totals, has_totals_ll; logger = logger
     )
-    totals_check_state = all_totals_check(totals_dict, corrected_state_name_data)
-    if Try.iserr(has_totals)
+
     if skiptotals
-        _log_try_error(
         calculated_totals_dict = Try.Err(nothing)
-            has_totals, :Warn;
     else
         calculated_totals_dict = calculate_all_totals(corrected_state_name_data)
 
@@ -116,22 +146,14 @@ function all_cleaning_steps(
             calculate_all_totals_ll;
             logger = logger
         )
-        push!(
     end
-            corrected_state_name_data,
-            merge(Dict("states_ut" => "Total calculated"), totals_dict);
-    cleaned_data = corrected_state_name_data
-            promote = true
 
-        )
+    cleaned_data = corrected_state_name_data
+
     # If totals can be calculated, then calculate values that rely on the totals
-    elseif Try.iserr(totals_check_state)
     if Try.isok(calculated_totals_dict)
-        _log_try_error(
         calculated_totals_dict = Try.unwrap(calculated_totals_dict)
-            totals_check_state,
         # Check if calculated and provided totals match
-            :Warn;
         totals_check_state = all_totals_check(calculated_totals_dict, cleaned_data)
 
         # If a totals row doesn't exist then use calculated totals values
@@ -165,29 +187,17 @@ function all_cleaning_steps(
             select_calculated_totals_ll;
             logger = logger
         )
-        push!(
-            cleaned_data,
-            merge(Dict("states_ut" => "Total calculated"), totals_dict);
-            promote = true
-        )
     end
 
-    calculated_state_counts_data = calculate_state_counts(corrected_state_name_data)
     if Try.isok(aggregate_pre_post_exist_result)
-    calculated_state_seroprevs_data = calculate_state_seroprevalence(calculated_state_counts_data)
         # Calculate missing state count and seroprevalence values that may be missing
         cleaned_data = calculate_state_counts(cleaned_data)
         cleaned_data = calculate_state_seroprevalence(cleaned_data)
 
-    Try.@? _log_try_error(
         Try.@? _log_try_error(
-        check_calculated_values_match_existing(calculated_state_seroprevs_data),
             check_calculated_values_match_existing(cleaned_data),
-        :Warn;
             check_calculated_values_match_existing_ll;
-        logger = logger
             logger = logger
-    )
         )
         Try.@? _log_try_error(
             select_calculated_cols!(cleaned_data),
@@ -195,28 +205,22 @@ function all_cleaning_steps(
             logger = logger
         )
 
-    Try.@? _log_try_error(
     end
-        select_calculated_totals!(calculated_state_seroprevs_data), :Warn;
+
+    Try.@? _log_try_error(
+        sort_columns!(cleaned_data),
+        sort_columns_ll;
         logger = logger
     )
     Try.@? _log_try_error(
-        select_calculated_cols!(calculated_state_seroprevs_data), :Warn;
+        sort_states!(cleaned_data),
+        sort_states_ll;
         logger = logger
     )
 
     Try.@? _log_try_error(
-        sort_columns!(calculated_state_seroprevs_data), :Warn;
-        logger = logger
-    )
-    Try.@? _log_try_error(
-        sort_states!(calculated_state_seroprevs_data), :Warn;
-        logger = logger
-    )
-
-    cleaned_data = calculated_state_seroprevs_data
-    Try.@? _log_try_error(
-        write_csv(output_filename, output_dir, cleaned_data);
+        write_csv(output_filename, output_dir, cleaned_data),
+        write_csv_ll;
         logger = logger
     )
 
