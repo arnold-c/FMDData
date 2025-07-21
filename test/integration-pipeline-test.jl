@@ -49,13 +49,15 @@ import Base: isfile, isdir
         initial_cleaned_result = all_cleaning_steps(
             "integration_initial.csv",
             test_data_dir(),
-            output_dir = test_data_dir()
+            output_dir = test_data_dir();
+            has_totals_ll = :Warn
         )
 
         cumulative_cleaned_result = all_cleaning_steps(
             "integration_cumulative.csv",
             test_data_dir(),
-            output_dir = test_data_dir()
+            output_dir = test_data_dir();
+            has_totals_ll = :Warn
         )
 
         @test Try.isok(initial_cleaned_result)
