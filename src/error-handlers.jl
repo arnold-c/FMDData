@@ -31,12 +31,15 @@ function _log_try_error(
         if Try.iserr(res)
             if type == :Error
                 show_warnings && @error Try.unwrap_err(res)
+                return res
             elseif type == :Warn
                 show_warnings && @warn Try.unwrap_err(res)
             elseif type == :Info
                 show_warnings && @info Try.unwrap_err(res)
             end
-            return res
+            # Want to be able to bypass Try.@? returning an error up the stack
+            # when only using :Warn or :Info
+            return Try.Ok(nothing)
         end
 
         if Try.isok(res)
