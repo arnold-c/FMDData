@@ -72,13 +72,13 @@ function all_cleaning_steps(
         Try.@? _log_try_error(check_pre_post_exists(corrected_state_name_data))
 
         has_totals = has_totals_row(corrected_state_name_data)
-        totals_dict = _log_try_error(calculate_all_totals(corrected_state_name_data))
+        totals_dict = Try.@? _log_try_error(calculate_all_totals(corrected_state_name_data))
         totals_check_state = all_totals_check(totals_dict, corrected_state_name_data)
         if Try.iserr(has_totals)
             _log_try_error(has_totals, :Warn)
             push!(
                 corrected_state_name_data,
-                merge(Dict("states_ut" => "Total calculated"), Try.unwrap_err(totals_dict));
+                merge(Dict("states_ut" => "Total calculated"), totals_dict);
                 promote = true
             )
         elseif Try.iserr(totals_check_state)
