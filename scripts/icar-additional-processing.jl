@@ -41,8 +41,19 @@ using LoggingExtras
 # "2022_Annual-Report_Organized-farms.csv"
 
 #%%
+"""
+    report_specific_processing_files_dir(args...)
+
+Returns the absolute path to the `report-specific-processing-files` directory within the processed data folder,
+which contains individual processing files for specific ICAR reports that are included in the main
+processing pipeline.
+"""
+report_specific_processing_files_dir(args...) = scriptsdir("report-specific-processing-files", args...)
+
+
 icar_processed_logdir = icar_processed_dir("logfiles")
 isdir(icar_processed_logdir) || mkpath(icar_processed_logdir)
+
 logfile = joinpath(icar_processed_logdir, "nadcp_2.log")
 logger = FileLogger(logfile)
 
@@ -224,3 +235,15 @@ Try.@? FMDData._log_try_error(
 if filesize(logfile) == 0
     rm(logfile)
 end
+
+
+#%%
+# Process remaining non-2019 files
+
+# Not including 2020 organized farm as has duplicate states and farms within a single year
+# that will need to be handled in a special way
+# include(report_specific_processing_files_dir("process-2020-organized-farms.jl"))
+
+include(report_specific_processing_files_dir("process-2021-organized-farms.jl"))
+include(report_specific_processing_files_dir("process-2022-nadcp-3.jl"))
+include(report_specific_processing_files_dir("process-2022-organized-farms.jl"))
