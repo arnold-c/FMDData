@@ -4,6 +4,7 @@ using DrWatson
 
 using FMDData
 using Try
+using DataFrames: DataFrames
 using OrderedCollections: OrderedDict
 using Logging
 using LoggingExtras
@@ -61,6 +62,7 @@ processing_files = [
     ("process-2021-organized-farms.jl", "2021 Organized farms"),
     ("process-2022-nadcp-3.jl", "2022 NADCP-3"),
     ("process-2022-organized-farms.jl", "2022 Organized farms"),
+    ("process-2019-state-files.jl", "2019 State files (all 23 states)"),
 ]
 
 println("="^60)
