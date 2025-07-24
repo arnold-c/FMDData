@@ -54,13 +54,26 @@ icar_processed_logdir = icar_processed_dir("logfiles")
 isdir(icar_processed_logdir) || mkpath(icar_processed_logdir)
 
 #%%
-include(report_specific_processing_files_dir("process-nadcp-2.jl"))
-include(report_specific_processing_files_dir("process-nadcp-1.jl"))
+# Process NADCP rounds with cumulative data inference
+processing_files = [
+    ("process-nadcp-2.jl", "NADCP-2 (2021/2022 cumulative data with inference)"),
+    ("process-nadcp-1.jl", "NADCP-1 (2020/2021 cumulative data with inference)"),
+    ("process-2021-organized-farms.jl", "2021 Organized farms"),
+    ("process-2022-nadcp-3.jl", "2022 NADCP-3"),
+    ("process-2022-organized-farms.jl", "2022 Organized farms"),
+]
 
-# Not including 2020 organized farm as has duplicate states and farms within a single year
-# that will need to be handled in a special way
-# include(report_specific_processing_files_dir("process-2020-organized-farms.jl"))
+println("="^60)
+println("Processing cleaned data")
+println("="^60)
 
-include(report_specific_processing_files_dir("process-2021-organized-farms.jl"))
-include(report_specific_processing_files_dir("process-2022-nadcp-3.jl"))
-include(report_specific_processing_files_dir("process-2022-organized-farms.jl"))
+for (i, (filename, description)) in pairs(processing_files)
+    println("[$i/$(length(processing_files))] Processing $description...")
+    include(report_specific_processing_files_dir(filename))
+    println("✓ Completed $description")
+    println()
+end
+
+println("="^60)
+println("All processing complete!")
+println("="^60)
