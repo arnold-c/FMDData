@@ -6,8 +6,7 @@ A Dictionary of States/UTs that can appear in the data set. The keys will be ret
 """
 states_dict = Dict(
     [
-        ["A&N Island"; "A&N Islands"; "Andaman and Nicobar Islands"] .=> "A&N Island";
-        ["Andaman"] .=> "Andaman";
+        ["A&N Island"; "A&N Islands"; "Andaman and Nicobar Islands"; "Andaman"] .=> "A&N Island";
         ["Andhra Pradesh"; "AP"] .=> "Andhra Pradesh";
         ["Arunachal Pradesh"; "AR"] .=> "Arunachal Pradesh";
         ["Assam"] .=> "Assam";
@@ -15,14 +14,14 @@ states_dict = Dict(
         ["Chandigarh"] .=> "Chandigarh";
         ["Chhattisgarh"] .=> "Chhattisgarh";
         ["Dadra and Nagar Haveli and Daman and Diu"] .=> "Dadra and Nagar Haveli and Daman and Diu";
-        ["Delhi"] .=> "Delhi";
+        # ["Delhi"] .=> "Delhi";
         ["Goa"] .=> "Goa";
         ["Gujarat"] .=> "Gujarat";
         ["Haryana"] .=> "Haryana";
         ["Himachal Pradesh"; "HP"] .=> "Himachal Pradesh";
         ["Jammu & Kashmir"; "Jammu Kashmir"] .=> "Jammu & Kashmir";
         ["Jharkhand"] .=> "Jharkhand";
-        ["Kamataka"] .=> "Kamataka";
+        # ["Kamataka"] .=> "Kamataka";
         ["Karnataka"] .=> "Karnataka";
         ["Kerala"] .=> "Kerala";
         ["Madhya Pradesh"; "MP"] .=> "Madhya Pradesh";
