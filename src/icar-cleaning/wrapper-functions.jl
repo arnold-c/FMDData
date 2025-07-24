@@ -38,7 +38,7 @@ function all_cleaning_steps(
         check_pre_post_exists_ll = :Error,
         calculate_all_totals_ll = :Error,
         has_totals_ll = :Error,
-        totals_check_state_ll = :Error,
+        calculated_totals_match_ll = :Warn,
         check_calculated_values_match_existing_ll = :Warn,
         select_calculated_totals_ll = :Warn,
         select_calculated_cols_ll = :Warn,
@@ -154,7 +154,7 @@ function all_cleaning_steps(
     if Try.isok(calculated_totals_dict)
         calculated_totals_dict = Try.unwrap(calculated_totals_dict)
         # Check if calculated and provided totals match
-        totals_check_state = all_totals_check(calculated_totals_dict, cleaned_data)
+        calculated_totals_match = all_totals_check(calculated_totals_dict, cleaned_data)
 
         # If a totals row doesn't exist then use calculated totals values
         if Try.iserr(has_totals)
@@ -169,10 +169,10 @@ function all_cleaning_steps(
                 promote = true
             )
             # If calculated and provided totals don't match then add calculated totals
-        elseif Try.iserr(totals_check_state)
+        elseif Try.iserr(calculated_totals_match)
             Try.@? _log_try_error(
-                totals_check_state,
-                totals_check_state_ll;
+                calculated_totals_match,
+                calculated_totals_match_ll;
                 logger = logger
             )
             push!(
