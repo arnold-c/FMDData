@@ -16,7 +16,7 @@ Selection options:
 
 Returns a DataFrame containing the selected processed ICAR seroprevalence data.
 """
-function combine_all_processed_data(selection::String = "all")
+function combine_all_processed_data(selection::String = "all"; cols = :union)
     # Get all CSV files from processed directory
     processed_dir = icar_processed_dir()
     all_csv_files = filter(f -> endswith(f, ".csv"), readdir(processed_dir))
@@ -45,7 +45,7 @@ function combine_all_processed_data(selection::String = "all")
         push!(dataframes, df_result)
     end
 
-    return vcat(dataframes...; cols = :union)
+    return vcat(dataframes...; cols = cols)
 end
 
 
@@ -55,7 +55,7 @@ end
 Combines multiple DataFrames into a single DataFrame with permissive column handling.
 """
 function combine_round_dfs(
-        dfs::DataFrame...
+        dfs::DataFrame...; cols = :setequal
     )
-    return Try.Ok(vcat(dfs...))
+    return Try.Ok(vcat(dfs..., cols = cols))
 end
