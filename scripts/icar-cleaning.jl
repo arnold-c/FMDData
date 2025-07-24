@@ -14,10 +14,16 @@ for file in [
         "2021_Annual-Report_NADCP-1.csv",
         "2020_Annual-Report_NADCP-1.csv",
     ]
-    all_cleaning_steps(
+
+    println("Cleaning $file ======================")
+
+    Try.@? all_cleaning_steps(
         file,
         icar_inputs_dir(),
     )
+
+    println("Successful ✓\n")
+
 end
 
 #%%
@@ -53,7 +59,9 @@ for file in [
         "2019_Annual-Report_Uttarakhand.csv"
         "2019_Annual-Report_West-Bengal.csv"
     ]
-    all_cleaning_steps(
+    println("Cleaning $file ======================")
+
+    Try.@? all_cleaning_steps(
         file,
         icar_inputs_dir();
         skiptotals = true,
@@ -64,7 +72,6 @@ for file in [
         check_pre_post_exists_ll = :Error,
         has_totals_ll = :Warn,
         calculate_all_totals_ll = :Warn,
-        totals_check_state_ll = :Error,
         check_calculated_values_match_existing_ll = :Error,
         select_calculated_totals_ll = :Error,
         select_calculated_cols_ll = :Error,
@@ -72,4 +79,7 @@ for file in [
         sort_states_ll = :Error,
         write_csv_ll = :Error,
     )
+
+    println("Successful ✓\n")
+
 end

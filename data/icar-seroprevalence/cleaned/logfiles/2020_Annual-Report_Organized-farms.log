@@ -1,2 +1,0 @@
-┌ Error: The dataframe has 19 state values, but only 4 unique state values. ("Kerala", "Andhra Pradesh") were duplicated
-└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/utils.jl:27
