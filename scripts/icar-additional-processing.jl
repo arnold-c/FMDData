@@ -9,38 +9,6 @@ using OrderedCollections: OrderedDict
 using Logging
 using LoggingExtras
 
-# "2019_Annual-Report_A-N-Islands.csv"
-# "2019_Annual-Report_Andhra-Pradesh.csv"
-# "2019_Annual-Report_Bihar.csv"
-# "2019_Annual-Report_Chhattisgarh.csv"
-# "2019_Annual-Report_Goa.csv"
-# "2019_Annual-Report_Gujarat.csv"
-# "2019_Annual-Report_Haryana.csv"
-# "2019_Annual-Report_Jammu-Kashmir.csv"
-# "2019_Annual-Report_Karnataka.csv"
-# "2019_Annual-Report_Kerala.csv"
-# "2019_Annual-Report_Madhya-Pradesh.csv"
-# "2019_Annual-Report_Maharashtra.csv"
-# "2019_Annual-Report_Manipur.csv"
-# "2019_Annual-Report_Mizoram.csv"
-# "2019_Annual-Report_Odisha.csv"
-# "2019_Annual-Report_Pondicherry.csv"
-# "2019_Annual-Report_Punjab.csv"
-# "2019_Annual-Report_Rajasthan.csv"
-# "2019_Annual-Report_Tamil-Nadu.csv"
-# "2019_Annual-Report_Telangana.csv"
-# "2019_Annual-Report_Uttar-Pradesh.csv"
-# "2019_Annual-Report_Uttarakhand.csv"
-# "2019_Annual-Report_West-Bengal.csv"
-# "2020_Annual-Report_NADCP-1.csv"
-# "2020_Annual-Report_Organized-farms.csv"
-# "2021_Annual-Report_NADCP-1.csv"
-# "2021_Annual-Report_NADCP-2.csv"
-# "2021_Annual-Report_Organized-farms.csv"
-# "2022_Annual-Report_NADCP-2.csv"
-# "2022_Annual-Report_NADCP-3.csv"
-# "2022_Annual-Report_Organized-farms.csv"
-
 #%%
 """
     report_specific_processing_files_dir(args...)
@@ -78,4 +46,35 @@ end
 
 println("="^60)
 println("All processing complete!")
+println("="^60)
+
+#%%
+# Combine processed data with different selection options
+println("Creating combined datasets...")
+
+# All data
+println("Combining all processed data...")
+all_data = combine_all_processed_data("all")
+println("✓ Combined $(nrow(all_data)) rows from all files")
+Try.@? write_csv("all_combined_icar_data.csv", icar_processed_dir(), all_data)
+
+# 2019 state files only
+println("Combining 2019 state files...")
+data_2019 = combine_all_processed_data("2019")
+println("✓ Combined $(nrow(data_2019)) rows from 2019 state files")
+Try.@? write_csv("combined_2019_states.csv", icar_processed_dir(), data_2019)
+
+# NADCP files only
+println("Combining NADCP files...")
+nadcp_data = combine_all_processed_data("nadcp")
+println("✓ Combined $(nrow(nadcp_data)) rows from NADCP files")
+Try.@? write_csv("combined_nadcp_data.csv", icar_processed_dir(), nadcp_data)
+
+# Organized farms only
+println("Combining organized farms files...")
+farms_data = combine_all_processed_data("organized_farms")
+println("✓ Combined $(nrow(farms_data)) rows from organized farms files")
+Try.@? write_csv("combined_organized_farms.csv", icar_processed_dir(), farms_data)
+
+println("✓ All combined datasets exported successfully")
 println("="^60)
