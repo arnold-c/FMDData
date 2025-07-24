@@ -4,7 +4,7 @@ using DrWatson
 
 using FMDData
 using Try
-using DataFrames: DataFrames
+using DataFrames
 using OrderedCollections: OrderedDict
 using Logging
 using LoggingExtras

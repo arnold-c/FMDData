@@ -3,6 +3,7 @@ using DrWatson
 @quickactivate "FMDData"
 
 using FMDData
+using Try
 
 #%%
 for file in [

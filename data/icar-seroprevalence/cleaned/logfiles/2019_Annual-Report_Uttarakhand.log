@@ -1,0 +1,8 @@
+┌ Warning: The dataframe has 5 state values, but only 1 unique state values. ("Uttarakhand",) were duplicated
+└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/error-handlers.jl:36
+┌ Warning: Found 3 allowed serotypes (["o", "a", "asia1"]). Required 4: ["all", "o", "a", "asia1"].
+└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/error-handlers.jl:36
+┌ Warning: The aggregated count columns ["serotype_all_count_pre", "serotype_all_count_post"] do not exist in the data
+└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/error-handlers.jl:36
+┌ Warning: Totals row not found in the data using the possible row keys ["total", "totals"] in the column :states_ut
+└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/error-handlers.jl:36
