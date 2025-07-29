@@ -87,9 +87,3 @@ begin
 
     end
 end
-
-# #%%
-# all_cleaning_steps(
-#     "2021_Annual-Report_NADCP-2.csv",
-#     icar_inputs_dir()
-# )

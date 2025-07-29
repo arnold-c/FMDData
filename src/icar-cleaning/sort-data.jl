@@ -72,6 +72,7 @@ end
 	sort_states!(
         df::DataFrame;
         statename_column = :states_ut,
+        roundname_column = :round_name,
         totals_key = "total"
     )
 
@@ -80,12 +81,22 @@ Sort the dataframe by alphabetical order of the states and list the totals row a
 function sort_states!(
         df::DataFrame;
         statename_column = :states_ut,
+        roundname_column = :round_name,
         totals_key = "total"
     )
-    sort!(
-        df,
-        statename_column;
-        by = n -> (lowercase(n) == totals_key, n)
-    )
+    statename_fn = n -> (lowercase(n) == totals_key, n)
+    if roundname_column in names(df)
+        sort(
+            df,
+            [statename_column, roundname_column],
+            by = [statename_fn, identity]
+        )
+    else
+        sort(
+            df,
+            [statename_column],
+            by = [statename_fn]
+        )
+    end
     return Try.Ok(nothing)
 end
