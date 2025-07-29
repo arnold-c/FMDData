@@ -1,9 +1,10 @@
-using DataFrames: DataFrame, transform, ByRow
+using DataFrames: DataFrame, transform, transform!, ByRow
 using Try: Try
 
 export correct_all_state_names,
     check_missing_states,
-    check_duplicated_states
+    check_duplicated_states,
+    add_state_code!
 
 """
     correct_all_state_names(
@@ -96,6 +97,24 @@ function check_duplicated_states(
     state_counts = _calculate_string_occurences(states, unique_states)
 
     nstates == length(unique_states) || return Try.Err("The dataframe has $nstates state values, but only $(length(unique_states)) unique state values. $(String.(keys(filter(c -> values(c) != 1, state_counts)))) were duplicated")
+
+    return Try.Ok(nothing)
+end
+
+function add_state_code!(
+        df::DataFrame,
+        state_code_dict::Dict = state_code_dict,
+        column::Symbol = :states_ut;
+        totals_key = "total",
+    )
+    transform!(
+        df,
+        column => ByRow(s -> get(state_code_dict, s, missing)) => :region_code
+    )
+    if sum(ismissing(subset(df, column => c -> lowercase.(c) .!= totals_key)[!, :region_code])) != 0
+        number_missing_code = nrow(subset(df, [column, :region_code] => ByRow((c, r) -> lowercase(c) != totals_key && ismissing(r))))
+        return Try.Err("The dataframe has $number_missing_code rows that could not match the state name to the region code")
+    end
 
     return Try.Ok(nothing)
 end

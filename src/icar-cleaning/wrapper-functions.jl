@@ -29,6 +29,7 @@ function all_cleaning_steps(
         clean_colnames_ll = :Error,
         rename_aggregated_pre_post_counts_ll = :Error,
         correct_all_state_names_ll = :Error,
+        add_state_code_ll = :Error,
         check_duplicated_column_names_ll = :Error,
         check_missing_states_ll = :Error,
         check_duplicated_states_ll = :Error,
@@ -46,11 +47,6 @@ function all_cleaning_steps(
         sort_states_ll = :Warn,
         write_csv_ll = :Error,
     ) where {T1 <: AbstractString}
-
-    if show_warnings
-        println("\n==========================================================================")
-        println("Cleaning $(joinpath(input_dir, input_filename))\n")
-    end
 
     if !isdir(output_dir)
         mkpath(output_dir)
@@ -206,6 +202,12 @@ function all_cleaning_steps(
         )
 
     end
+
+    Try.@? _log_try_error(
+        add_state_code!(cleaned_data),
+        add_state_code_ll;
+        logger = logger
+    )
 
     Try.@? _log_try_error(
         sort_columns!(cleaned_data),

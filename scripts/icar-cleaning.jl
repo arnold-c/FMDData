@@ -6,81 +6,90 @@ using FMDData
 using Try
 
 #%%
-for file in [
-        "2022_Annual-Report_Organized-farms.csv",
-        "2022_Annual-Report_NADCP-3.csv",
-        "2022_Annual-Report_NADCP-2.csv",
-        "2021_Annual-Report_Organized-farms.csv",
-        "2021_Annual-Report_NADCP-2.csv",
-        "2021_Annual-Report_NADCP-1.csv",
-        "2020_Annual-Report_NADCP-1.csv",
-    ]
+# Wrap in a being block so an error in any section of the script will
+# exit execution - including if being run in a REPL with `include()`,
+# which would otherwise just move to the next code section and continue
+begin
+    for file in [
+            "2022_Annual-Report_Organized-farms.csv",
+            "2022_Annual-Report_NADCP-3.csv",
+            "2022_Annual-Report_NADCP-2.csv",
+            "2021_Annual-Report_Organized-farms.csv",
+            "2021_Annual-Report_NADCP-2.csv",
+            "2021_Annual-Report_NADCP-1.csv",
+            "2020_Annual-Report_NADCP-1.csv",
+        ]
 
-    println("Cleaning $file ======================")
+        println("Cleaning $file ======================")
 
-    Try.@? all_cleaning_steps(
-        file,
-        icar_inputs_dir(),
-    )
+        Try.@? all_cleaning_steps(
+            file,
+            icar_inputs_dir(),
+        )
 
-    println("Successful ✓\n")
+        println("Successful ✓\n")
 
+    end
+
+    # errors as provides farm-level data with duplicated states
+    # all_cleaning_steps(
+    #     "2020_Annual-Report_Organized-farms.csv",
+    #     icar_inputs_dir(),
+    # )
+
+    for file in [
+            "2019_Annual-Report_A-N-Islands.csv"
+            "2019_Annual-Report_Andhra-Pradesh.csv"
+            "2019_Annual-Report_Bihar.csv"
+            "2019_Annual-Report_Chhattisgarh.csv"
+            "2019_Annual-Report_Goa.csv"
+            "2019_Annual-Report_Gujarat.csv"
+            "2019_Annual-Report_Haryana.csv"
+            "2019_Annual-Report_Jammu-Kashmir.csv"
+            "2019_Annual-Report_Karnataka.csv"
+            "2019_Annual-Report_Kerala.csv"
+            "2019_Annual-Report_Madhya-Pradesh.csv"
+            "2019_Annual-Report_Maharashtra.csv"
+            "2019_Annual-Report_Manipur.csv"
+            "2019_Annual-Report_Mizoram.csv"
+            "2019_Annual-Report_Odisha.csv"
+            "2019_Annual-Report_Pondicherry.csv"
+            "2019_Annual-Report_Punjab.csv"
+            "2019_Annual-Report_Rajasthan.csv"
+            "2019_Annual-Report_Tamil-Nadu.csv"
+            "2019_Annual-Report_Telangana.csv"
+            "2019_Annual-Report_Uttar-Pradesh.csv"
+            "2019_Annual-Report_Uttarakhand.csv"
+            "2019_Annual-Report_West-Bengal.csv"
+        ]
+        println("Cleaning $file ======================")
+
+        Try.@? all_cleaning_steps(
+            file,
+            icar_inputs_dir();
+            skiptotals = true,
+            check_duplicated_states_ll = :Warn,
+            check_allowed_serotypes_ll = :Warn,
+            check_seroprevalence_as_pct_ll = :Error,
+            check_aggregated_pre_post_counts_exist_ll = :Warn,
+            check_pre_post_exists_ll = :Error,
+            has_totals_ll = :Warn,
+            calculate_all_totals_ll = :Warn,
+            check_calculated_values_match_existing_ll = :Error,
+            select_calculated_totals_ll = :Error,
+            select_calculated_cols_ll = :Error,
+            sort_columns_ll = :Error,
+            sort_states_ll = :Error,
+            write_csv_ll = :Error,
+        )
+
+        println("Successful ✓\n")
+
+    end
 end
 
-#%%
-# errors as provides farm-level data with duplicated states
+# #%%
 # all_cleaning_steps(
-#     "2020_Annual-Report_Organized-farms.csv",
-#     icar_inputs_dir(),
+#     "2021_Annual-Report_NADCP-2.csv",
+#     icar_inputs_dir()
 # )
-
-#%%
-for file in [
-        "2019_Annual-Report_A-N-Islands.csv"
-        "2019_Annual-Report_Andhra-Pradesh.csv"
-        "2019_Annual-Report_Bihar.csv"
-        "2019_Annual-Report_Chhattisgarh.csv"
-        "2019_Annual-Report_Goa.csv"
-        "2019_Annual-Report_Gujarat.csv"
-        "2019_Annual-Report_Haryana.csv"
-        "2019_Annual-Report_Jammu-Kashmir.csv"
-        "2019_Annual-Report_Karnataka.csv"
-        "2019_Annual-Report_Kerala.csv"
-        "2019_Annual-Report_Madhya-Pradesh.csv"
-        "2019_Annual-Report_Maharashtra.csv"
-        "2019_Annual-Report_Manipur.csv"
-        "2019_Annual-Report_Mizoram.csv"
-        "2019_Annual-Report_Odisha.csv"
-        "2019_Annual-Report_Pondicherry.csv"
-        "2019_Annual-Report_Punjab.csv"
-        "2019_Annual-Report_Rajasthan.csv"
-        "2019_Annual-Report_Tamil-Nadu.csv"
-        "2019_Annual-Report_Telangana.csv"
-        "2019_Annual-Report_Uttar-Pradesh.csv"
-        "2019_Annual-Report_Uttarakhand.csv"
-        "2019_Annual-Report_West-Bengal.csv"
-    ]
-    println("Cleaning $file ======================")
-
-    Try.@? all_cleaning_steps(
-        file,
-        icar_inputs_dir();
-        skiptotals = true,
-        check_duplicated_states_ll = :Warn,
-        check_allowed_serotypes_ll = :Warn,
-        check_seroprevalence_as_pct_ll = :Error,
-        check_aggregated_pre_post_counts_exist_ll = :Warn,
-        check_pre_post_exists_ll = :Error,
-        has_totals_ll = :Warn,
-        calculate_all_totals_ll = :Warn,
-        check_calculated_values_match_existing_ll = :Error,
-        select_calculated_totals_ll = :Error,
-        select_calculated_cols_ll = :Error,
-        sort_columns_ll = :Error,
-        sort_states_ll = :Error,
-        write_csv_ll = :Error,
-    )
-
-    println("Successful ✓\n")
-
-end

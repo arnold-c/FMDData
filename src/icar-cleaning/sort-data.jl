@@ -33,6 +33,7 @@ The serotype specific columns have their data presented in the following order.
 function sort_columns!(
         df::DataFrame;
         statename_column = :states_ut,
+        region_code_column = :region_code,
         allowed_serotypes = vcat("all", default_allowed_serotypes),
         prefix = "serotype_",
         suffix_order = [
@@ -45,7 +46,7 @@ function sort_columns!(
 
     colnames = names(df)
 
-    ordered_names = [String(statename_column)]
+    ordered_names = String.([statename_column, region_code_column])
 
     for serotype in allowed_serotypes
         for suffix in suffix_order

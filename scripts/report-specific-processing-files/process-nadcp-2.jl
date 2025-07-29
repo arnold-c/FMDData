@@ -88,3 +88,4 @@ Try.@? FMDData._log_try_error(
 if filesize(logfile) == 0
     rm(logfile)
 end
+

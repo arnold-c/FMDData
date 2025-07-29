@@ -16,6 +16,7 @@ using Try: Try
             "serotype_asia1_pct_post" => Float64[],
             "serotype_a_count_pre" => Int64[],
             "serotype_asia1_count_pre" => Int64[],
+            "region_code" => String[]
         )
 
         @test isequal(
@@ -27,6 +28,7 @@ using Try: Try
             names(unsorted_df),
             [
                 "states_ut",
+                "region_code",
                 "serotype_all_count_pre",
                 "serotype_all_count_post",
                 "serotype_o_count_pre",

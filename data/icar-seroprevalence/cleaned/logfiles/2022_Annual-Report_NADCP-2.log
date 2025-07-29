@@ -1,2 +1,2 @@
-┌ Error: State name `Delhi` doesn't exist in current dictionary match. Confirm if this is a new state or uncharacterized misspelling.
-└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/error-handlers.jl:33
+┌ Warning: There were discrepancies in the totals calculated and those provided in the data: OrderedCollections.OrderedDict{AbstractString, NamedTuple{(:provided, :calculated)}}("serotype_all_count_pre" => (provided = 44860, calculated = 44796), "serotype_o_pct_pre" => (provided = 30.9, calculated = 31.0))
+└ @ FMDData /Users/cfa5228/Documents/Repos/FMDData/src/error-handlers.jl:36
