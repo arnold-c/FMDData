@@ -6,7 +6,7 @@ A Dictionary of States/UTs that can appear in the data set. The keys will be ret
 """
 states_dict = Dict(
     [
-        ["A&N Island"; "A&N Islands"; "Andaman and Nicobar Islands"; "Andaman"] .=> "A&N Island";
+        ["A&N Island"; "A&N Islands"; "Andaman and Nicobar Islands"; "Andaman and Nicobar"; "Andaman"] .=> "A&N Island";
         ["Andhra Pradesh"; "AP"] .=> "Andhra Pradesh";
         ["Arunachal Pradesh"; "AR"] .=> "Arunachal Pradesh";
         ["Assam"] .=> "Assam";
@@ -19,7 +19,7 @@ states_dict = Dict(
         ["Gujarat"] .=> "Gujarat";
         ["Haryana"] .=> "Haryana";
         ["Himachal Pradesh"; "HP"] .=> "Himachal Pradesh";
-        ["Jammu & Kashmir"; "Jammu Kashmir"] .=> "Jammu & Kashmir";
+        ["Jammu & Kashmir"; "Jammu Kashmir"; "Jammu and Kashmir"] .=> "Jammu & Kashmir";
         ["Jharkhand"] .=> "Jharkhand";
         ["Karnataka", "Kamataka"] .=> "Karnataka";
         ["Kerala"] .=> "Kerala";
@@ -30,7 +30,7 @@ states_dict = Dict(
         ["Mizoram"] .=> "Mizoram";
         ["Nagaland"] .=> "Nagaland";
         ["Odisha"] .=> "Odisha";
-        ["Pondicherry"; "Pondichery"; "Pudhucherry"] .=> "Pondichery";
+        ["Pondicherry"; "Pondichery"; "Pudhucherry"; "Puducherry"] .=> "Pondichery";
         ["Punjab"] .=> "Punjab";
         ["Rajasthan"] .=> "Rajasthan";
         ["Sikkim"] .=> "Sikkim";
