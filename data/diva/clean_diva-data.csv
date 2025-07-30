@@ -1,4 +1,4 @@
-states_ut,region_code,count_all,count_positive,diva_pct,sample_year
+states_ut,region_code,diva_count_all,diva_count_positive,diva_pct,sample_year
 Andhra Pradesh,AP,2200,536,24.36,2011
 Arunachal Pradesh,AR,408,142,34.8,2011
 Assam,AS,1900,606,31.89,2011

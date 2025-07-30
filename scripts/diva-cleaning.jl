@@ -12,8 +12,8 @@ begin
 
     rename!(diva_data, :state => :states_ut)
     rename!(diva_data, :year => :sample_year)
-    rename!(diva_data, :n_tested => :count_all)
-    rename!(diva_data, :n_positive => :count_positive)
+    rename!(diva_data, :n_tested => :diva_count_all)
+    rename!(diva_data, :n_positive => :diva_count_positive)
     rename!(diva_data, :diva_percent => :diva_pct)
     select!(diva_data, Not("Column1"))
     transform!(diva_data, :diva_pct => p -> round.(p; digits = 2); renamecols = false)
