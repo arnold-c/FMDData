@@ -36,27 +36,37 @@ end
         column::Symbol = :states_ut,
         totals_key = "total",
         allowed_serotypes = vcat("all", default_allowed_serotypes),
-        reg::Regex, # Note: This is a positional argument in the function signature.
+        reg::Regex,
         atol = 0.0,
         digits = 1
     )
 
-Checks if the totals row in a DataFrame is accurate.
+Verify that the totals row in a DataFrame accurately reflects the sum of state-level data.
 
 This function has two main methods:
-1.  **`all_totals_check(df::DataFrame; ...)`**: This is the main method, which calculates the totals and then compares them to the existing totals row in the DataFrame.
-2.  **`all_totals_check(totals_dict::OrderedDict, df::DataFrame; ...)`**: This method is used when the totals have already been calculated and are passed in as a dictionary.
+1. `all_totals_check(df::DataFrame; ...)` - Calculates totals and compares with existing totals row
+2. `all_totals_check(totals_dict::OrderedDict, df::DataFrame; ...)` - Uses pre-calculated totals
 
-The function calculates the totals for both counts and seroprevalence. For counts, it calculates a simple sum. For seroprevalence, it calculates a weighted sum based on the relevant counts (pre- or post-vaccination).
+# Calculation Methods
+- **Count columns**: Simple sum across all states
+- **Percentage columns**: Weighted average based on corresponding count columns
 
 # Arguments
-- `df`: The DataFrame to check.
-- `column`: The column containing the state/UT names. Defaults to `:states_ut`.
-- `totals_key`: The key used to identify the totals row. Defaults to `"total"`.
-- `allowed_serotypes`: A vector of allowed serotypes.
-- `reg`: A regular expression used to select the columns to check.
-- `atol`: The absolute tolerance to use when comparing floating-point numbers. Defaults to `0.0`.
-- `digits`: The number of digits to round to. Defaults to `1`.
+- `df`: DataFrame to validate
+- `column`: Column containing state names
+- `totals_key`: String identifying the totals row (case-insensitive)
+- `allowed_serotypes`: Serotypes to include in validation
+- `reg`: Regex pattern to identify columns for validation
+- `atol`: Absolute tolerance for floating-point comparisons
+- `digits`: Decimal places for percentage calculations
+
+# Returns
+- `Try.Ok(nothing)` if totals are accurate within tolerance
+- `Try.Err(message)` describing discrepancies found
+
+# Note
+This function is critical for data quality assurance, ensuring that reported 
+totals match the sum of individual state contributions.
 """
 function all_totals_check(
         df::DataFrame;
