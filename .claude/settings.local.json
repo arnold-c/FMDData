@@ -7,7 +7,9 @@
       "Bash(mkdir:*)",
       "Bash(julia:*)",
       "Bash(jj describe:*)",
-      "Bash(jj new:*)"
+      "Bash(jj new:*)",
+      "Bash(jj restore:*)",
+      "Bash(jj status:*)"
     ],
     "deny": []
   }
