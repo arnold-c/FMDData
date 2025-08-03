@@ -1,19 +1,18 @@
 # Data Cleaning Process
 
-This document outlines the data cleaning process for the FMDData project. The process is orchestrated by the `scripts/icar-cleaning.jl` script, which uses two distinct cleaning pipelines to handle variations in the source data formats.
+This document outlines the data cleaning process for the FMDData project. The process is orchestrated by the `scripts/icar-cleaning.jl` script, which uses a unified cleaning pipeline to handle variations in the source data formats.
 
-### Cleaning Pipelines
+### Cleaning Pipeline
 
-The `scripts/icar-cleaning.jl` script segregates files into two main cleaning workflows:
+The `scripts/icar-cleaning.jl` script uses a single, flexible cleaning workflow:
 
-1.  **`all_cleaning_steps`**: The standard pipeline for NADCP and post-2019 reports.
-2.  **`all_2019_cleaning_steps`**: A specialized pipeline for the 2019 annual report data, which has a different structure.
+1.  **`all_cleaning_steps`**: A comprehensive pipeline that handles all data formats, including NADCP reports, post-2019 reports, and the 2019 annual report data with its different structure.
 
 ---
 
 ### Main Workflow: `all_cleaning_steps`
 
-This function, defined in `src/icar-cleaning/wrapper-functions.jl`, is a multi-stage process for loading, validating, calculating, and saving the data.
+This function, defined in `src/icar-cleaning/wrapper-functions.jl`, is a multi-stage process for loading, validating, calculating, and saving the data. The function includes flexible parameters to handle different data formats, including the ability to skip totals processing for datasets that don't contain totals rows (such as 2019 data).
 
 **Step 1: Setup and Logging**
 
@@ -59,21 +58,26 @@ The cleaned DataFrame is saved as a new CSV file in the `data/icar-seroprevalenc
 
 ---
 
-### Specialized Workflow: `all_2019_cleaning_steps`
+### Handling Different Data Formats
 
-The 2019 data requires a different cleaning process due to its unique structure.
+The `all_cleaning_steps` function includes flexible parameters to handle different data structures:
 
-1.  **No Totals Row**: The 2019 tables do not contain a "Total" row. The function will log an error if one is found.
+1.  **`skiptotals` Parameter**: When set to `true`, skips totals-related processing for datasets that don't contain totals rows (such as 2019 data).
 
-2.  **Duplicate States**: The 2019 data may contain multiple rows for the same state. The `check_duplicated_states` validation step is skipped in this pipeline.
+2.  **Conditional Logic**: The function automatically detects and adapts to different data structures:
+    - **Duplicate States**: Handles datasets with multiple rows for the same state (common in 2019 data)
+    - **Missing Totals**: Gracefully processes datasets without totals rows
+    - **Variable Columns**: Adapts to different column structures across different report years
 
-3.  **Conditional Calculations**: The core calculations (`calculate_state_counts`, `calculate_state_seroprevalence`) are only performed if aggregated count columns are present.
+3.  **Flexible Validation**: Validation steps are conditionally applied based on the data structure detected.
 
 ### Summary
 
-The FMDData project uses two distinct cleaning pipelines to handle different data formats:
+The FMDData project uses a unified, flexible cleaning pipeline that adapts to different data formats:
 
-*   **`all_cleaning_steps`**: A comprehensive pipeline for structured tables with a single row per state and a totals row.
-*   **`all_2019_cleaning_steps`**: A flexible pipeline for the 2019 report tables, which lack totals and may have multiple entries per state.
+*   **`all_cleaning_steps`**: A comprehensive pipeline that handles all data formats including:
+    - Structured tables with a single row per state and a totals row (NADCP and post-2019 reports)
+    - Flexible tables with multiple entries per state and no totals (2019 report tables)
+    - Various column structures across different report years
 
-This approach allows for robust and accurate cleaning of various data formats.
+This unified approach provides robust and accurate cleaning while maintaining flexibility for different data formats.

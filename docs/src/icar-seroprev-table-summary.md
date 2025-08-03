@@ -2,6 +2,82 @@
 
 Each table relating to pre- and post-vaccination seroprevalence estimates was extracted into its own table with the filename denoting the report and state/vaccination round associated with it, as appropriate.
 
+## Data Availability Summary
+
+The following table provides a comprehensive overview of FMD seroprevalence data availability by state and year across all ICAR reports (2011-2022).
+
+### FMD Seroprevalence Data Availability by State and Year
+
+**Legend:**
+- **✅** = Data available from state-specific reports (2011-2019) or NADCP/Organized Farm programs (2020-2022)
+    - **N1** = NADCP-1
+    - **N2** = NADCP-2
+    - **N3** = NADCP-3
+    - **OF** = Organized Farms
+- **❌** = No data available
+
+| State | 2011 | 2012 | 2013 | 2014 | 2015 | 2016 | 2017 | 2018 | 2019 | 2020 | 2021 | 2022 |
+|-------|------|------|------|------|------|------|------|------|------|------|------|------|
+| A&N Islands | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ (N1) | ✅ (N1, N2) | ✅ (N2) |
+| Andhra Pradesh | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ (N1, OF) | ✅ (N1, N2, OF) | ✅ (N2, OF) |
+| Arunachal Pradesh | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ (N1) | ✅ (N1) | ✅ (N2) |
+| Assam | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ (N1) | ✅ (N1) | ✅ (N2) |
+| Bihar | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ (N2) |
+| Chandigarh | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ (N2) | ✅ (N2) |
+| Chhattisgarh | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ (N1, OF) | ✅ (N1, OF) | ✅ (N2, OF) |
+| Dadra and Nagar Haveli and Daman and Diu | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ (N2) |
+| Delhi | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ (N1) | ✅ (N1, N2) | ✅ (N2) |
+| Goa | ❌ | ❌ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ (N1) | ✅ (N1) | ✅ (N2) |
+| Gujarat | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ (N1) | ✅ (N1, OF) | ✅ (N2, OF) |
+| Haryana | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ | ✅ (N1) | ✅ (N1, N2, OF) | ✅ (N2, N3, OF) |
+| Himachal Pradesh | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ (N1) | ✅ (N1, N2, OF) | ✅ (N2, OF) |
+| Jammu & Kashmir | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ (N1) | ✅ (N1, N2) | ✅ (N2) |
+| Jharkhand | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ (N1) | ✅ (N1) | ✅ (N2) |
+| Karnataka | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ (N1) | ✅ (N1, N2) | ✅ (N2, N3, OF) |
+| Kerala | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ (N1, OF) | ✅ (N1, OF) | ✅ (N2, OF) |
+| Madhya Pradesh | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ | ✅ (OF) | ✅ (N1, OF) | ✅ (N2, OF) |
+| Maharashtra | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ (N1) | ✅ (N1, N2) | ✅ (N2, OF) |
+| Manipur | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ (N1) | ✅ (N1) | ❌ |
+| Meghalaya | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ (N1) | ✅ (N2) |
+| Mizoram | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ (N1) | ✅ (N1) | ❌ |
+| Nagaland | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ (N1) | ✅ (N2) |
+| Odisha | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ (N1) | ✅ (N1) | ✅ (N2, OF) |
+| Pondicherry/Puducherry | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ (N1) | ✅ (N2) |
+| Punjab | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ (N1) | ✅ (N1) | ❌ |
+| Rajasthan | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ (N1) | ❌ |
+| Sikkim | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ (N1) | ✅ (N1) | ❌ |
+| Tamil Nadu | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ (N1) | ✅ (N1, OF) | ✅ (N2, OF) |
+| Telangana | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ (N1) | ✅ (N1) | ✅ (N2, OF) |
+| Uttar Pradesh | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ (N1) | ✅ (N1, N2, OF) | ✅ (N2, OF) |
+| Uttarakhand | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ (N1) | ❌ | ✅ (N2, OF) |
+| West Bengal | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ | ✅ (OF) | ❌ |
+
+### Summary Statistics by Year
+
+| Year | States with Data | Data Source |
+|------|------------------|-------------|
+| 2011 | 1 | State reports (Haryana) |
+| 2012 | 2 | State reports (Haryana, Pondicherry) |
+| 2013 | 6 | State reports (A&N Islands, Goa, Gujarat, Haryana, Kerala, Punjab) |
+| 2014 | 10 | State reports (A&N Islands, Goa, Gujarat, Haryana, Karnataka, Kerala, Maharashtra, Punjab, Tamil Nadu, Telangana) |
+| 2015 | 12 | State reports (A&N Islands, Andhra Pradesh, Goa, Gujarat, Haryana, Karnataka, Kerala, Maharashtra, Pondicherry, Punjab, Tamil Nadu, Telangana) |
+| 2016 | 11 | State reports (A&N Islands, Andhra Pradesh, Gujarat, Karnataka, Kerala, Maharashtra, Pondicherry, Punjab, Rajasthan, Tamil Nadu, Telangana) |
+| 2017 | 18 | State reports (A&N Islands, Andhra Pradesh, Bihar, Goa, Gujarat, Karnataka, Kerala, Madhya Pradesh, Maharashtra, Odisha, Pondicherry, Punjab, Rajasthan, Tamil Nadu, Telangana, Uttar Pradesh, Uttarakhand, West Bengal) |
+| 2018 | 21 | State reports (A&N Islands, Andhra Pradesh, Bihar, Chhattisgarh, Goa, Gujarat, Jammu & Kashmir, Karnataka, Kerala, Madhya Pradesh, Maharashtra, Manipur, Odisha, Pondicherry, Punjab, Rajasthan, Tamil Nadu, Telangana, Uttar Pradesh, Uttarakhand, West Bengal) |
+| 2019 | 20 | State reports (A&N Islands, Andhra Pradesh, Bihar, Chhattisgarh, Goa, Gujarat, Haryana, Jammu & Kashmir, Karnataka, Kerala, Maharashtra, Manipur, Mizoram, Odisha, Pondicherry, Rajasthan, Tamil Nadu, Telangana, Uttar Pradesh, Uttarakhand) |
+| 2020 | 25 | NADCP-1 + Organized farms |
+| 2021 | 29 | NADCP-1, NADCP-2 + Organized farms |
+| 2022 | 31 | NADCP-2, NADCP-3 + Organized farms |
+
+### Key Observations
+
+1. **Historical data (2011-2019)**: Extracted from individual state sections in the 2019 ICAR report, showing the progressive expansion of the FMD control program
+2. **NADCP era (2020-2022)**: Organized by vaccination programs with standardized national coverage
+3. **Data gaps**: Some states have gaps in coverage during the transition periods (e.g., Haryana missing 2016-2018)
+4. **Program evolution**: Clear shift from state-by-state implementation to national coordinated programs
+5. **Coverage expansion**: From 1 state in 2011 to 31 states/territories by 2022
+6. **Peak pre-NADCP coverage**: 21 states in 2018, before the transition to national programs
+
 ```bash
 shell> tree
 .
@@ -70,9 +146,9 @@ shell> tree
 
 **NADCP-2**
 
-| Variable   | Value    |
+| Variable | Value |
 |:--------------- | :--------------- |
-| Table number   | 6   |
+| Table number | 6   |
 | Report page number   | 29   |
 | Test used   | SPCE @ 35% inhibition, 1.65 log10 threshold   |
 | Sample years   | 2021/2022   |
