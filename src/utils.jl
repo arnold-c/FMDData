@@ -95,7 +95,14 @@ end
         unique_vals::Vector{S} = unique(vals)
     ) where {S <: AbstractString}
 
-Internal function to calculate how many times each unique string value occurs in a vector of strings
+Internal function to calculate how many times each unique string value occurs in a vector of strings.
+
+# Arguments
+- `vals`: Vector of strings to analyze
+- `unique_vals`: Vector of unique values (defaults to unique(vals))
+
+# Returns
+NamedTuple with unique values as keys and their occurrence counts as values
 """
 function _calculate_string_occurences(
         vals::Vector{S},
