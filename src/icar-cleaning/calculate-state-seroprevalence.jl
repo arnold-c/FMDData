@@ -4,7 +4,26 @@ export calculate_state_seroprevalence
 """
     calculate_state_seroprevalence(df::DataFrame, allowed_serotypes = default_allowed_serotypes)
 
-A wrapper function around the internal [`_calculate_state_seroprevalence()`](@ref) function to calculate the state/serotype specific counts based upon the state/serotype seroprevalence values and total state counts. See the documentation of [`_calculate_state_seroprevalence()`](@ref) for more details on the implementation.
+Calculate state-specific serotype seroprevalence percentages from count data.
+
+This function calculates the seroprevalence percentage for each serotype by dividing 
+the serotype-specific positive count by the total number of samples tested for that 
+state and vaccination timing (pre/post).
+
+Formula: seroprevalence_pct = (serotype_count / total_count) * 100
+
+# Arguments
+- `df`: DataFrame containing count data
+- `allowed_serotypes`: Vector of serotype names to process
+- `reg`: Regex pattern to identify count columns (optional)
+- `digits`: Number of decimal places for percentages (default: 1)
+
+# Returns
+DataFrame with additional calculated seroprevalence columns suffixed with "_calculated"
+
+# Note
+The calculated values can be compared with existing percentage columns using 
+`check_calculated_values_match_existing()`.
 """
 function calculate_state_seroprevalence(
         df::DataFrame,

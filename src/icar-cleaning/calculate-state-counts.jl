@@ -5,7 +5,24 @@ export calculate_state_counts
 """
     calculate_state_counts(df::DataFrame, allowed_serotypes = default_allowed_serotypes)
 
-A wrapper function around the internal [`_calculate_state_counts()`](@ref) function to calculate the state/serotype specific counts based upon the state/serotype seroprevalence values and total state counts. See the documentation of [`_calculate_state_counts()`](@ref) for more details on the implementation.
+Calculate state-specific serotype counts from seroprevalence percentages and total counts.
+
+This function calculates the number of positive samples for each serotype by multiplying 
+the seroprevalence percentage by the total number of samples tested for that state and 
+vaccination timing (pre/post).
+
+Formula: count = (seroprevalence_pct / 100) * total_count
+
+# Arguments
+- `df`: DataFrame containing seroprevalence data
+- `allowed_serotypes`: Vector of serotype names to process
+
+# Returns
+DataFrame with additional calculated count columns suffixed with "_calculated"
+
+# Note
+The calculated values can be compared with existing count columns using 
+`check_calculated_values_match_existing()`.
 """
 function calculate_state_counts(
         df::DataFrame,
