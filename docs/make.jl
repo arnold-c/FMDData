@@ -27,7 +27,7 @@ Documenter.makedocs(
     sitename = "FMDData",
     pages = Any[
         "Data Descriptions & Tutorials" => [
-            "extracted-seroprev-tables.md",
+            "icar-seroprev-table-summary.md",
             "cleaning-process.md",
             "additional-processing.md",
         ],

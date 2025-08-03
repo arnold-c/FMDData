@@ -5,7 +5,9 @@
       "Bash(ls:*)",
       "Bash(grep:*)",
       "Bash(mkdir:*)",
-      "Bash(julia:*)"
+      "Bash(julia:*)",
+      "Bash(jj describe:*)",
+      "Bash(jj new:*)"
     ],
     "deny": []
   }
