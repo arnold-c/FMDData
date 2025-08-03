@@ -101,6 +101,16 @@ function check_duplicated_states(
     return Try.Ok(nothing)
 end
 
+"""
+    add_state_code!(
+        df::DataFrame,
+        state_code_dict::Dict = state_code_dict,
+        column::Symbol = :states_ut;
+        totals_key = "total",
+    )
+
+Add a region code column to the DataFrame based on state names. Maps state names to their corresponding region codes using the provided dictionary.
+"""
 function add_state_code!(
         df::DataFrame,
         state_code_dict::Dict = state_code_dict,

@@ -4,9 +4,24 @@ using Try: Try
 export clean_colnames,
     rename_aggregated_pre_post_counts
 """
-    clean_colnames(df::DataFrame, allowed_chars_reg::Regex)
+    clean_colnames(df::DataFrame, allowed_chars_reg::Regex = r"[^\\w]")
 
-Replace spaces and / with underscores, and (n) and (%) with "count" and "pct" respectively. `allowed_chars_reg` should be a negative match, where the default `r"[^\\w]"` matches to all non numeric/alphabetic/_ characters
+Standardize column names by replacing special characters and abbreviations with consistent formats.
+
+Performs the following transformations:
+- Converts to lowercase
+- Replaces "/" and spaces with underscores
+- Replaces "(n)" and "_n_" with "count"
+- Replaces "(%)" and "_%_" with "pct"
+- Validates that no disallowed characters remain
+
+# Arguments
+- `df`: DataFrame to clean
+- `allowed_chars_reg`: Regex pattern for disallowed characters (default matches non-alphanumeric/underscore)
+
+# Returns
+- `Try.Ok(cleaned_df)` with standardized column names
+- `Try.Err(message)` if disallowed characters remain after cleaning
 """
 function clean_colnames(
         df::DataFrame,
