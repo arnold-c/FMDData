@@ -33,6 +33,22 @@ jobs:
           using Pkg
           Pkg.develop(PackageSpec(path=pwd()))
           Pkg.instantiate()
+      - name: Comment out lines for main branch
+        if: github.ref == 'refs/heads/main'
+        run: |
+          # Verify and comment out the specific lines
+          if grep -q "md_output_path = \"\.\",\$" docs/make.jl && \
+             grep -q "build_vitepress = false,\$" docs/make.jl; then
+            echo "Found target lines, commenting them out..."
+            sed -i '/md_output_path = "\.",$/s/^/        # /' docs/make.jl
+            sed -i '/build_vitepress = false,$/s/^/        # /' docs/make.jl
+            echo "Lines commented out successfully"
+          else
+            echo "Warning: Target lines not found in expected format"
+            echo "Current content around those line numbers:"
+            sed -n '20,30p' docs/make.jl
+            exit 1
+          fi
       - name: Build and deploy
         run: julia --color=yes --project=docs docs/make.jl
         env:
