@@ -1,4 +1,5 @@
-# public states_dict
+public states_dict
+public state_code_dict
 
 """
     states_dict
@@ -43,6 +44,10 @@ states_dict = Dict(
     ]
 )
 
+"""
+    state_code_dict
+A Dictionary mapping standardized state/UT names to their official two-letter state codes. The keys correspond to the standardized names from `states_dict`, and the values are the ISO 3166-2:IN state codes used for administrative purposes.
+"""
 state_code_dict = Dict(
     "A&N Island" => "AN",
     "Andhra Pradesh" => "AP",
