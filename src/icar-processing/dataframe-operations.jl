@@ -5,16 +5,34 @@ export combine_round_dfs, combine_all_processed_data
 
 
 """
-    combine_all_processed_data(selection::String = "all")
+    combine_all_processed_data(selection::String = "all"; cols = :union)
 
-Loads processed CSV files from the processed directory and combines them into a single DataFrame.
-Selection options:
-- "all": All processed files
-- "2019": Only 2019 state files
-- "nadcp": Only NADCP files (NADCP-1, NADCP-2, NADCP-3)
-- "organized_farms": Only organized farms files
+Load and combine processed CSV files from the processed directory into a single DataFrame.
 
-Returns a DataFrame containing the selected processed ICAR seroprevalence data.
+# Selection Options
+- `"all"`: All processed files in the directory
+- `"2019"`: Files matching pattern "*_2019.csv" (state-specific 2019 data)
+- `"nadcp"`: Files matching pattern "nadcp_[123].csv" (NADCP rounds 1, 2, 3)
+- `"organized_farms"`: Files containing "organized_farms" (farm survey data)
+
+# Arguments
+- `selection`: String specifying which files to combine
+- `cols`: Column handling strategy for vcat (:union allows different columns)
+
+# Returns
+Combined DataFrame with all selected processed data
+
+# Errors
+Throws error if selection is invalid or no matching files found
+
+# Examples
+```julia
+# Combine all data
+all_data = combine_all_processed_data("all")
+
+# Only NADCP surveillance data
+nadcp_data = combine_all_processed_data("nadcp")
+```
 """
 function combine_all_processed_data(selection::String = "all"; cols = :union)
     # Get all CSV files from processed directory

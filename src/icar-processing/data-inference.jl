@@ -17,10 +17,33 @@ export infer_later_year_values
         reg::Regex,
         atol = 0.0,
         digits = 1
-
     ) where {T <: AbstractDataFrame}
 
-Infers the values for a later year by subtracting the values from an initial year from a cumulative dataset. This is useful when a report provides cumulative data, and you need to extract the data for a single year.
+Infer single-year values by subtracting initial year data from cumulative data.
+
+This function is used when ICAR reports provide cumulative data (e.g., 2021+2022 combined)
+and you need to extract the data for just the later year (e.g., 2022 only).
+
+# Arguments
+- `cumulative_later_df`: DataFrame with cumulative data for multiple years
+- `initial_df`: DataFrame with data for the initial year only
+- `year_column`: Column containing sample year information
+- `statename_column`: Column containing state/UT names
+- `allowed_serotypes`: Vector of serotypes to process
+- `reg`: Regex pattern to identify count columns for processing
+- `atol`: Absolute tolerance for floating-point comparisons
+- `digits`: Number of decimal places for calculated percentages
+
+# Returns
+- `Try.Ok(inferred_df)` with single-year data for the later period
+- `Try.Err(message)` if inference fails
+
+# Process
+1. Subtracts initial year counts from cumulative counts
+2. Handles rounding errors and missing values
+3. Recalculates totals and seroprevalence percentages
+4. Removes states with no data
+5. Validates final totals
 """
 function infer_later_year_values(
         cumulative_later_df::T,
